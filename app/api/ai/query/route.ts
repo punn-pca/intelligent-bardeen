@@ -24,6 +24,29 @@ export async function POST(req: NextRequest) {
     const evidenceList: InventoryEvidence[] = [];
     const evidenceRaw: any[] = [];
 
+    // 0. Aggregate System Metrics (Always included to answer count / aggregate queries accurately)
+    const [totalProductCount, totalWarehouseCount, totalDocumentCount, inventorySumResult] = await Promise.all([
+      prisma.product.count({ where: { isDeleted: false } }).catch(() => 0),
+      prisma.warehouse.count({ where: { active: true } }).catch(() => 0),
+      prisma.document.count().catch(() => 0),
+      prisma.inventory.aggregate({ _sum: { onHand: true } }).catch(() => ({ _sum: { onHand: 0 } })),
+    ]);
+    const totalStockQty = inventorySumResult._sum?.onHand || 0;
+
+    evidenceRaw.push({
+      type: 'METRICS',
+      totalProducts: totalProductCount,
+      totalWarehouses: totalWarehouseCount,
+      totalDocuments: totalDocumentCount,
+      totalStockQuantity: totalStockQty,
+    });
+
+    evidenceList.push({
+      id: 'SYS-METRICS-001',
+      sourceId: 'system:metrics',
+      text: `[ข้อมูลสถิติภาพรวมทั้งระบบ (ERP Database Summary Statistics)] จำนวนสินค้าทั้งหมดในระบบ (Total Active Products): ${totalProductCount.toLocaleString()} รายการ | คลังสินค้าทั้งหมด (Active Warehouses): ${totalWarehouseCount} คลัง | เอกสารในระบบทั้งหมด (Total Documents): ${totalDocumentCount.toLocaleString()} ใบ | ปริมาณสต๊อกสินค้าคงคลังรวมทุกคลัง (Total Inventory Stock): ${totalStockQty.toLocaleString()} ชิ้น`,
+    });
+
     // 1. Search Products & Inventory
     const products = await prisma.product.findMany({
       where: {
@@ -116,8 +139,8 @@ export async function POST(req: NextRequest) {
     }
 
     const naturalSummaryAnswer = evidenceList.length
-      ? `จากการตรวจสอบฐานข้อมูล ERP สำหรับคำถาม "${query}" พบหลักฐานที่เกี่ยวข้องดังนี้:\n\n` +
-        evidenceList.map((e, idx) => `• ${e.text}`).slice(0, 6).join('\n')
+      ? `จากการตรวจสอบฐานข้อมูล ERP สำหรับคำถาม "${query}" พบข้อมูลสถิติและหลักฐานดังนี้:\n\n` +
+        evidenceList.map((e) => `• ${e.text}`).slice(0, 6).join('\n')
       : 'ไม่พบข้อมูลหลักฐานที่ตรงกับคำถามในระบบ ERP';
 
     const governed = governInventoryQuery({
@@ -147,7 +170,7 @@ export async function POST(req: NextRequest) {
             messages: [
               {
                 role: 'system',
-                content: `คุณคือ AI ERP Assistant ประจำระบบ S&B Enterprise ERP ภายใต้ FIRE KEEPER Governance\nตอบคำถามภาษาไทยให้อ่านง่าย กระชับ และเป็นธรรมชาติ โดยสรุปจากหลักฐานที่ให้มาเท่านั้น\nสร้าง JSON DecisionObject เท่านั้น ห้ามใส่ markdown\n\nโครงสร้างที่ต้องส่ง:\n{"options":[{"id":"ANSWER","text":"...สรุปคำตอบเป็นภาษาไทยอธิบายอย่างชัดเจน...","rationale":"...เหตุผล...","isRecommended":true}],"risks":[],"uncertainties":[],"consequences":[],"evidence":[],"assumptions":[],"recommendation":{"optionId":"ANSWER","rationale":"..."},"confidence":{"score":0.95,"label":"HIGH","breakdown":{"coverage":1,"reliability":1,"quality":1}},"applicable_policies":[],"policy_conflicts":[],"escalation_required":false,"controlLevel":"LOW"}`,
+                content: `คุณคือ AI ERP Assistant ประจำระบบ S&B Enterprise ERP ภายใต้ FIRE KEEPER Governance\nตอบคำถามภาษาไทยให้อ่านง่าย กระชับ และเป็นธรรมชาติ โดยสรุปจากหลักฐานที่ให้มาเท่านั้น\nหากผู้ใช้ถามจำนวนสินค้า หรือจำนวนเอกสาร หรือภาพรวมระบบ ให้ตอบตามสถิติใน [SYS-METRICS-001] เสมอ ห้ามนำรายการตัวอย่างมานับแทนจำนวนรวมทั้งหมดของระบบ\nสร้าง JSON DecisionObject เท่านั้น ห้ามใส่ markdown\n\nโครงสร้างที่ต้องส่ง:\n{"options":[{"id":"ANSWER","text":"...สรุปคำตอบเป็นภาษาไทยอธิบายอย่างชัดเจน...","rationale":"...เหตุผล...","isRecommended":true}],"risks":[],"uncertainties":[],"consequences":[],"evidence":[],"assumptions":[],"recommendation":{"optionId":"ANSWER","rationale":"..."},"confidence":{"score":0.95,"label":"HIGH","breakdown":{"coverage":1,"reliability":1,"quality":1}},"applicable_policies":[],"policy_conflicts":[],"escalation_required":false,"controlLevel":"LOW"}`,
               },
               {
                 role: 'user',
@@ -189,7 +212,7 @@ export async function POST(req: NextRequest) {
           body: JSON.stringify({
             model: ollamaModel,
             stream: false,
-            prompt: `คุณคือ AI ERP Assistant ประจำระบบ S&B Enterprise ERP ภายใต้ FIRE KEEPER Governance\nตอบคำถามภาษาไทยให้อ่านง่าย กระชับ และเป็นธรรมชาติ โดยสรุปจากหลักฐานที่ให้มาเท่านั้น\n\nคำถาม: ${query}\n\nหลักฐาน authoritative:\n${evidenceText}\n\nให้ตอบคำถามเป็นภาษาไทยกระชับชัดเจน:`,
+            prompt: `คุณคือ AI ERP Assistant ประจำระบบ S&B Enterprise ERP ภายใต้ FIRE KEEPER Governance\nตอบคำถามภาษาไทยให้อ่านง่าย กระชับ และเป็นธรรมชาติ โดยสรุปจากหลักฐานที่ให้มาเท่านั้น\nหากผู้ใช้ถามจำนวนสินค้า หรือจำนวนเอกสาร หรือภาพรวมระบบ ให้ตอบตามสถิติใน [SYS-METRICS-001] เสมอ ห้ามนำรายการตัวอย่างมานับแทนจำนวนรวมทั้งหมดของระบบ\n\nคำถาม: ${query}\n\nหลักฐาน authoritative:\n${evidenceText}\n\nให้ตอบคำถามเป็นภาษาไทยกระชับชัดเจน:`,
           }),
         });
 

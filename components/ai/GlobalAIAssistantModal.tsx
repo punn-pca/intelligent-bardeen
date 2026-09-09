@@ -100,14 +100,14 @@ export default function GlobalAIAssistantModal({ isOpen: externalIsOpen, onClose
       {!isOpen && (
         <button
           onClick={() => setInternalIsOpen(true)}
-          className="fixed bottom-6 right-6 z-40 bg-slate-900 hover:bg-slate-800 text-emerald-400 p-3.5 rounded-2xl shadow-2xl border border-emerald-500/30 flex items-center gap-2.5 transition-all transform hover:scale-105 group"
+          className="fixed bottom-6 right-6 z-50 bg-slate-900 hover:bg-slate-800 text-emerald-400 p-3 rounded-2xl shadow-2xl border border-emerald-500/30 inline-flex items-center gap-2.5 transition-all transform hover:scale-105 group cursor-pointer whitespace-nowrap"
           title="กด Ctrl + K เพื่อเปิด AI Assistant"
         >
-          <div className="w-8 h-8 bg-emerald-500/20 rounded-xl flex items-center justify-center text-emerald-400 group-hover:rotate-12 transition-transform">
-            <Sparkles className="w-5 h-5" />
+          <div className="w-8 h-8 bg-emerald-500/20 rounded-xl inline-flex items-center justify-center text-emerald-400 group-hover:rotate-12 transition-transform shrink-0">
+            <Sparkles className="w-4 h-4" />
           </div>
-          <span className="text-sm font-bold text-white pr-1">ERP AI Assistant</span>
-          <span className="text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded-md font-mono border border-slate-700">Ctrl + K</span>
+          <span className="text-xs font-bold text-white pr-1">ERP AI Assistant</span>
+          <span className="text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded-md font-mono border border-slate-700 shrink-0">Ctrl + K</span>
         </button>
       )}
 
