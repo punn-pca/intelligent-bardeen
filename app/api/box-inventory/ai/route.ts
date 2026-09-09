@@ -1,0 +1,55 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/db';
+
+async function ensureTables() {
+  await prisma.$executeRawUnsafe(`CREATE TABLE IF NOT EXISTS box_inventory_boxes (id TEXT PRIMARY KEY NOT NULL, box_code TEXT NOT NULL UNIQUE, qr_token TEXT NOT NULL UNIQUE, name TEXT NOT NULL, warehouse_id TEXT, location_code TEXT, status TEXT NOT NULL DEFAULT 'ACTIVE', notes TEXT, created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP)`);
+  await prisma.$executeRawUnsafe(`CREATE TABLE IF NOT EXISTS box_inventory_items (id TEXT PRIMARY KEY NOT NULL, box_id TEXT NOT NULL, product_id TEXT NOT NULL, quantity REAL NOT NULL DEFAULT 1, lot TEXT, serial TEXT, notes TEXT, created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP)`);
+}
+
+export async function POST(req: NextRequest) {
+  try {
+    await ensureTables();
+    const { q = '' } = await req.json();
+    const query = String(q).trim();
+    if (!query) return NextResponse.json({ answer: 'กรุณาระบุคำถาม', evidence: [] });
+
+    const evidence = await prisma.$queryRawUnsafe<any[]>(`
+      SELECT b.box_code, b.name AS box_name, b.location_code, b.status,
+             w.code AS warehouse_code, w.name AS warehouse_name,
+             p.sku, p.name AS product_name, p.barcode, i.quantity, i.lot, i.serial
+      FROM box_inventory_items i
+      JOIN box_inventory_boxes b ON b.id = i.box_id
+      LEFT JOIN products p ON p.id = i.product_id
+      LEFT JOIN warehouses w ON w.id = b.warehouse_id
+      WHERE b.box_code LIKE ? OR b.name LIKE ? OR p.sku LIKE ? OR p.name LIKE ? OR p.barcode LIKE ?
+      ORDER BY b.box_code, p.name
+      LIMIT 100
+    `, `%${query}%`, `%${query}%`, `%${query}%`, `%${query}%`, `%${query}%`);
+
+    const evidenceText = evidence.length
+      ? evidence.map((e) => `${e.box_code} | ${e.product_name || '-'} | qty ${e.quantity} | warehouse ${e.warehouse_name || '-'} | location ${e.location_code || '-'} | sku ${e.sku || '-'}`).join('\n')
+      : 'ไม่พบหลักฐานที่ตรงกับคำค้นใน Box Inventory';
+
+    const ollamaBase = process.env.OLLAMA_BASE_URL || process.env.OLLAMA_URL;
+    const ollamaModel = process.env.OLLAMA_MODEL;
+    if (ollamaBase && ollamaModel && evidence.length) {
+      try {
+        const response = await fetch(`${ollamaBase.replace(/\/$/, '')}/api/generate`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ model: ollamaModel, stream: false, prompt: `ตอบคำถามภาษาไทยจากหลักฐานเท่านั้น ห้ามเดาข้อมูลที่ไม่มีในหลักฐาน และระบุ Box/ตำแหน่งเมื่อมี\n\nคำถาม: ${query}\n\nหลักฐาน:\n${evidenceText}` }),
+        });
+        if (response.ok) {
+          const data = await response.json();
+          return NextResponse.json({ answer: data.response || evidenceText, evidence, source: 'ollama' });
+        }
+      } catch {}
+    }
+
+    const answer = evidence.length
+      ? evidence.map((e) => `${e.box_code}: ${e.product_name || e.sku} จำนวน ${e.quantity} อยู่ ${e.warehouse_name || 'ไม่ระบุคลัง'} / ${e.location_code || 'ไม่ระบุตำแหน่ง'}`).join('\n')
+      : 'ไม่พบข้อมูลใน Box Inventory';
+    return NextResponse.json({ answer, evidence, source: 'deterministic-evidence' });
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message || 'AI query failed' }, { status: 500 });
+  }
+}
