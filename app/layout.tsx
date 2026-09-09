@@ -4,6 +4,7 @@ import React from 'react';
 import './globals.css';
 import Sidebar from '@/components/layout/Sidebar';
 import Navbar from '@/components/layout/Navbar';
+import { RoleProvider } from '@/components/context/RoleContext';
 import GlobalAIAssistantModal from '@/components/ai/GlobalAIAssistantModal';
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
