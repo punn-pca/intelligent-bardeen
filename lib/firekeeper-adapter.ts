@@ -34,3 +34,36 @@ export function governInventoryQuery(input: {
   if (!parsed.success) return { decision: decision as DecisionObject, validation: { status: 'REPAIR_REQUIRED', errors: parsed.error.issues.map(i => `${i.path.join('.')}: ${i.message}`), metadata: { timestamp: new Date().toISOString(), checkedFields: [] } }, evidence: input.evidence };
   return { decision: parsed.data, validation: validateDecisionObject(parsed.data), evidence: input.evidence };
 }
+
+/** Validate an LLM-produced DecisionObject without trusting its evidence claims. */
+export function governLLMDecision(input: {
+  question: string;
+  evidence: InventoryEvidence[];
+  candidate: unknown;
+}): GovernedInventoryDecision {
+  const parsed = DecisionObjectSchema.safeParse(input.candidate);
+  if (!parsed.success) {
+    const fallback = governInventoryQuery({ question: input.question, evidence: input.evidence, answer: 'ไม่สามารถยืนยันคำตอบจากโมเดลได้ เนื่องจากรูปแบบ Decision Object ไม่ผ่านการตรวจสอบ' });
+    return { ...fallback, validation: { status: 'REPAIR_REQUIRED', errors: parsed.error.issues.map(i => `${i.path.join('.')}: ${i.message}`), metadata: { timestamp: new Date().toISOString(), checkedFields: [] } } };
+  }
+
+  const candidate = parsed.data;
+  const authoritative = new Map(input.evidence.map(e => [e.id, e]));
+  const unsupportedEvidence = candidate.evidence.filter(e => {
+    const source = authoritative.get(e.id);
+    return !source || source.sourceId !== e.sourceId || source.text !== e.text;
+  });
+  if (unsupportedEvidence.length) {
+    const validation: ValidatorResult = {
+      status: 'REPAIR_REQUIRED',
+      errors: unsupportedEvidence.map(e => `Unsupported evidence claim: ${e.id}`),
+      metadata: { timestamp: new Date().toISOString(), checkedFields: ['evidence'] },
+    };
+    return { decision: { ...candidate, evidence: input.evidence }, validation, evidence: input.evidence };
+  }
+
+  // The ERP evidence set is authoritative. Always replace the model's evidence with it.
+  const governedDecision: DecisionObject = { ...candidate, evidence: input.evidence };
+  const validation = validateDecisionObject(governedDecision);
+  return { decision: governedDecision, validation, evidence: input.evidence };
+}
