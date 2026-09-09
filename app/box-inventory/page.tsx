@@ -1,16 +1,14 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { Boxes, Plus, Search, Trash2, QrCode, Sparkles, MapPin, Package, RefreshCw } from 'lucide-react';
-
-const qrUrl = (token: string) => `https://quickchart.io/qr?size=240&margin=2&text=${encodeURIComponent(token)}`;
+import { Boxes, Plus, Search, Trash2, QrCode, Sparkles, MapPin, Package, RefreshCw, ShieldCheck } from 'lucide-react';
 
 type Item = { productId: string; quantity: number; lot?: string; serial?: string };
+type Box = { id: string; box_code: string; qr_token: string; name: string; warehouse_id?: string; warehouse_name?: string; location_code?: string; status: string; notes?: string; items: any[] };
 
-type Box = {
-  id: string; box_code: string; qr_token: string; name: string; warehouse_id?: string;
-  warehouse_name?: string; location_code?: string; status: string; notes?: string; items: any[];
-};
+a constSafe: never = undefined as never;
+void a;
+const qrUrl = (token: string) => `https://quickchart.io/qr?size=240&margin=2&text=${encodeURIComponent(token)}`;
 
 export default function BoxInventoryPage() {
   const [boxes, setBoxes] = useState<Box[]>([]);
@@ -20,6 +18,7 @@ export default function BoxInventoryPage() {
   const [selected, setSelected] = useState<Box | null>(null);
   const [aiQuestion, setAiQuestion] = useState('');
   const [aiAnswer, setAiAnswer] = useState('');
+  const [governance, setGovernance] = useState<any>(null);
   const [saving, setSaving] = useState(false);
   const [showCreate, setShowCreate] = useState(false);
   const [form, setForm] = useState({ boxCode: '', name: '', warehouseId: '', locationCode: '', notes: '' });
@@ -57,10 +56,12 @@ export default function BoxInventoryPage() {
 
   async function askAI() {
     if (!aiQuestion.trim()) return;
-    setAiAnswer('กำลังค้นหลักฐาน...');
+    setAiAnswer('กำลังค้นหลักฐานและตรวจสอบด้วย FIRE KEEPER...');
+    setGovernance(null);
     const res = await fetch('/api/box-inventory/ai', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ q: aiQuestion }) });
     const data = await res.json();
     setAiAnswer(data.answer || data.error || 'ไม่พบคำตอบ');
+    setGovernance(data.governance || null);
   }
 
   return (
@@ -68,7 +69,7 @@ export default function BoxInventoryPage() {
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-slate-200 pb-5">
         <div>
           <div className="flex items-center gap-2"><Boxes className="w-7 h-7 text-emerald-600" /><h1 className="text-2xl font-bold text-slate-900">Box Inventory + QR + AI</h1></div>
-          <p className="text-sm text-slate-500 mt-1">ผูกกล่องจริงกับ Inventory ด้วย Box ID / QR และค้นหาด้วยหลักฐานจากข้อมูลจริง</p>
+          <p className="text-sm text-slate-500 mt-1">Physical inventory ที่เชื่อมกับ Evidence และ FIRE KEEPER governance</p>
         </div>
         <button onClick={() => setShowCreate(true)} className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-semibold flex items-center gap-2"><Plus className="w-4 h-4" />สร้างกล่อง</button>
       </div>
@@ -94,10 +95,11 @@ export default function BoxInventoryPage() {
 
         <div className="bg-slate-900 text-white rounded-xl p-5 h-fit">
           <div className="flex items-center gap-2 font-bold"><Sparkles className="w-5 h-5" />AI Inventory Assistant</div>
-          <p className="text-xs text-slate-400 mt-1">ค้นจาก Box Inventory ก่อนตอบ และส่งหลักฐานให้ Ollama ได้ถ้าตั้งค่า OLLAMA_BASE_URL / OLLAMA_MODEL</p>
+          <p className="text-xs text-slate-400 mt-1">ถาม AI โดยให้ Box Inventory เป็น evidence source และผ่าน governance boundary</p>
           <textarea value={aiQuestion} onChange={e => setAiQuestion(e.target.value)} placeholder="เช่น Adapter อยู่กล่องไหน?" className="mt-4 w-full min-h-24 bg-slate-800 border border-slate-700 rounded-lg p-3 text-sm outline-none" />
           <button onClick={askAI} className="mt-2 w-full py-2.5 bg-emerald-500 hover:bg-emerald-400 rounded-lg text-sm font-semibold">ถาม AI</button>
           {aiAnswer && <pre className="mt-4 whitespace-pre-wrap text-xs leading-6 text-slate-200 font-sans">{aiAnswer}</pre>}
+          {governance && <div className="mt-4 border-t border-slate-700 pt-4"><div className="flex items-center gap-2 text-xs font-semibold"><ShieldCheck className="w-4 h-4 text-emerald-400" />FIRE KEEPER Governance</div><div className="mt-2 grid grid-cols-2 gap-2 text-[11px]"><div className="rounded bg-slate-800 p-2">Validation<strong className="block text-emerald-400">{governance.validation?.status}</strong></div><div className="rounded bg-slate-800 p-2">Confidence<strong className="block">{governance.decision?.confidence?.label} · {governance.decision?.confidence?.score}</strong></div></div><p className="mt-2 text-[10px] text-slate-400">Evidence: {governance.evidence?.length || 0} รายการ · Control: {governance.decision?.controlLevel || 'LOW'}</p></div>}
         </div>
       </div>
 
