@@ -17,8 +17,9 @@ export function governInventoryQuery(input: {
   const coverage = Math.min(1, input.evidence.length / 3);
   const reliability = hasEvidence ? 1 : 0;
   const quality = hasEvidence ? 1 : 0;
-  const score = hasEvidence ? Number((0.40 * coverage + 0.35 * reliability + 0.25 * quality).toFixed(3)) : null;
-  const label = score === null ? 'LOW' : score >= 0.75 ? 'HIGH' : score >= 0.45 ? 'MEDIUM' : 'LOW';
+  // FIRE KEEPER contract requires a numeric confidence score. No evidence = 0.
+  const score = hasEvidence ? Number((0.40 * coverage + 0.35 * reliability + 0.25 * quality).toFixed(3)) : 0;
+  const label = score >= 0.75 ? 'HIGH' : score >= 0.45 ? 'MEDIUM' : 'LOW';
   const severity = input.risk?.severity || 'LOW';
   const decision = {
     options: [{ id: 'ANSWER', text: input.answer, rationale: 'Derived from ERP inventory evidence.', isRecommended: true }],
@@ -62,7 +63,6 @@ export function governLLMDecision(input: {
     return { decision: { ...candidate, evidence: input.evidence }, validation, evidence: input.evidence };
   }
 
-  // The ERP evidence set is authoritative. Always replace the model's evidence with it.
   const governedDecision: DecisionObject = { ...candidate, evidence: input.evidence };
   const validation = validateDecisionObject(governedDecision);
   return { decision: governedDecision, validation, evidence: input.evidence };
