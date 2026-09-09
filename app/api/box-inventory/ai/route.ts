@@ -79,13 +79,65 @@ export async function POST(req: NextRequest) {
       risk: rows.length ? undefined : { text: 'ไม่มีหลักฐานจาก Box Inventory ที่ตรงกับคำถาม', severity: 'MEDIUM' },
     });
 
-    // 4. Ollama Local LLM Execution with Defaults
+    const evidenceText = evidence.map((e) => `[${e.id}] ${e.text}`).join('\n');
+
+    // 4. Try DeepSeek Cloud API First (Ideal for Web Deployment)
+    const deepseekApiKey = process.env.DEEPSEEK_API_KEY;
+    const deepseekModel = process.env.DEEPSEEK_MODEL || 'deepseek-chat';
+
+    if (deepseekApiKey && rows.length && governed.validation.status === 'PASS') {
+      try {
+        const dsRes = await fetch('https://api.deepseek.com/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${deepseekApiKey}`,
+          },
+          body: JSON.stringify({
+            model: deepseekModel,
+            response_format: { type: 'json_object' },
+            messages: [
+              {
+                role: 'system',
+                content: `คุณคือ AI Inventory Assistant ภายใต้ FIRE KEEPER Governance\nตอบคำถามเป็นภาษาไทยให้อ่านง่าย กระชับ และตรงประเด็น โดยอ้างอิงจากหลักฐานที่ให้มาเท่านั้น\nสร้าง JSON DecisionObject เท่านั้น ห้ามใส่ markdown\n\nกฎสำคัญ:\n1. ใช้ evidence เฉพาะรายการที่ให้มา โดยคง id, sourceId และ text ให้ตรงกันทุกตัวอักษร\n2. ห้ามสร้างหลักฐานใหม่ หรือเดาข้อเท็จจริงนอกเหนือจากที่ระบุในหลักฐาน\n3. options ต้องมีคำตอบภาษาไทยที่สรุปตอบคำถามหลักได้อย่างถูกต้องตรงตามหลักฐาน\n\nโครงสร้างที่ต้องส่ง:\n{"options":[{"id":"ANSWER","text":"...คำตอบภาษาไทย...","rationale":"...เหตุผลจากหลักฐาน...","isRecommended":true}],"risks":[],"uncertainties":[],"consequences":[],"evidence":[],"assumptions":[],"recommendation":{"optionId":"ANSWER","rationale":"..."},"confidence":{"score":0.95,"label":"HIGH","breakdown":{"coverage":1,"reliability":1,"quality":1}},"applicable_policies":[],"policy_conflicts":[],"escalation_required":false,"controlLevel":"LOW"}`,
+              },
+              {
+                role: 'user',
+                content: `คำถาม: ${query}\n\nหลักฐาน authoritative:\n${evidenceText}`,
+              },
+            ],
+          }),
+        });
+
+        if (dsRes.ok) {
+          const dsData = await dsRes.json();
+          const rawContent = dsData?.choices?.[0]?.message?.content || '';
+          const candidate = extractJson(rawContent);
+          if (candidate) {
+            const llmGoverned = governLLMDecision({ question: query, evidence, candidate });
+            if (llmGoverned.validation.status === 'PASS' || llmGoverned.validation.status === 'ESCALATE') {
+              const answer = llmGoverned.decision.options.find((o) => o.isRecommended)?.text || llmGoverned.decision.options[0]?.text || deterministicAnswer;
+              return NextResponse.json({
+                answer,
+                evidence: rows,
+                governance: llmGoverned,
+                source: 'deepseek+firekeeper-validated',
+                model: deepseekModel,
+              });
+            }
+          }
+        }
+      } catch (e: any) {
+        console.error('DeepSeek execution fallback:', e);
+      }
+    }
+
+    // 5. Try Local Ollama Instance (Ideal for Local Execution)
     const ollamaBase = process.env.OLLAMA_BASE_URL || process.env.OLLAMA_URL || 'http://localhost:11434';
     const ollamaModel = process.env.OLLAMA_MODEL || 'qwen3:4b';
 
     if (ollamaBase && ollamaModel && rows.length && governed.validation.status === 'PASS') {
       try {
-        const evidenceText = evidence.map((e) => `[${e.id}] ${e.text}`).join('\n');
         const response = await fetch(`${ollamaBase.replace(/\/$/, '')}/api/generate`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -93,7 +145,7 @@ export async function POST(req: NextRequest) {
             model: ollamaModel,
             stream: false,
             format: 'json',
-            prompt: `คุณคือ AI Inventory Assistant ภายใต้ FIRE KEEPER Governance\nตอบคำถามเป็นภาษาไทยให้กระชับ ชัดเจน และตรงประเด็น โดยอ้างอิงจากหลักฐานที่ให้มาเท่านั้น\nสร้าง JSON DecisionObject เท่านั้น ห้ามใส่ markdown\n\nกฎสำคัญ:\n1. ใช้ evidence เฉพาะรายการที่ให้มา โดยคง id, sourceId และ text ให้ตรงกันทุกตัวอักษร\n2. ห้ามสร้างหลักฐานใหม่ หรือเดาข้อเท็จจริงนอกเหนือจากที่ระบุในหลักฐาน\n3. options ต้องมีคำตอบภาษาไทยที่สรุปตอบคำถามหลักได้อย่างถูกต้องตรงตามหลักฐาน\n4. confidence ต้องสะท้อนคุณภาพของหลักฐาน ไม่ใช่ความมั่นใจของโมเดล\n\nโครงสร้างที่ต้องส่ง:\n{"options":[{"id":"ANSWER","text":"...คำตอบภาษาไทย...","rationale":"...เหตุผลจากหลักฐาน...","isRecommended":true}],"risks":[],"uncertainties":[],"consequences":[],"evidence":[],"assumptions":[],"recommendation":{"optionId":"ANSWER","rationale":"..."},"confidence":{"score":0.9,"label":"HIGH","breakdown":{"coverage":1,"reliability":1,"quality":1}},"applicable_policies":[],"policy_conflicts":[],"escalation_required":false,"controlLevel":"LOW"}\n\nคำถาม: ${query}\n\nหลักฐาน authoritative:\n${evidenceText}`,
+            prompt: `คุณคือ AI Inventory Assistant ภายใต้ FIRE KEEPER Governance\nตอบคำถามเป็นภาษาไทยให้อ่านง่าย กระชับ และตรงประเด็น โดยอ้างอิงจากหลักฐานที่ให้มาเท่านั้น\nสร้าง JSON DecisionObject เท่านั้น ห้ามใส่ markdown\n\nกฎสำคัญ:\n1. ใช้ evidence เฉพาะรายการที่ให้มา โดยคง id, sourceId และ text ให้ตรงกันทุกตัวอักษร\n2. ห้ามสร้างหลักฐานใหม่ หรือเดาข้อเท็จจริงนอกเหนือจากที่ระบุในหลักฐาน\n3. options ต้องมีคำตอบภาษาไทยที่สรุปตอบคำถามหลักได้อย่างถูกต้องตรงตามหลักฐาน\n\nโครงสร้างที่ต้องส่ง:\n{"options":[{"id":"ANSWER","text":"...คำตอบภาษาไทย...","rationale":"...เหตุผลจากหลักฐาน...","isRecommended":true}],"risks":[],"uncertainties":[],"consequences":[],"evidence":[],"assumptions":[],"recommendation":{"optionId":"ANSWER","rationale":"..."},"confidence":{"score":0.9,"label":"HIGH","breakdown":{"coverage":1,"reliability":1,"quality":1}},"applicable_policies":[],"policy_conflicts":[],"escalation_required":false,"controlLevel":"LOW"}\n\nคำถาม: ${query}\n\nหลักฐาน authoritative:\n${evidenceText}`,
           }),
         });
 
@@ -124,7 +176,7 @@ export async function POST(req: NextRequest) {
       evidence: rows,
       governance: governed,
       source: 'firekeeper',
-      model: ollamaModel,
+      model: deepseekApiKey ? deepseekModel : (ollamaModel || null),
     });
   } catch (error: any) {
     return NextResponse.json({ error: error.message || 'AI query failed' }, { status: 500 });

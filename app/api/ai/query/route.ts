@@ -123,13 +123,65 @@ export async function POST(req: NextRequest) {
       recommendation: evidenceList.length ? 'ใช้ข้อมูลหลักฐาน ERP DB เป็นหลักอ้างอิง' : undefined,
     });
 
-    // 4. Ollama LLM Connection & Governance Validation
+    const evidenceText = evidenceList.map((e) => `[${e.id}] ${e.text}`).join('\n');
+
+    // 4. Try DeepSeek Cloud API First (Ideal for Web / Production Deployment)
+    const deepseekApiKey = process.env.DEEPSEEK_API_KEY;
+    const deepseekModel = process.env.DEEPSEEK_MODEL || 'deepseek-chat';
+
+    if (deepseekApiKey && evidenceList.length && governed.validation.status === 'PASS') {
+      try {
+        const dsRes = await fetch('https://api.deepseek.com/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${deepseekApiKey}`,
+          },
+          body: JSON.stringify({
+            model: deepseekModel,
+            response_format: { type: 'json_object' },
+            messages: [
+              {
+                role: 'system',
+                content: `คุณคือ AI ERP Assistant ประจำระบบ S&B Enterprise ERP ภายใต้ FIRE KEEPER Governance\nตอบคำถามภาษาไทยให้อ่านง่าย กระชับ และตรงประเด็น โดยอ้างอิงจากหลักฐาน ERP เท่านั้น\nสร้าง JSON DecisionObject เท่านั้น ห้ามใส่ markdown\n\nกฎสำคัญ:\n1. ใช้ evidence เฉพาะรายการที่ให้มา โดยคง id, sourceId และ text ให้ตรงกันทุกตัวอักษร\n2. ห้ามสร้างหลักฐานใหม่ หรือเดาข้อเท็จจริงนอกเหนือจากหลักฐาน\n3. options ต้องมีคำตอบภาษาไทยสรุปประเด็นหลักได้อย่างถูกต้อง\n\nโครงสร้างที่ต้องส่ง:\n{"options":[{"id":"ANSWER","text":"...คำตอบสรุปภาษาไทย...","rationale":"...เหตุผลจากหลักฐาน...","isRecommended":true}],"risks":[],"uncertainties":[],"consequences":[],"evidence":[],"assumptions":[],"recommendation":{"optionId":"ANSWER","rationale":"..."},"confidence":{"score":0.95,"label":"HIGH","breakdown":{"coverage":1,"reliability":1,"quality":1}},"applicable_policies":[],"policy_conflicts":[],"escalation_required":false,"controlLevel":"LOW"}`,
+              },
+              {
+                role: 'user',
+                content: `คำถาม: ${query}\n\nหลักฐาน authoritative:\n${evidenceText}`,
+              },
+            ],
+          }),
+        });
+
+        if (dsRes.ok) {
+          const dsData = await dsRes.json();
+          const rawContent = dsData?.choices?.[0]?.message?.content || '';
+          const candidate = extractJson(rawContent);
+          if (candidate) {
+            const llmGoverned = governLLMDecision({ question: query, evidence: evidenceList, candidate });
+            if (llmGoverned.validation.status === 'PASS' || llmGoverned.validation.status === 'ESCALATE') {
+              const answer = llmGoverned.decision.options.find((o) => o.isRecommended)?.text || llmGoverned.decision.options[0]?.text || deterministicAnswer;
+              return NextResponse.json({
+                answer,
+                evidence: evidenceRaw,
+                governance: llmGoverned,
+                source: `deepseek+firekeeper-validated`,
+                model: deepseekModel,
+              });
+            }
+          }
+        }
+      } catch (e) {
+        console.error('DeepSeek Cloud API execution fallback:', e);
+      }
+    }
+
+    // 5. Try Local Ollama Instance (Ideal for Local Execution)
     const ollamaBase = process.env.OLLAMA_BASE_URL || process.env.OLLAMA_URL || 'http://localhost:11434';
     const ollamaModel = process.env.OLLAMA_MODEL || 'qwen3:4b';
 
     if (evidenceList.length && governed.validation.status === 'PASS') {
       try {
-        const evidenceText = evidenceList.map((e) => `[${e.id}] ${e.text}`).join('\n');
         const response = await fetch(`${ollamaBase.replace(/\/$/, '')}/api/generate`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -168,7 +220,7 @@ export async function POST(req: NextRequest) {
       evidence: evidenceRaw,
       governance: governed,
       source: 'firekeeper',
-      model: ollamaModel,
+      model: deepseekApiKey ? deepseekModel : (ollamaModel || null),
     });
   } catch (error: any) {
     return NextResponse.json({ error: error.message || 'Global AI query failed' }, { status: 500 });
