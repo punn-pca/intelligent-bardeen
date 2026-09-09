@@ -1,0 +1,582 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id           String   @id @default(uuid())
+  username     String   @unique
+  passwordHash String
+  name         String
+  role         String   @default("STAFF") // ADMIN, MANAGER, WAREHOUSE, ACCOUNTING, USER
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  createdTransactions StockTransaction[]
+  createdTransfers    StockTransfer[]
+  createdAdjustments  StockAdjustment[]
+  createdMovements    StockMovement[]
+  createdDocuments    Document[]          @relation("CreatedDocuments")
+  approvedDocuments   Document[]          @relation("ApprovedDocuments")
+  createdAudits       StockAudit[]        @relation("CreatedAudits")
+  createdAssemblies   AssemblyOrder[]     @relation("CreatedAssemblies")
+  createdPayments     PaymentTransaction[] @relation("CreatedPayments")
+  approvalRequests    ApprovalWorkflow[]  @relation("RequestedApprovals")
+  approvedSteps       ApprovalWorkflow[]  @relation("ApprovedSteps")
+  auditLogs           AuditLog[]
+
+  @@map("users")
+}
+
+model CompanySetting {
+  id                      String   @id @default("default")
+  name                    String   @default("บริษัท เอส แอนด์ บี อิเล็กทรอนิกส์ เซอร์วิส จำกัด")
+  taxId                   String   @default("0105555081714")
+  address                 String   @default("120/288 หมู่ที่ 5 ตำบลบางเดื่อ อำเภอเมืองปทุมธานี จ.ปทุมธานี 12000")
+  phone                   String   @default("02-789-9999")
+  email                   String   @default("info@sb-electronic.co.th")
+  website                 String   @default("www.sb-electronic.co.th")
+  logoUrl                 String?
+  bankName                String?  @default("ธนาคารกสิกรไทย (KBANK)")
+  bankAccountNo           String?  @default("123-4-56789-0")
+  bankAccountName         String?  @default("บจก. เอส แอนด์ บี อิเล็กทรอนิกส์ เซอร์วิส")
+  defaultNotes            String?  @default("กรุณาตรวจสอบสินค้าและเอกสารก่อนลงนามรับของ ขอบคุณที่ใช้บริการ")
+  signaturePreparedLabel  String   @default("ผู้จัดทำ (Prepared By)")
+  signatureApprovedLabel  String   @default("ผู้อนุมัติ (Approved By)")
+  signatureReceivedLabel  String   @default("ผู้รับสินค้า / ลูกค้า (Received By)")
+  updatedAt               DateTime @updatedAt
+
+  @@map("company_settings")
+}
+
+model Category {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String?
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  products Product[]
+
+  @@map("categories")
+}
+
+model Unit {
+  id          String   @id @default(uuid())
+  code        String   @unique
+  name        String
+  description String?
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  products Product[]
+
+  @@map("units")
+}
+
+model Supplier {
+  id            String   @id @default(uuid())
+  code          String   @unique
+  name          String
+  contactPerson String?
+  email         String?
+  phone         String?
+  address       String?
+  taxId         String?
+  active        Boolean  @default(true)
+  isDeleted     Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  products         Product[]
+  documents        Document[]
+  paymentRecords   PaymentTransaction[]
+
+  @@map("suppliers")
+}
+
+model Customer {
+  id            String   @id @default(uuid())
+  code          String   @unique
+  name          String
+  contactPerson String?
+  email         String?
+  phone         String?
+  address       String?
+  taxId         String?
+  courierName   String?  @default("Kerry Express") // Kerry, Flash, J&T, SPEED-D, EMS
+  active        Boolean  @default(true)
+  isDeleted     Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  documents      Document[]
+  paymentRecords PaymentTransaction[]
+
+  @@map("customers")
+}
+
+model Product {
+  id           String   @id @default(uuid())
+  sku          String   @unique
+  barcode      String   @unique
+  name         String
+  description  String?
+  imageUrl     String?
+  categoryId   String
+  unitId       String?
+  unit         String   @default("ชิ้น")
+  supplierId   String?
+  costPrice    Float    @default(0.0)
+  sellingPrice Float    @default(0.0)
+  minStock     Float    @default(5.0)
+  maxStock     Float    @default(100.0)
+  isBundle     Boolean  @default(false)
+  active       Boolean  @default(true)
+  isDeleted    Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  category         Category               @relation(fields: [categoryId], references: [id])
+  unitRef          Unit?                  @relation(fields: [unitId], references: [id])
+  supplier         Supplier?              @relation(fields: [supplierId], references: [id])
+  inventories      Inventory[]
+  transactionItems StockTransactionItem[]
+  transfers        StockTransfer[]
+  adjustments      StockAdjustment[]
+  movements        StockMovement[]
+  documentItems    DocumentItem[]
+  auditItems       StockAuditItem[]
+  assemblyOrders   AssemblyOrder[]        @relation("AssemblyFinishedProduct")
+  
+  bundleItems      BundleItem[]           @relation("BundleParent")
+  componentIn      BundleItem[]           @relation("BundleComponent")
+
+  @@index([sku])
+  @@index([barcode])
+  @@index([categoryId])
+  @@map("products")
+}
+
+model BundleItem {
+  id                 String   @id @default(uuid())
+  bundleProductId    String
+  componentProductId String
+  quantity           Float    @default(1.0) // Component quantity required for 1 Bundle set
+  createdAt          DateTime @default(now())
+
+  bundleProduct    Product @relation("BundleParent", fields: [bundleProductId], references: [id], onDelete: Cascade)
+  componentProduct Product @relation("BundleComponent", fields: [componentProductId], references: [id], onDelete: Cascade)
+
+  @@unique([bundleProductId, componentProductId])
+  @@index([bundleProductId])
+  @@index([componentProductId])
+  @@map("bundle_items")
+}
+
+model AssemblyOrder {
+  id                String   @id @default(uuid())
+  assemblyNo        String   @unique // G2608-00001
+  finishedProductId String
+  warehouseId       String
+  quantity          Float    @default(1.0)
+  status            String   @default("COMPLETED") // IN_PROGRESS, COMPLETED, CANCELLED
+  notes             String?
+  createdById       String
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  finishedProduct Product   @relation("AssemblyFinishedProduct", fields: [finishedProductId], references: [id])
+  warehouse       Warehouse @relation(fields: [warehouseId], references: [id])
+  createdBy       User      @relation("CreatedAssemblies", fields: [createdById], references: [id])
+
+  @@index([assemblyNo])
+  @@index([finishedProductId])
+  @@map("assembly_orders")
+}
+
+model Warehouse {
+  id          String   @id @default(uuid())
+  code        String   @unique
+  name        String
+  address     String?
+  managerName String?
+  active      Boolean  @default(true)
+  isDeleted   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  locations            WarehouseLocation[]
+  inventories          Inventory[]
+  transactionItems     StockTransactionItem[]
+  sourceTransfers      StockTransfer[]        @relation("SourceWarehouse")
+  destinationTransfers StockTransfer[]        @relation("DestinationWarehouse")
+  adjustments          StockAdjustment[]
+  movements            StockMovement[]
+  documents            Document[]             @relation("PrimaryWarehouse")
+  targetDocuments      Document[]             @relation("TargetWarehouse")
+  stockAudits          StockAudit[]
+  assemblyOrders       AssemblyOrder[]
+
+  @@index([code])
+  @@map("warehouses")
+}
+
+model WarehouseLocation {
+  id          String   @id @default(uuid())
+  warehouseId String
+  code        String   // e.g. ZONE-A, RACK-01, BIN-01
+  name        String
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  warehouse     Warehouse        @relation(fields: [warehouseId], references: [id])
+  documentItems DocumentItem[]
+  movements     StockMovement[]
+  auditItems    StockAuditItem[]
+
+  @@unique([warehouseId, code])
+  @@index([warehouseId])
+  @@map("warehouse_locations")
+}
+
+model Inventory {
+  id          String   @id @default(uuid())
+  productId   String
+  warehouseId String
+  onHand      Float    @default(0.0)
+  reserved    Float    @default(0.0)
+  updatedAt   DateTime @updatedAt
+
+  product   Product   @relation(fields: [productId], references: [id])
+  warehouse Warehouse @relation(fields: [warehouseId], references: [id])
+
+  @@unique([productId, warehouseId])
+  @@index([productId])
+  @@index([warehouseId])
+  @@map("inventories")
+}
+
+model StockAudit {
+  id          String   @id @default(uuid())
+  auditNo     String   @unique // AUD-2026-000001
+  warehouseId String
+  status      String   @default("IN_PROGRESS") // IN_PROGRESS, COMPLETED, CANCELLED
+  notes       String?
+  createdById String
+  startedAt   DateTime @default(now())
+  completedAt DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  warehouse Warehouse        @relation(fields: [warehouseId], references: [id])
+  createdBy User             @relation("CreatedAudits", fields: [createdById], references: [id])
+  items     StockAuditItem[]
+
+  @@index([auditNo])
+  @@index([warehouseId])
+  @@index([status])
+  @@map("stock_audits")
+}
+
+model StockAuditItem {
+  id            String  @id @default(uuid())
+  auditId       String
+  productId     String
+  locationId    String?
+  systemQty     Float   @default(0.0)
+  countedQty    Float   @default(0.0)
+  varianceQty   Float   @default(0.0) // countedQty - systemQty
+  unitCost      Float   @default(0.0)
+  varianceValue Float   @default(0.0) // varianceQty * unitCost
+  notes         String?
+
+  audit    StockAudit         @relation(fields: [auditId], references: [id], onDelete: Cascade)
+  product  Product            @relation(fields: [productId], references: [id])
+  location WarehouseLocation? @relation(fields: [locationId], references: [id])
+
+  @@unique([auditId, productId])
+  @@index([auditId])
+  @@index([productId])
+  @@map("stock_audit_items")
+}
+
+model DocumentSequence {
+  prefix       String // e.g. PR, PO, GRN, SO, INV, TRF, ADJ, AUD, ASM, QT, RC
+  year         Int
+  month        Int    @default(1)
+  lastSequence Int    @default(0)
+
+  @@id([prefix, year])
+  @@map("document_sequences")
+}
+
+model Document {
+  id                String   @id @default(uuid())
+  documentNo        String   @unique // PR-2026-000001, PO-2026-000001, etc.
+  documentType      String   // PR, PO, GRN, QUOTATION, SO, DELIVERY_NOTE, STOCK_ISSUE, STOCK_TRANSFER, STOCK_ADJUSTMENT, STOCK_RETURN, INVOICE, RECEIPT, PAYMENT_VOUCHER, CREDIT_NOTE, DEBIT_NOTE
+  status            String   @default("DRAFT") // DRAFT, PENDING_APPROVAL, APPROVED, ISSUED, COMPLETED, CANCELLED, VOID
+  approvalStatus    String   @default("APPROVED") // PENDING, APPROVED, REJECTED
+  issueDate         DateTime @default(now())
+  dueDate           DateTime?
+  customerId        String?
+  supplierId        String?
+  warehouseId       String?
+  targetWarehouseId String?
+  parentDocumentId  String?  // Link to previous document in chain (e.g. QT -> SO -> DO -> INV -> RC)
+  parentDocumentNo  String?
+  refDocumentNo     String?
+  subtotal          Float    @default(0.0)
+  discount          Float    @default(0.0)
+  vatRate           Float    @default(7.0) // 7% VAT
+  vatAmount         Float    @default(0.0)
+  whtRate           Float    @default(0.0) // 3% WHT if applicable
+  whtAmount         Float    @default(0.0)
+  grandTotal        Float    @default(0.0)
+  paidAmount        Float    @default(0.0)
+  dueAmount         Float    @default(0.0)
+  paymentStatus     String   @default("UNPAID") // UNPAID, PARTIAL, PAID
+  notes             String?
+  createdById       String
+  approvedById      String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  customer         Customer?            @relation(fields: [customerId], references: [id])
+  supplier         Supplier?            @relation(fields: [supplierId], references: [id])
+  warehouse        Warehouse?           @relation("PrimaryWarehouse", fields: [warehouseId], references: [id])
+  targetWarehouse  Warehouse?           @relation("TargetWarehouse", fields: [targetWarehouseId], references: [id])
+  parentDocument   Document?            @relation("DocumentChain", fields: [parentDocumentId], references: [id])
+  childDocuments   Document[]           @relation("DocumentChain")
+  createdBy        User                 @relation("CreatedDocuments", fields: [createdById], references: [id])
+  approvedBy       User?                @relation("ApprovedDocuments", fields: [approvedById], references: [id])
+  items            DocumentItem[]
+  movements        StockMovement[]
+  payments         PaymentTransaction[]
+  approvalRequests ApprovalWorkflow[]
+
+  @@index([documentNo])
+  @@index([documentType])
+  @@index([status])
+  @@index([paymentStatus])
+  @@index([issueDate])
+  @@map("documents")
+}
+
+model DocumentItem {
+  id         String  @id @default(uuid())
+  documentId String
+  productId  String
+  locationId String?
+  quantity   Float   @default(1.0)
+  unitCost   Float   @default(0.0)
+  unitPrice  Float   @default(0.0)
+  discount   Float   @default(0.0)
+  totalCost  Float   @default(0.0)
+  totalPrice Float   @default(0.0)
+
+  document Document           @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  product  Product            @relation(fields: [productId], references: [id])
+  location WarehouseLocation? @relation(fields: [locationId], references: [id])
+
+  @@index([documentId])
+  @@index([productId])
+  @@map("document_items")
+}
+
+model PaymentTransaction {
+  id            String   @id @default(uuid())
+  paymentNo     String   @unique // PAY-2026-000001
+  type          String   // RECEIPT (AR), PAYMENT_VOUCHER (AP)
+  documentId    String
+  customerId    String?
+  supplierId    String?
+  amount        Float
+  paymentMethod String   @default("BANK_TRANSFER") // CASH, CHEQUE, BANK_TRANSFER
+  bankName      String?
+  chequeNo      String?
+  transactionRef String?
+  notes         String?
+  createdById   String
+  createdAt     DateTime @default(now())
+
+  document Document  @relation(fields: [documentId], references: [id])
+  customer Customer?  @relation(fields: [customerId], references: [id])
+  supplier Supplier?  @relation(fields: [supplierId], references: [id])
+  createdBy User     @relation("CreatedPayments", fields: [createdById], references: [id])
+
+  @@index([paymentNo])
+  @@index([documentId])
+  @@index([type])
+  @@map("payment_transactions")
+}
+
+model ApprovalWorkflow {
+  id          String   @id @default(uuid())
+  documentId  String
+  action      String   // APPROVE_DOCUMENT, APPROVE_ADJUSTMENT, APPROVE_VOID
+  status      String   @default("PENDING") // PENDING, APPROVED, REJECTED
+  requestedBy String
+  approvedBy  String?
+  reason      String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  document Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  requester User    @relation("RequestedApprovals", fields: [requestedBy], references: [id])
+  approver  User?   @relation("ApprovedSteps", fields: [approvedBy], references: [id])
+
+  @@index([documentId])
+  @@index([status])
+  @@map("approval_workflows")
+}
+
+model StockTransaction {
+  id          String   @id // Custom Transaction ID: TX-IN-xxxx, etc.
+  type        String   // STOCK_IN, STOCK_OUT, TRANSFER, ADJUSTMENT
+  reference   String?
+  note        String?
+  createdById String
+  createdAt   DateTime @default(now())
+
+  createdBy   User                   @relation(fields: [createdById], references: [id])
+  items       StockTransactionItem[]
+  transfers   StockTransfer[]
+  adjustments StockAdjustment[]
+  movements   StockMovement[]
+
+  @@index([type])
+  @@index([createdAt])
+  @@map("stock_transactions")
+}
+
+model StockTransactionItem {
+  id            String  @id @default(uuid())
+  transactionId String
+  productId     String
+  warehouseId   String
+  quantity      Float
+  costPrice     Float?
+  lotNumber     String?
+  reason        String?
+
+  transaction StockTransaction @relation(fields: [transactionId], references: [id])
+  product     Product          @relation(fields: [productId], references: [id])
+  warehouse   Warehouse        @relation(fields: [warehouseId], references: [id])
+
+  @@index([transactionId])
+  @@index([productId])
+  @@index([warehouseId])
+  @@map("stock_transaction_items")
+}
+
+model StockTransfer {
+  id                     String   @id @default(uuid())
+  transactionId          String
+  sourceWarehouseId      String
+  destinationWarehouseId String
+  productId              String
+  quantity               Float
+  createdById            String
+  createdAt              DateTime @default(now())
+
+  transaction          StockTransaction @relation(fields: [transactionId], references: [id])
+  sourceWarehouse      Warehouse        @relation("SourceWarehouse", fields: [sourceWarehouseId], references: [id])
+  destinationWarehouse Warehouse        @relation("DestinationWarehouse", fields: [destinationWarehouseId], references: [id])
+  product              Product          @relation(fields: [productId], references: [id])
+  createdBy            User             @relation(fields: [createdById], references: [id])
+
+  @@index([transactionId])
+  @@index([sourceWarehouseId])
+  @@index([destinationWarehouseId])
+  @@index([productId])
+  @@map("stock_transfers")
+}
+
+model StockAdjustment {
+  id            String   @id @default(uuid())
+  transactionId String
+  productId     String
+  warehouseId   String
+  currentStock  Float
+  actualStock   Float
+  adjustmentQty Float
+  reason        String
+  note          String?
+  createdById   String
+  createdAt     DateTime @default(now())
+
+  transaction StockTransaction @relation(fields: [transactionId], references: [id])
+  product     Product          @relation(fields: [productId], references: [id])
+  warehouse   Warehouse        @relation(fields: [warehouseId], references: [id])
+  createdBy   User             @relation(fields: [createdById], references: [id])
+
+  @@index([transactionId])
+  @@index([productId])
+  @@index([warehouseId])
+  @@map("stock_adjustments")
+}
+
+model StockMovement {
+  id            String   @id @default(uuid())
+  transactionId String?
+  documentId    String?
+  type          String   // RECEIVE, ISSUE, TRANSFER_IN, TRANSFER_OUT, ADJUST_IN, ADJUST_OUT, RETURN_IN, RETURN_OUT, REVERSE, BUNDLE_ASSEMBLE, BUNDLE_DISASSEMBLE
+  productId     String
+  warehouseId   String
+  locationId    String?
+  quantity      Float
+  unitCost      Float    @default(0.0)
+  totalCost     Float    @default(0.0)
+  beforeOnHand  Float
+  afterOnHand   Float
+  createdById   String
+  reference     String?
+  reason        String?
+  createdAt     DateTime @default(now())
+
+  transaction StockTransaction?  @relation(fields: [transactionId], references: [id])
+  document    Document?          @relation(fields: [documentId], references: [id])
+  product     Product            @relation(fields: [productId], references: [id])
+  warehouse   Warehouse          @relation(fields: [warehouseId], references: [id])
+  location    WarehouseLocation? @relation(fields: [locationId], references: [id])
+  createdBy   User               @relation(fields: [createdById], references: [id])
+
+  @@index([transactionId])
+  @@index([documentId])
+  @@index([productId])
+  @@index([warehouseId])
+  @@index([type])
+  @@index([createdAt])
+  @@map("stock_movements")
+}
+
+model AuditLog {
+  id           String   @id @default(uuid())
+  userId       String?
+  username     String
+  action       String
+  entity       String
+  entityId     String?
+  beforeData   String?
+  afterData    String?
+  ipAddress    String?
+  hash         String?
+  previousHash String?
+  createdAt    DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id])
+
+  @@index([action])
+  @@index([entity])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
