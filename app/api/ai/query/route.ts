@@ -60,6 +60,67 @@ export async function POST(req: NextRequest) {
       });
     }
 
+    // 0.5. Excel Stock Ledger Matrix (Physical Inventory Ledger Breakdown)
+    const [activeInventories, stockMovements] = await Promise.all([
+      prisma.inventory.findMany({
+        where: { onHand: { gt: 0 } },
+        include: {
+          product: { include: { category: true } },
+          warehouse: true,
+        },
+        orderBy: { product: { sku: 'asc' } },
+      }).catch(() => []),
+      prisma.stockMovement.findMany({
+        select: { productId: true, type: true, quantity: true, reference: true, transactionId: true },
+      }).catch(() => []),
+    ]);
+
+    const movStats: Record<string, { stockIn: number; stockOut: number; dealerOut: number; shopeeOut: number }> = {};
+    stockMovements.forEach((m) => {
+      if (!movStats[m.productId]) {
+        movStats[m.productId] = { stockIn: 0, stockOut: 0, dealerOut: 0, shopeeOut: 0 };
+      }
+      const ref = (m.reference || m.transactionId || '').toUpperCase();
+      const qty = Math.abs(m.quantity);
+      if (m.type === 'RECEIVE' || m.type === 'IN') {
+        movStats[m.productId].stockIn += qty;
+      } else if (m.type === 'ISSUE' || m.type === 'OUT') {
+        if (ref.startsWith('B2608') || ref.startsWith('R2608')) {
+          movStats[m.productId].dealerOut += qty;
+        } else if (ref.includes('SHOPEE') || ref.startsWith('A2608')) {
+          movStats[m.productId].shopeeOut += qty;
+        } else {
+          movStats[m.productId].stockOut += qty;
+        }
+      }
+    });
+
+    const activeLedgerItems = activeInventories.map(inv => {
+      const pMov = movStats[inv.productId] || { stockIn: 0, stockOut: 0, dealerOut: 0, shopeeOut: 0 };
+      const openingBalance = Math.max(0, inv.onHand - pMov.stockIn + pMov.stockOut + pMov.dealerOut + pMov.shopeeOut);
+      return {
+        id: inv.id,
+        sku: inv.product.sku,
+        name: inv.product.name,
+        category: inv.product.category.name,
+        openingBalance,
+        stockIn: pMov.stockIn,
+        stockOut: pMov.stockOut,
+        dealerOut: pMov.dealerOut,
+        shopeeOut: pMov.shopeeOut,
+        onHand: inv.onHand,
+        warehouse: inv.warehouse.name,
+      };
+    });
+
+    const totalLedgerOnHand = activeLedgerItems.reduce((sum, item) => sum + item.onHand, 0);
+
+    evidenceList.push({
+      id: 'SYS-METRICS-003',
+      sourceId: 'system:stock-ledger-matrix',
+      text: `[ข้อมูลตารางสต๊อกสินค้าหลัก (Excel Stock Ledger Matrix 1:1 Page)] สินค้าที่มีสต๊อกคงเหลือเคลื่อนไหวในตารางหลัก: ${activeLedgerItems.length} รายการ | ยอดรวมสต๊อกคงเหลือสุทธิ (Total On-Hand): ${totalLedgerOnHand.toLocaleString()} ชิ้น`,
+    });
+
     // 1. Smart Category & Keyword Matching
     const lowerQuery = query.toLowerCase();
     const stopWords = ['มีอะไรบ้าง', 'มีอะไร', 'บ้าง', 'รายการ', 'ของ', 'ใน', 'เกี่ยวกับ', 'เช็ค', 'ดู', 'ขอ', 'มี', 'กี่', 'เท่าไหร่', 'ครับ', 'ค่ะ', 'ไหม', 'อะไร', 'สินค้า', 'หมวดหมู่'];
@@ -117,6 +178,24 @@ export async function POST(req: NextRequest) {
         id: `PROD-EVIDENCE-${p.sku}`,
         sourceId: `product:${p.sku}`,
         text: `สินค้า ${p.name} [SKU: ${p.sku}] (หมวดหมู่: ${p.category.name}) | ราคาขาย ฿${p.sellingPrice} | สต๊อกรวม ${totalStock} ชิ้น (${invDetails || 'ไม่มีคลัง'}) | ขั้นต่ำ ${p.minStock} ชิ้น`,
+      });
+    });
+
+    // 1.5. Add Matching Stock Ledger Matrix Items to Evidence List
+    const isLedgerQuery = /ตาราง|สต๊อกหลัก|ตารางสต๊อก|excel|matrix|ยอดยกมา|รับเข้า|เบิก|ส่งตัวแทน|shopee|ยอดคงเหลือ|คงเหลือ|มีสต๊อก/i.test(query);
+    const matchingLedgerItems = activeLedgerItems.filter(item => {
+      if (isLedgerQuery) return true;
+      if (!cleanQuery) return item.onHand > 0;
+      const q = cleanQuery.toLowerCase();
+      return item.sku.toLowerCase().includes(q) || item.name.toLowerCase().includes(q) || item.category.toLowerCase().includes(q);
+    }).slice(0, 25);
+
+    matchingLedgerItems.forEach((item) => {
+      evidenceRaw.push({ type: 'LEDGER', ...item });
+      evidenceList.push({
+        id: `LEDGER-EVIDENCE-${item.sku}`,
+        sourceId: `ledger:${item.sku}`,
+        text: `[ตารางสต๊อกสินค้าหลัก Excel Stock Ledger Matrix 1:1] สินค้า: ${item.name} [SKU: ${item.sku}] (หมวดหมู่: ${item.category}) | ยอดยกมา: ${item.openingBalance} | รับเข้า: +${item.stockIn} | เบิกลง: -${item.stockOut} | ส่งตัวแทน: -${item.dealerOut} | ขาย Shopee: -${item.shopeeOut} | ยอดคงเหลือสุทธิ: ${item.onHand} ชิ้น (คลัง: ${item.warehouse})`,
       });
     });
 
