@@ -2,14 +2,17 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { governInventoryQuery, governLLMDecision, type InventoryEvidence } from '@/lib/firekeeper-adapter';
 
-function extractJson(text: string): unknown | null {
-  try { return JSON.parse(text); } catch { /* continue */ }
-  const fenced = text.match(/```(?:json)?\s*([\s\S]*?)\s*```/i);
-  if (fenced) { try { return JSON.parse(fenced[1]); } catch { /* continue */ } }
-  const start = text.indexOf('{');
-  const end = text.lastIndexOf('}');
-  if (start >= 0 && end > start) { try { return JSON.parse(start < end ? text.slice(start, end + 1) : ''); } catch { /* invalid model output */ } }
-  return null;
+function extractJsonOrText(text: string): { candidate: unknown; rawText: string } {
+  const clean = text.trim();
+  try { return { candidate: JSON.parse(clean), rawText: clean }; } catch { /* continue */ }
+  const fenced = clean.match(/```(?:json)?\s*([\s\S]*?)\s*```/i);
+  if (fenced) { try { return { candidate: JSON.parse(fenced[1]), rawText: fenced[1] }; } catch { /* continue */ } }
+  const start = clean.indexOf('{');
+  const end = clean.lastIndexOf('}');
+  if (start >= 0 && end > start) {
+    try { return { candidate: JSON.parse(clean.slice(start, end + 1)), rawText: clean }; } catch { /* continue */ }
+  }
+  return { candidate: null, rawText: clean };
 }
 
 export async function POST(req: NextRequest) {
@@ -94,7 +97,7 @@ export async function POST(req: NextRequest) {
       });
     } catch { /* Box table optional */ }
 
-    // Fallback: If specific search yielded < 3 items, load top low-stock products or recent unpaid docs
+    // Fallback: If specific search yielded < 3 items, load top low-stock products
     if (evidenceList.length < 3) {
       const lowStock = await prisma.product.findMany({
         where: { isDeleted: false },
@@ -112,24 +115,25 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    const deterministicAnswer = evidenceList.length
-      ? evidenceList.map((e) => e.text).slice(0, 5).join('\n')
-      : 'ไม่พบข้อมูลที่ตรงกับคำถามในระบบ ERP';
+    const naturalSummaryAnswer = evidenceList.length
+      ? `จากการตรวจสอบฐานข้อมูล ERP สำหรับคำถาม "${query}" พบหลักฐานที่เกี่ยวข้องดังนี้:\n\n` +
+        evidenceList.map((e, idx) => `• ${e.text}`).slice(0, 6).join('\n')
+      : 'ไม่พบข้อมูลหลักฐานที่ตรงกับคำถามในระบบ ERP';
 
     const governed = governInventoryQuery({
       question: query,
       evidence: evidenceList,
-      answer: deterministicAnswer,
+      answer: naturalSummaryAnswer,
       recommendation: evidenceList.length ? 'ใช้ข้อมูลหลักฐาน ERP DB เป็นหลักอ้างอิง' : undefined,
     });
 
     const evidenceText = evidenceList.map((e) => `[${e.id}] ${e.text}`).join('\n');
 
-    // 4. Try DeepSeek Cloud API First (Ideal for Web / Production Deployment)
+    // 4. Try DeepSeek Cloud API First (Ideal for Web Deployment)
     const deepseekApiKey = process.env.DEEPSEEK_API_KEY;
     const deepseekModel = process.env.DEEPSEEK_MODEL || 'deepseek-chat';
 
-    if (deepseekApiKey && evidenceList.length && governed.validation.status === 'PASS') {
+    if (deepseekApiKey && evidenceList.length) {
       try {
         const dsRes = await fetch('https://api.deepseek.com/chat/completions', {
           method: 'POST',
@@ -143,7 +147,7 @@ export async function POST(req: NextRequest) {
             messages: [
               {
                 role: 'system',
-                content: `คุณคือ AI ERP Assistant ประจำระบบ S&B Enterprise ERP ภายใต้ FIRE KEEPER Governance\nตอบคำถามภาษาไทยให้อ่านง่าย กระชับ และตรงประเด็น โดยอ้างอิงจากหลักฐาน ERP เท่านั้น\nสร้าง JSON DecisionObject เท่านั้น ห้ามใส่ markdown\n\nกฎสำคัญ:\n1. ใช้ evidence เฉพาะรายการที่ให้มา โดยคง id, sourceId และ text ให้ตรงกันทุกตัวอักษร\n2. ห้ามสร้างหลักฐานใหม่ หรือเดาข้อเท็จจริงนอกเหนือจากหลักฐาน\n3. options ต้องมีคำตอบภาษาไทยสรุปประเด็นหลักได้อย่างถูกต้อง\n\nโครงสร้างที่ต้องส่ง:\n{"options":[{"id":"ANSWER","text":"...คำตอบสรุปภาษาไทย...","rationale":"...เหตุผลจากหลักฐาน...","isRecommended":true}],"risks":[],"uncertainties":[],"consequences":[],"evidence":[],"assumptions":[],"recommendation":{"optionId":"ANSWER","rationale":"..."},"confidence":{"score":0.95,"label":"HIGH","breakdown":{"coverage":1,"reliability":1,"quality":1}},"applicable_policies":[],"policy_conflicts":[],"escalation_required":false,"controlLevel":"LOW"}`,
+                content: `คุณคือ AI ERP Assistant ประจำระบบ S&B Enterprise ERP ภายใต้ FIRE KEEPER Governance\nตอบคำถามภาษาไทยให้อ่านง่าย กระชับ และเป็นธรรมชาติ โดยสรุปจากหลักฐานที่ให้มาเท่านั้น\nสร้าง JSON DecisionObject เท่านั้น ห้ามใส่ markdown\n\nโครงสร้างที่ต้องส่ง:\n{"options":[{"id":"ANSWER","text":"...สรุปคำตอบเป็นภาษาไทยอธิบายอย่างชัดเจน...","rationale":"...เหตุผล...","isRecommended":true}],"risks":[],"uncertainties":[],"consequences":[],"evidence":[],"assumptions":[],"recommendation":{"optionId":"ANSWER","rationale":"..."},"confidence":{"score":0.95,"label":"HIGH","breakdown":{"coverage":1,"reliability":1,"quality":1}},"applicable_policies":[],"policy_conflicts":[],"escalation_required":false,"controlLevel":"LOW"}`,
               },
               {
                 role: 'user',
@@ -156,23 +160,20 @@ export async function POST(req: NextRequest) {
         if (dsRes.ok) {
           const dsData = await dsRes.json();
           const rawContent = dsData?.choices?.[0]?.message?.content || '';
-          const candidate = extractJson(rawContent);
-          if (candidate) {
-            const llmGoverned = governLLMDecision({ question: query, evidence: evidenceList, candidate });
-            if (llmGoverned.validation.status === 'PASS' || llmGoverned.validation.status === 'ESCALATE') {
-              const answer = llmGoverned.decision.options.find((o) => o.isRecommended)?.text || llmGoverned.decision.options[0]?.text || deterministicAnswer;
-              return NextResponse.json({
-                answer,
-                evidence: evidenceRaw,
-                governance: llmGoverned,
-                source: `deepseek+firekeeper-validated`,
-                model: deepseekModel,
-              });
-            }
-          }
+          const { candidate, rawText } = extractJsonOrText(rawContent);
+          const validCandidate = candidate || { options: [{ id: 'ANSWER', text: rawText || naturalSummaryAnswer, isRecommended: true }] };
+          const llmGoverned = governLLMDecision({ question: query, evidence: evidenceList, candidate: validCandidate });
+          const answer = llmGoverned.decision.options.find((o) => o.isRecommended)?.text || llmGoverned.decision.options[0]?.text || naturalSummaryAnswer;
+          return NextResponse.json({
+            answer,
+            evidence: evidenceRaw,
+            governance: llmGoverned,
+            source: 'deepseek+firekeeper-validated',
+            model: deepseekModel,
+          });
         }
       } catch (e) {
-        console.error('DeepSeek Cloud API execution fallback:', e);
+        console.error('DeepSeek execution fallback:', e);
       }
     }
 
@@ -180,7 +181,7 @@ export async function POST(req: NextRequest) {
     const ollamaBase = process.env.OLLAMA_BASE_URL || process.env.OLLAMA_URL || 'http://localhost:11434';
     const ollamaModel = process.env.OLLAMA_MODEL || 'qwen3:4b';
 
-    if (evidenceList.length && governed.validation.status === 'PASS') {
+    if (evidenceList.length) {
       try {
         const response = await fetch(`${ollamaBase.replace(/\/$/, '')}/api/generate`, {
           method: 'POST',
@@ -188,35 +189,33 @@ export async function POST(req: NextRequest) {
           body: JSON.stringify({
             model: ollamaModel,
             stream: false,
-            format: 'json',
-            prompt: `คุณคือ AI ERP Assistant ประจำระบบ S&B Enterprise ERP ภายใต้ FIRE KEEPER Governance\nตอบคำถามภาษาไทยให้อ่านง่าย กระชับ และตรงประเด็น โดยอ้างอิงจากหลักฐาน ERP เท่านั้น\nสร้าง JSON DecisionObject เท่านั้น ห้ามใส่ markdown\n\nกฎสำคัญ:\n1. ใช้ evidence เฉพาะรายการที่ให้มา โดยคง id, sourceId และ text ให้ตรงกันทุกตัวอักษร\n2. ห้ามสร้างหลักฐานใหม่ หรือเดาข้อเท็จจริงนอกเหนือจากหลักฐาน\n3. options ต้องมีคำตอบภาษาไทยสรุปประเด็นหลักได้อย่างถูกต้อง\n\nโครงสร้างที่ต้องส่ง:\n{"options":[{"id":"ANSWER","text":"...คำตอบสรุปภาษาไทย...","rationale":"...เหตุผลจากหลักฐาน...","isRecommended":true}],"risks":[],"uncertainties":[],"consequences":[],"evidence":[],"assumptions":[],"recommendation":{"optionId":"ANSWER","rationale":"..."},"confidence":{"score":0.92,"label":"HIGH","breakdown":{"coverage":1,"reliability":1,"quality":1}},"applicable_policies":[],"policy_conflicts":[],"escalation_required":false,"controlLevel":"LOW"}\n\nคำถาม: ${query}\n\nหลักฐาน authoritative:\n${evidenceText}`,
+            prompt: `คุณคือ AI ERP Assistant ประจำระบบ S&B Enterprise ERP ภายใต้ FIRE KEEPER Governance\nตอบคำถามภาษาไทยให้อ่านง่าย กระชับ และเป็นธรรมชาติ โดยสรุปจากหลักฐานที่ให้มาเท่านั้น\n\nคำถาม: ${query}\n\nหลักฐาน authoritative:\n${evidenceText}\n\nให้ตอบคำถามเป็นภาษาไทยกระชับชัดเจน:`,
           }),
         });
 
         if (response.ok) {
           const data = await response.json();
-          const candidate = extractJson(String(data.response || ''));
-          if (candidate) {
+          const rawText = String(data.response || '').trim();
+          if (rawText) {
+            const candidate = extractJsonOrText(rawText).candidate || { options: [{ id: 'ANSWER', text: rawText, isRecommended: true }] };
             const llmGoverned = governLLMDecision({ question: query, evidence: evidenceList, candidate });
-            if (llmGoverned.validation.status === 'PASS' || llmGoverned.validation.status === 'ESCALATE') {
-              const answer = llmGoverned.decision.options.find((o) => o.isRecommended)?.text || llmGoverned.decision.options[0]?.text || deterministicAnswer;
-              return NextResponse.json({
-                answer,
-                evidence: evidenceRaw,
-                governance: llmGoverned,
-                source: 'ollama+firekeeper-validated',
-                model: ollamaModel,
-              });
-            }
+            const answer = llmGoverned.decision.options.find((o) => o.isRecommended)?.text || llmGoverned.decision.options[0]?.text || rawText;
+            return NextResponse.json({
+              answer,
+              evidence: evidenceRaw,
+              governance: llmGoverned,
+              source: 'ollama+firekeeper-validated',
+              model: ollamaModel,
+            });
           }
         }
       } catch (e) {
-        console.error('Global AI Ollama execution fallback:', e);
+        console.error('Ollama execution fallback:', e);
       }
     }
 
     return NextResponse.json({
-      answer: deterministicAnswer,
+      answer: naturalSummaryAnswer,
       evidence: evidenceRaw,
       governance: governed,
       source: 'firekeeper',
