@@ -6,8 +6,6 @@ import { Boxes, Plus, Search, Trash2, QrCode, Sparkles, MapPin, Package, Refresh
 type Item = { productId: string; quantity: number; lot?: string; serial?: string };
 type Box = { id: string; box_code: string; qr_token: string; name: string; warehouse_id?: string; warehouse_name?: string; location_code?: string; status: string; notes?: string; items: any[] };
 
-a constSafe: never = undefined as never;
-void a;
 const qrUrl = (token: string) => `https://quickchart.io/qr?size=240&margin=2&text=${encodeURIComponent(token)}`;
 
 export default function BoxInventoryPage() {

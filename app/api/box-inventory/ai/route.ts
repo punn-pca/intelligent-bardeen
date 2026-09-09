@@ -17,7 +17,7 @@ function extractJson(text: string): unknown | null {
   if (fenced) { try { return JSON.parse(fenced[1]); } catch { /* continue */ } }
   const start = text.indexOf('{');
   const end = text.lastIndexOf('}');
-  if (start >= 0 && end > start) { try { return JSON.parse(text.slice(start, end + 1)); } catch { /* invalid model output */ } }
+  if (start >= 0 && end > start) { try { return JSON.parse(start < end ? text.slice(start, end + 1) : ''); } catch { /* invalid model output */ } }
   return null;
 }
 
@@ -28,14 +28,43 @@ export async function POST(req: NextRequest) {
     const query = String(q).trim();
     if (!query) return NextResponse.json({ error: 'กรุณาระบุคำถาม' }, { status: 400 });
 
-    const rows = await prisma.$queryRawUnsafe<any[]>(`
+    // 1. Initial SQL Search using Full Query String
+    let rows = await prisma.$queryRawUnsafe<any[]>(`
       SELECT b.box_code, b.name AS box_name, b.location_code, b.status, w.code AS warehouse_code, w.name AS warehouse_name,
              p.sku, p.name AS product_name, p.barcode, i.quantity, i.lot, i.serial
       FROM box_inventory_items i JOIN box_inventory_boxes b ON b.id = i.box_id
       LEFT JOIN products p ON p.id = i.product_id LEFT JOIN warehouses w ON w.id = b.warehouse_id
-      WHERE b.box_code LIKE ? OR b.name LIKE ? OR p.sku LIKE ? OR p.name LIKE ? OR p.barcode LIKE ?
+      WHERE b.box_code LIKE ? OR b.name LIKE ? OR p.sku LIKE ? OR p.name LIKE ? OR p.barcode LIKE ? OR b.location_code LIKE ?
       ORDER BY b.box_code, p.name LIMIT 100
-    `, `%${query}%`, `%${query}%`, `%${query}%`, `%${query}%`, `%${query}%`);
+    `, `%${query}%`, `%${query}%`, `%${query}%`, `%${query}%`, `%${query}%`, `%${query}%`);
+
+    // 2. Keyword Fallback for Natural Language Queries (e.g. "ใน BOX 1 มีสินค้าอะไรบ้าง")
+    if (rows.length === 0) {
+      const words = query.match(/(?:BOX\s*\d+|[A-Za-z0-9-]+|[\u0E00-\u0E7F]{3,})/gi) || [];
+      if (words.length > 0) {
+        const conditions = words.map(() => `(b.box_code LIKE ? OR b.name LIKE ? OR p.sku LIKE ? OR p.name LIKE ? OR b.location_code LIKE ?)`).join(' OR ');
+        const params = words.flatMap(w => [`%${w}%`, `%${w}%`, `%${w}%`, `%${w}%`, `%${w}%`]);
+        rows = await prisma.$queryRawUnsafe<any[]>(`
+          SELECT b.box_code, b.name AS box_name, b.location_code, b.status, w.code AS warehouse_code, w.name AS warehouse_name,
+                 p.sku, p.name AS product_name, p.barcode, i.quantity, i.lot, i.serial
+          FROM box_inventory_items i JOIN box_inventory_boxes b ON b.id = i.box_id
+          LEFT JOIN products p ON p.id = i.product_id LEFT JOIN warehouses w ON w.id = b.warehouse_id
+          WHERE ${conditions}
+          ORDER BY b.box_code, p.name LIMIT 50
+        `, ...params);
+      }
+    }
+
+    // 3. General Fallback: Load active box inventory as context if specific keywords yielded no match
+    if (rows.length === 0) {
+      rows = await prisma.$queryRawUnsafe<any[]>(`
+        SELECT b.box_code, b.name AS box_name, b.location_code, b.status, w.code AS warehouse_code, w.name AS warehouse_name,
+               p.sku, p.name AS product_name, p.barcode, i.quantity, i.lot, i.serial
+        FROM box_inventory_items i JOIN box_inventory_boxes b ON b.id = i.box_id
+        LEFT JOIN products p ON p.id = i.product_id LEFT JOIN warehouses w ON w.id = b.warehouse_id
+        ORDER BY b.box_code, p.name LIMIT 50
+      `);
+    }
 
     const evidence = toEvidence(rows);
     const deterministicAnswer = rows.length
@@ -50,20 +79,24 @@ export async function POST(req: NextRequest) {
       risk: rows.length ? undefined : { text: 'ไม่มีหลักฐานจาก Box Inventory ที่ตรงกับคำถาม', severity: 'MEDIUM' },
     });
 
-    const ollamaBase = process.env.OLLAMA_BASE_URL || process.env.OLLAMA_URL;
-    const ollamaModel = process.env.OLLAMA_MODEL;
+    // 4. Ollama Local LLM Execution with Defaults
+    const ollamaBase = process.env.OLLAMA_BASE_URL || process.env.OLLAMA_URL || 'http://localhost:11434';
+    const ollamaModel = process.env.OLLAMA_MODEL || 'qwen3:4b';
+
     if (ollamaBase && ollamaModel && rows.length && governed.validation.status === 'PASS') {
       try {
         const evidenceText = evidence.map((e) => `[${e.id}] ${e.text}`).join('\n');
         const response = await fetch(`${ollamaBase.replace(/\/$/, '')}/api/generate`, {
-          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             model: ollamaModel,
             stream: false,
             format: 'json',
-            prompt: `คุณคือ AI Inventory Assistant ภายใต้ FIRE KEEPER Governance\nสร้าง JSON DecisionObject เท่านั้น ห้ามใส่ markdown\nกฎสำคัญ:\n1. ใช้ evidence เฉพาะรายการที่ให้มา โดยคง id, sourceId และ text ให้ตรงกันทุกตัวอักษร\n2. ห้ามสร้างหลักฐานใหม่\n3. ห้ามเดาข้อเท็จจริงด้านสินค้า จำนวน คลัง หรือตำแหน่ง\n4. options ต้องมีคำตอบที่ตอบคำถามจาก evidence\n5. ถ้าไม่แน่ใจ ให้ใส่ uncertainty\n6. confidence ต้องสะท้อนคุณภาพของหลักฐาน ไม่ใช่ความมั่นใจของโมเดล\n7. applicable_policies และ policy_conflicts ใช้ [] หากไม่มีข้อมูลนโยบาย\n8. escalation_required เป็น false เว้นแต่มีเหตุให้ต้องตรวจโดยมนุษย์\n\nโครงสร้างที่ต้องส่ง:\n{"options":[{"id":"ANSWER","text":"...","rationale":"...","isRecommended":true}],"risks":[],"uncertainties":[],"consequences":[],"evidence":[],"assumptions":[],"recommendation":{"optionId":"ANSWER","rationale":"..."},"confidence":{"score":0.0,"label":"LOW","breakdown":{"coverage":0,"reliability":0,"quality":0}},"applicable_policies":[],"policy_conflicts":[],"escalation_required":false,"controlLevel":"LOW"}\n\nคำถาม: ${query}\n\nหลักฐาน authoritative:\n${evidenceText}`,
+            prompt: `คุณคือ AI Inventory Assistant ภายใต้ FIRE KEEPER Governance\nตอบคำถามเป็นภาษาไทยให้กระชับ ชัดเจน และตรงประเด็น โดยอ้างอิงจากหลักฐานที่ให้มาเท่านั้น\nสร้าง JSON DecisionObject เท่านั้น ห้ามใส่ markdown\n\nกฎสำคัญ:\n1. ใช้ evidence เฉพาะรายการที่ให้มา โดยคง id, sourceId และ text ให้ตรงกันทุกตัวอักษร\n2. ห้ามสร้างหลักฐานใหม่ หรือเดาข้อเท็จจริงนอกเหนือจากที่ระบุในหลักฐาน\n3. options ต้องมีคำตอบภาษาไทยที่สรุปตอบคำถามหลักได้อย่างถูกต้องตรงตามหลักฐาน\n4. confidence ต้องสะท้อนคุณภาพของหลักฐาน ไม่ใช่ความมั่นใจของโมเดล\n\nโครงสร้างที่ต้องส่ง:\n{"options":[{"id":"ANSWER","text":"...คำตอบภาษาไทย...","rationale":"...เหตุผลจากหลักฐาน...","isRecommended":true}],"risks":[],"uncertainties":[],"consequences":[],"evidence":[],"assumptions":[],"recommendation":{"optionId":"ANSWER","rationale":"..."},"confidence":{"score":0.9,"label":"HIGH","breakdown":{"coverage":1,"reliability":1,"quality":1}},"applicable_policies":[],"policy_conflicts":[],"escalation_required":false,"controlLevel":"LOW"}\n\nคำถาม: ${query}\n\nหลักฐาน authoritative:\n${evidenceText}`,
           }),
         });
+
         if (response.ok) {
           const data = await response.json();
           const candidate = extractJson(String(data.response || ''));
@@ -71,14 +104,28 @@ export async function POST(req: NextRequest) {
             const llmGoverned = governLLMDecision({ question: query, evidence, candidate });
             if (llmGoverned.validation.status === 'PASS' || llmGoverned.validation.status === 'ESCALATE') {
               const answer = llmGoverned.decision.options.find(o => o.isRecommended)?.text || llmGoverned.decision.options[0]?.text || deterministicAnswer;
-              return NextResponse.json({ answer, evidence: rows, governance: llmGoverned, source: 'ollama+firekeeper-validated', model: ollamaModel });
+              return NextResponse.json({
+                answer,
+                evidence: rows,
+                governance: llmGoverned,
+                source: 'ollama+firekeeper-validated',
+                model: ollamaModel,
+              });
             }
           }
         }
-      } catch { /* governed deterministic fallback */ }
+      } catch (e: any) {
+        console.error('Ollama execution fallback:', e);
+      }
     }
 
-    return NextResponse.json({ answer: deterministicAnswer, evidence: rows, governance: governed, source: 'firekeeper', model: ollamaModel || null });
+    return NextResponse.json({
+      answer: deterministicAnswer,
+      evidence: rows,
+      governance: governed,
+      source: 'firekeeper',
+      model: ollamaModel,
+    });
   } catch (error: any) {
     return NextResponse.json({ error: error.message || 'AI query failed' }, { status: 500 });
   }
