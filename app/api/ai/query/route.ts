@@ -24,12 +24,15 @@ export async function POST(req: NextRequest) {
     const evidenceList: InventoryEvidence[] = [];
     const evidenceRaw: any[] = [];
 
-    // 0. Aggregate System Metrics (Always included to answer count / aggregate queries accurately)
-    const [totalProductCount, totalWarehouseCount, totalDocumentCount, inventorySumResult] = await Promise.all([
+    // 0. Aggregate System Metrics & Category Breakdown
+    const [totalProductCount, totalWarehouseCount, totalDocumentCount, inventorySumResult, allCategories] = await Promise.all([
       prisma.product.count({ where: { isDeleted: false } }).catch(() => 0),
       prisma.warehouse.count({ where: { active: true } }).catch(() => 0),
       prisma.document.count().catch(() => 0),
       prisma.inventory.aggregate({ _sum: { onHand: true } }).catch(() => ({ _sum: { onHand: 0 } })),
+      prisma.category.findMany({
+        include: { _count: { select: { products: { where: { isDeleted: false } } } } },
+      }).catch(() => []),
     ]);
     const totalStockQty = inventorySumResult._sum?.onHand || 0;
 
@@ -39,6 +42,7 @@ export async function POST(req: NextRequest) {
       totalWarehouses: totalWarehouseCount,
       totalDocuments: totalDocumentCount,
       totalStockQuantity: totalStockQty,
+      categories: allCategories.map(c => ({ name: c.name, count: c._count.products })),
     });
 
     evidenceList.push({
@@ -47,30 +51,72 @@ export async function POST(req: NextRequest) {
       text: `[ข้อมูลสถิติภาพรวมทั้งระบบ (ERP Database Summary Statistics)] จำนวนสินค้าทั้งหมดในระบบ (Total Active Products): ${totalProductCount.toLocaleString()} รายการ | คลังสินค้าทั้งหมด (Active Warehouses): ${totalWarehouseCount} คลัง | เอกสารในระบบทั้งหมด (Total Documents): ${totalDocumentCount.toLocaleString()} ใบ | ปริมาณสต๊อกสินค้าคงคลังรวมทุกคลัง (Total Inventory Stock): ${totalStockQty.toLocaleString()} ชิ้น`,
     });
 
-    // 1. Search Products & Inventory
+    if (allCategories.length > 0) {
+      const catSummary = allCategories.map(c => `${c.name} (${c._count.products} สินค้า)`).join(', ');
+      evidenceList.push({
+        id: 'SYS-METRICS-002',
+        sourceId: 'system:category-metrics',
+        text: `[สรุปจำนานสินค้าแยกตามหมวดหมู่ (Product Category Summary)] ${catSummary}`,
+      });
+    }
+
+    // 1. Smart Category & Keyword Matching
+    const lowerQuery = query.toLowerCase();
+    const stopWords = ['มีอะไรบ้าง', 'มีอะไร', 'บ้าง', 'รายการ', 'ของ', 'ใน', 'เกี่ยวกับ', 'เช็ค', 'ดู', 'ขอ', 'มี', 'กี่', 'เท่าไหร่', 'ครับ', 'ค่ะ', 'ไหม', 'อะไร', 'สินค้า', 'หมวดหมู่'];
+    
+    let cleanQuery = query;
+    stopWords.forEach(sw => {
+      cleanQuery = cleanQuery.replace(new RegExp(sw, 'gi'), '');
+    });
+    cleanQuery = cleanQuery.trim();
+
+    // Check matching category
+    const matchedCategories = allCategories.filter(cat => {
+      const catName = cat.name.toLowerCase();
+      return lowerQuery.includes(catName) || (cleanQuery && catName.includes(cleanQuery.toLowerCase())) || (cleanQuery && cleanQuery.toLowerCase().includes(catName));
+    });
+
+    const categoryIds = matchedCategories.map(c => c.id);
+
+    matchedCategories.forEach(cat => {
+      evidenceList.push({
+        id: `CAT-EVIDENCE-${cat.id}`,
+        sourceId: `category:${cat.id}`,
+        text: `[หมวดหมู่สินค้าตรงกับคำถาม] หมวดหมู่: "${cat.name}" มีจำนวนสินค้าทั้งหมดในระบบ ${cat._count.products} รายการ`,
+      });
+    });
+
+    // Search Products by Category OR SKU/Name/Barcode/Description OR Keywords
     const products = await prisma.product.findMany({
       where: {
+        isDeleted: false,
         OR: [
+          ...(categoryIds.length > 0 ? [{ categoryId: { in: categoryIds } }] : []),
           { sku: { contains: query } },
           { name: { contains: query } },
           { barcode: { contains: query } },
+          ...(cleanQuery.length >= 2 ? [
+            { sku: { contains: cleanQuery } },
+            { name: { contains: cleanQuery } },
+            { category: { name: { contains: cleanQuery } } },
+          ] : []),
         ],
-        isDeleted: false,
       },
       include: {
+        category: true,
         inventories: { include: { warehouse: true } },
       },
-      take: 10,
+      take: 15,
     });
 
     products.forEach((p) => {
       const totalStock = p.inventories.reduce((sum, inv) => sum + inv.onHand, 0);
       const invDetails = p.inventories.map(i => `${i.warehouse.name}: ${i.onHand}`).join(', ');
-      evidenceRaw.push({ type: 'PRODUCT', id: p.id, sku: p.sku, name: p.name, totalStock, invDetails });
+      evidenceRaw.push({ type: 'PRODUCT', id: p.id, sku: p.sku, name: p.name, category: p.category.name, totalStock, invDetails });
       evidenceList.push({
         id: `PROD-EVIDENCE-${p.sku}`,
         sourceId: `product:${p.sku}`,
-        text: `สินค้า ${p.name} [SKU: ${p.sku}] | ราคาขาย ฿${p.sellingPrice} | สต๊อกรวม ${totalStock} ชิ้น (${invDetails || 'ไม่มีคลัง'}) | ขั้นต่ำ ${p.minStock} ชิ้น`,
+        text: `สินค้า ${p.name} [SKU: ${p.sku}] (หมวดหมู่: ${p.category.name}) | ราคาขาย ฿${p.sellingPrice} | สต๊อกรวม ${totalStock} ชิ้น (${invDetails || 'ไม่มีคลัง'}) | ขั้นต่ำ ${p.minStock} ชิ้น`,
       });
     });
 
@@ -82,6 +128,11 @@ export async function POST(req: NextRequest) {
           { notes: { contains: query } },
           { customer: { name: { contains: query } } },
           { supplier: { name: { contains: query } } },
+          ...(cleanQuery.length >= 2 ? [
+            { documentNo: { contains: cleanQuery } },
+            { customer: { name: { contains: cleanQuery } } },
+            { supplier: { name: { contains: cleanQuery } } },
+          ] : []),
         ],
       },
       include: { customer: true, supplier: true },
