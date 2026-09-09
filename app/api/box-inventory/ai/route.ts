@@ -1,9 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
+import { governInventoryQuery, type InventoryEvidence } from '@/lib/firekeeper-adapter';
 
 async function ensureTables() {
   await prisma.$executeRawUnsafe(`CREATE TABLE IF NOT EXISTS box_inventory_boxes (id TEXT PRIMARY KEY NOT NULL, box_code TEXT NOT NULL UNIQUE, qr_token TEXT NOT NULL UNIQUE, name TEXT NOT NULL, warehouse_id TEXT, location_code TEXT, status TEXT NOT NULL DEFAULT 'ACTIVE', notes TEXT, created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP)`);
   await prisma.$executeRawUnsafe(`CREATE TABLE IF NOT EXISTS box_inventory_items (id TEXT PRIMARY KEY NOT NULL, box_id TEXT NOT NULL, product_id TEXT NOT NULL, quantity REAL NOT NULL DEFAULT 1, lot TEXT, serial TEXT, notes TEXT, created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP)`);
+}
+
+function toEvidence(rows: any[]): InventoryEvidence[] {
+  return rows.map((e, index) => ({
+    id: `BOX-EVIDENCE-${index + 1}`,
+    sourceId: `box:${e.box_code}`,
+    text: `${e.box_code} | ${e.product_name || e.sku || '-'} | qty ${e.quantity} | warehouse ${e.warehouse_name || '-'} | location ${e.location_code || '-'} | sku ${e.sku || '-'} | status ${e.status || '-'}`,
+  }));
 }
 
 export async function POST(req: NextRequest) {
@@ -11,9 +20,9 @@ export async function POST(req: NextRequest) {
     await ensureTables();
     const { q = '' } = await req.json();
     const query = String(q).trim();
-    if (!query) return NextResponse.json({ answer: 'กรุณาระบุคำถาม', evidence: [] });
+    if (!query) return NextResponse.json({ answer: 'กรุณาระบุคำถาม', evidence: [] }, { status: 400 });
 
-    const evidence = await prisma.$queryRawUnsafe<any[]>(`
+    const rows = await prisma.$queryRawUnsafe<any[]>(`
       SELECT b.box_code, b.name AS box_name, b.location_code, b.status,
              w.code AS warehouse_code, w.name AS warehouse_name,
              p.sku, p.name AS product_name, p.barcode, i.quantity, i.lot, i.serial
@@ -26,29 +35,53 @@ export async function POST(req: NextRequest) {
       LIMIT 100
     `, `%${query}%`, `%${query}%`, `%${query}%`, `%${query}%`, `%${query}%`);
 
-    const evidenceText = evidence.length
-      ? evidence.map((e) => `${e.box_code} | ${e.product_name || '-'} | qty ${e.quantity} | warehouse ${e.warehouse_name || '-'} | location ${e.location_code || '-'} | sku ${e.sku || '-'}`).join('\n')
-      : 'ไม่พบหลักฐานที่ตรงกับคำค้นใน Box Inventory';
+    const evidence = toEvidence(rows);
+    const deterministicAnswer = rows.length
+      ? rows.map((e) => `${e.box_code}: ${e.product_name || e.sku} จำนวน ${e.quantity} อยู่ ${e.warehouse_name || 'ไม่ระบุคลัง'} / ${e.location_code || 'ไม่ระบุตำแหน่ง'}`).join('\n')
+      : 'ไม่พบข้อมูลใน Box Inventory';
+
+    const governed = governInventoryQuery({
+      question: query,
+      evidence,
+      answer: deterministicAnswer,
+      recommendation: rows.length ? 'ใช้ข้อมูล Box Inventory เป็นหลักฐานอ้างอิงสำหรับคำตอบนี้' : undefined,
+      risk: rows.length ? undefined : { text: 'ไม่มีหลักฐานจาก Box Inventory ที่ตรงกับคำถาม', severity: 'MEDIUM' },
+    });
 
     const ollamaBase = process.env.OLLAMA_BASE_URL || process.env.OLLAMA_URL;
     const ollamaModel = process.env.OLLAMA_MODEL;
-    if (ollamaBase && ollamaModel && evidence.length) {
+    if (ollamaBase && ollamaModel && rows.length && governed.validation.status === 'PASS') {
       try {
+        const evidenceText = evidence.map((e) => `[${e.sourceId}] ${e.text}`).join('\n');
         const response = await fetch(`${ollamaBase.replace(/\/$/, '')}/api/generate`, {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ model: ollamaModel, stream: false, prompt: `ตอบคำถามภาษาไทยจากหลักฐานเท่านั้น ห้ามเดาข้อมูลที่ไม่มีในหลักฐาน และระบุ Box/ตำแหน่งเมื่อมี\n\nคำถาม: ${query}\n\nหลักฐาน:\n${evidenceText}` }),
+          body: JSON.stringify({
+            model: ollamaModel,
+            stream: false,
+            prompt: `คุณคือ AI Inventory Assistant ที่อยู่ภายใต้ FIRE KEEPER Governance\nตอบคำถามภาษาไทยจากหลักฐานที่ให้เท่านั้น ห้ามสร้างข้อมูลใหม่ ห้ามเดาตำแหน่งหรือจำนวนที่ไม่มีในหลักฐาน หากหลักฐานไม่พอให้ระบุความไม่แน่นอน\n\nคำถาม: ${query}\n\nหลักฐาน:\n${evidenceText}`,
+          }),
         });
         if (response.ok) {
           const data = await response.json();
-          return NextResponse.json({ answer: data.response || evidenceText, evidence, source: 'ollama' });
+          const answer = data.response || deterministicAnswer;
+          return NextResponse.json({
+            answer,
+            evidence: rows,
+            governance: governed,
+            source: 'ollama+firekeeper-adapter',
+          });
         }
-      } catch {}
+      } catch {
+        // Fall back to governed deterministic evidence response.
+      }
     }
 
-    const answer = evidence.length
-      ? evidence.map((e) => `${e.box_code}: ${e.product_name || e.sku} จำนวน ${e.quantity} อยู่ ${e.warehouse_name || 'ไม่ระบุคลัง'} / ${e.location_code || 'ไม่ระบุตำแหน่ง'}`).join('\n')
-      : 'ไม่พบข้อมูลใน Box Inventory';
-    return NextResponse.json({ answer, evidence, source: 'deterministic-evidence' });
+    return NextResponse.json({
+      answer: deterministicAnswer,
+      evidence: rows,
+      governance: governed,
+      source: 'firekeeper-governed-evidence',
+    });
   } catch (error: any) {
     return NextResponse.json({ error: error.message || 'AI query failed' }, { status: 500 });
   }
