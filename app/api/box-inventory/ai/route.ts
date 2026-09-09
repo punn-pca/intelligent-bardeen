@@ -81,13 +81,15 @@ export async function POST(req: NextRequest) {
 
     const evidenceText = evidence.map((e) => `[${e.id}] ${e.text}`).join('\n');
 
-    // 4. Try DeepSeek Cloud API First (Ideal for Web Deployment)
+    // 4. DeepSeek Cloud API (primary LLM for deployment)
+    // DeepSeek currently exposes the OpenAI-compatible API at this base URL.
     const deepseekApiKey = process.env.DEEPSEEK_API_KEY;
-    const deepseekModel = process.env.DEEPSEEK_MODEL || 'deepseek-chat';
+    const deepseekBaseUrl = (process.env.DEEPSEEK_BASE_URL || 'https://api.deepseek.com').replace(/\/$/, '');
+    const deepseekModel = process.env.DEEPSEEK_MODEL || 'deepseek-v4-flash';
 
     if (deepseekApiKey && rows.length && governed.validation.status === 'PASS') {
       try {
-        const dsRes = await fetch('https://api.deepseek.com/chat/completions', {
+        const dsRes = await fetch(`${deepseekBaseUrl}/chat/completions`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -95,7 +97,9 @@ export async function POST(req: NextRequest) {
           },
           body: JSON.stringify({
             model: deepseekModel,
+            thinking: { type: 'disabled' },
             response_format: { type: 'json_object' },
+            stream: false,
             messages: [
               {
                 role: 'system',
@@ -126,13 +130,15 @@ export async function POST(req: NextRequest) {
               });
             }
           }
+        } else {
+          console.error('DeepSeek API error:', dsRes.status, await dsRes.text());
         }
       } catch (e: any) {
         console.error('DeepSeek execution fallback:', e);
       }
     }
 
-    // 5. Try Local Ollama Instance (Ideal for Local Execution)
+    // 5. Try Local Ollama Instance as a fallback for local development
     const ollamaBase = process.env.OLLAMA_BASE_URL || process.env.OLLAMA_URL || 'http://localhost:11434';
     const ollamaModel = process.env.OLLAMA_MODEL || 'qwen3:4b';
 
