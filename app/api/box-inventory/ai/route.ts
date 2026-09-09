@@ -8,11 +8,7 @@ async function ensureTables() {
 }
 
 function toEvidence(rows: any[]): InventoryEvidence[] {
-  return rows.map((e, index) => ({
-    id: `BOX-EVIDENCE-${index + 1}`,
-    sourceId: `box:${e.box_code}`,
-    text: `${e.box_code} | ${e.product_name || e.sku || '-'} | qty ${e.quantity} | warehouse ${e.warehouse_name || '-'} | location ${e.location_code || '-'} | sku ${e.sku || '-'} | status ${e.status || '-'}`,
-  }));
+  return rows.map((e, index) => ({ id: `BOX-EVIDENCE-${index + 1}`, sourceId: `box:${e.box_code}`, text: `${e.box_code} | ${e.product_name || e.sku || '-'} | qty ${e.quantity} | warehouse ${e.warehouse_name || '-'} | location ${e.location_code || '-'} | sku ${e.sku || '-'} | status ${e.status || '-'}` }));
 }
 
 export async function POST(req: NextRequest) {
@@ -20,19 +16,15 @@ export async function POST(req: NextRequest) {
     await ensureTables();
     const { q = '' } = await req.json();
     const query = String(q).trim();
-    if (!query) return NextResponse.json({ answer: 'กรุณาระบุคำถาม', evidence: [] }, { status: 400 });
+    if (!query) return NextResponse.json({ error: 'กรุณาระบุคำถาม' }, { status: 400 });
 
     const rows = await prisma.$queryRawUnsafe<any[]>(`
-      SELECT b.box_code, b.name AS box_name, b.location_code, b.status,
-             w.code AS warehouse_code, w.name AS warehouse_name,
+      SELECT b.box_code, b.name AS box_name, b.location_code, b.status, w.code AS warehouse_code, w.name AS warehouse_name,
              p.sku, p.name AS product_name, p.barcode, i.quantity, i.lot, i.serial
-      FROM box_inventory_items i
-      JOIN box_inventory_boxes b ON b.id = i.box_id
-      LEFT JOIN products p ON p.id = i.product_id
-      LEFT JOIN warehouses w ON w.id = b.warehouse_id
+      FROM box_inventory_items i JOIN box_inventory_boxes b ON b.id = i.box_id
+      LEFT JOIN products p ON p.id = i.product_id LEFT JOIN warehouses w ON w.id = b.warehouse_id
       WHERE b.box_code LIKE ? OR b.name LIKE ? OR p.sku LIKE ? OR p.name LIKE ? OR p.barcode LIKE ?
-      ORDER BY b.box_code, p.name
-      LIMIT 100
+      ORDER BY b.box_code, p.name LIMIT 100
     `, `%${query}%`, `%${query}%`, `%${query}%`, `%${query}%`, `%${query}%`);
 
     const evidence = toEvidence(rows);
@@ -55,33 +47,17 @@ export async function POST(req: NextRequest) {
         const evidenceText = evidence.map((e) => `[${e.sourceId}] ${e.text}`).join('\n');
         const response = await fetch(`${ollamaBase.replace(/\/$/, '')}/api/generate`, {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            model: ollamaModel,
-            stream: false,
-            prompt: `คุณคือ AI Inventory Assistant ที่อยู่ภายใต้ FIRE KEEPER Governance\nตอบคำถามภาษาไทยจากหลักฐานที่ให้เท่านั้น ห้ามสร้างข้อมูลใหม่ ห้ามเดาตำแหน่งหรือจำนวนที่ไม่มีในหลักฐาน หากหลักฐานไม่พอให้ระบุความไม่แน่นอน\n\nคำถาม: ${query}\n\nหลักฐาน:\n${evidenceText}`,
-          }),
+          body: JSON.stringify({ model: ollamaModel, stream: false,
+            prompt: `คุณคือ AI Inventory Assistant ภายใต้ FIRE KEEPER Governance\nตอบจากหลักฐานเท่านั้น ห้ามสร้างหรือเดาข้อมูล หากหลักฐานไม่พอให้ระบุความไม่แน่นอน\n\nคำถาม: ${query}\n\nหลักฐาน:\n${evidenceText}` }),
         });
         if (response.ok) {
           const data = await response.json();
-          const answer = data.response || deterministicAnswer;
-          return NextResponse.json({
-            answer,
-            evidence: rows,
-            governance: governed,
-            source: 'ollama+firekeeper-adapter',
-          });
+          return NextResponse.json({ answer: data.response || deterministicAnswer, evidence: rows, governance: governed, source: 'ollama+firekeeper' });
         }
-      } catch {
-        // Fall back to governed deterministic evidence response.
-      }
+      } catch { /* governed deterministic fallback */ }
     }
 
-    return NextResponse.json({
-      answer: deterministicAnswer,
-      evidence: rows,
-      governance: governed,
-      source: 'firekeeper-governed-evidence',
-    });
+    return NextResponse.json({ answer: deterministicAnswer, evidence: rows, governance: governed, source: 'firekeeper' });
   } catch (error: any) {
     return NextResponse.json({ error: error.message || 'AI query failed' }, { status: 500 });
   }
