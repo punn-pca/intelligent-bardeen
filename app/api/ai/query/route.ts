@@ -24,8 +24,8 @@ export async function POST(req: NextRequest) {
     const evidenceList: InventoryEvidence[] = [];
     const evidenceRaw: any[] = [];
 
-    // 0. Aggregate System Metrics & Category Breakdown
-    const [totalProductCount, totalWarehouseCount, totalDocumentCount, inventorySumResult, allCategories] = await Promise.all([
+    // 0. Aggregate System Metrics, Category Breakdown & Company Profile
+    const [totalProductCount, totalWarehouseCount, totalDocumentCount, inventorySumResult, allCategories, companySetting] = await Promise.all([
       prisma.product.count({ where: { isDeleted: false } }).catch(() => 0),
       prisma.warehouse.count({ where: { active: true } }).catch(() => 0),
       prisma.document.count().catch(() => 0),
@@ -33,6 +33,7 @@ export async function POST(req: NextRequest) {
       prisma.category.findMany({
         include: { _count: { select: { products: { where: { isDeleted: false } } } } },
       }).catch(() => []),
+      prisma.companySetting.findFirst().catch(() => null),
     ]);
     const totalStockQty = inventorySumResult._sum?.onHand || 0;
 
@@ -43,6 +44,7 @@ export async function POST(req: NextRequest) {
       totalDocuments: totalDocumentCount,
       totalStockQuantity: totalStockQty,
       categories: allCategories.map(c => ({ name: c.name, count: c._count.products })),
+      companySetting,
     });
 
     evidenceList.push({
@@ -59,6 +61,24 @@ export async function POST(req: NextRequest) {
         text: `[สรุปจำนานสินค้าแยกตามหมวดหมู่ (Product Category Summary)] ${catSummary}`,
       });
     }
+
+    const comp = companySetting || {
+      name: 'บริษัท เอส แอนด์ บี อิเล็กทรอนิกส์ เซอร์วิส จำกัด',
+      taxId: '0105555081714',
+      address: '120/288 หมู่ที่ 5 ตำบลบางเดื่อ อำเภอเมืองปทุมธานี จ.ปทุมธานี 12000',
+      phone: '02-789-9999',
+      email: 'info@sb-electronic.co.th',
+      website: 'www.sb-electronic.co.th',
+      bankName: 'ธนาคารกสิกรไทย (KBANK)',
+      bankAccountNo: '123-4-56789-0',
+      bankAccountName: 'บจก. เอส แอนด์ บี อิเล็กทรอนิกส์ เซอร์วิส',
+    };
+
+    evidenceList.push({
+      id: 'SYS-COMPANY-PROFILE',
+      sourceId: 'system:company-profile',
+      text: `[ข้อมูลบริษัทและที่อยู่สำนักงาน ERP (Company Profile & Address)] ชื่อบริษัท: ${comp.name} | เลขประจำตัวผู้เสียภาษี (Tax ID): ${comp.taxId} | ที่อยู่สำนักงานใหญ่: ${comp.address} | เบอร์โทรศัพท์: ${comp.phone} | อีเมล: ${comp.email} | เว็บไซต์: ${comp.website} | ธนาคารชำระเงิน: ${comp.bankName} เลขบัญชี: ${comp.bankAccountNo} ชื่อบัญชี: ${comp.bankAccountName}`,
+    });
 
     // 0.5. Excel Stock Ledger Matrix (Physical Inventory Ledger Breakdown)
     const [activeInventories, stockMovements] = await Promise.all([
@@ -368,6 +388,11 @@ export async function POST(req: NextRequest) {
           return `${idx + 1}. ${item.name} [SKU: ${item.sku}] (หมวด: ${item.category})\n   • คงเหลือ: ${item.onHand.toLocaleString()} ชิ้น | คลัง: ${item.warehouse}`;
         }).join('\n\n');
         return `จากการตรวจสอบตารางสต๊อกสินค้าหลัก (Stock Ledger Matrix) พบสินค้าที่มีสต๊อกคงเหลือมากกว่า 0 ชิ้น ทั้งหมด ${inStockItems.length} รายการ (รวมทุกคลัง ${totalLedgerOnHand.toLocaleString()} ชิ้น) ตัวอย่างรายการสินค้าพร้อมขายมีดังนี้:\n\n${topList}\n\n(มีทั้งหมด ${inStockItems.length} รายการที่มีสต๊อกคงเหลือในระบบ)`;
+      }
+
+      // 0.4 Company Profile Query ("ที่อยู่บริษัท", "ข้อมูลบริษัท", "เลขผู้เสียภาษี", "ติดต่อบริษัท")
+      if (/ที่อยู่|ที่ตั้ง|สำนักงาน|บริษัท|เบอร์โทร|เลขผู้เสียภาษี|tax.?id|email|อีเมล|เว็บไซต์|ธนาคาร|เลขบัญชี|ติดต่อ/i.test(q)) {
+        return `🏢 **ข้อมูลบริษัทและที่อยู่สำนักงานใหญ่ในระบบ ERP:**\n\n• **ชื่อบริษัท:** ${comp.name}\n• **เลขประจำตัวผู้เสียภาษี (Tax ID):** ${comp.taxId}\n• **ที่อยู่สำนักงานใหญ่:** ${comp.address}\n• **เบอร์โทรศัพท์:** ${comp.phone}\n• **อีเมล:** ${comp.email}\n• **เว็บไซต์:** ${comp.website}\n• **บัญชีธนาคารชำระเงิน:** ${comp.bankName} เลขที่บัญชี ${comp.bankAccountNo} (ชื่อบัญชี: ${comp.bankAccountName})`;
       }
 
       // 1. Category Query ("สินค้ามีหมวดหมู่อะไรบ้าง", "หมวดหมู่สินค้า", "มีกี่หมวดหมู่")
