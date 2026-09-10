@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Sparkles, X, Send, Bot, ShieldCheck, ArrowRight, Zap, RefreshCw } from 'lucide-react';
+import { Sparkles, X, Send, Bot, ShieldCheck, ArrowRight, Zap, RefreshCw, Key, Check } from 'lucide-react';
 
 interface GlobalAIAssistantModalProps {
   isOpen?: boolean;
@@ -14,6 +14,10 @@ export default function GlobalAIAssistantModal({ isOpen: externalIsOpen, onClose
 
   const [inputQuery, setInputQuery] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [apiKey, setApiKey] = useState('');
+  const [savedSuccess, setSavedSuccess] = useState(false);
+
   const [chatHistory, setChatHistory] = useState<Array<{ role: 'user' | 'assistant'; text: string; governance?: any; source?: string }>>([
     {
       role: 'assistant',
@@ -22,6 +26,12 @@ export default function GlobalAIAssistantModal({ isOpen: externalIsOpen, onClose
   ]);
 
   const chatEndRef = useRef<HTMLDivElement>(null);
+
+  // Load API Key from localStorage
+  useEffect(() => {
+    const savedKey = localStorage.getItem('sb_deepseek_api_key') || '';
+    if (savedKey) setApiKey(savedKey);
+  }, []);
 
   // Keyboard shortcut Ctrl + K
   useEffect(() => {
@@ -39,6 +49,14 @@ export default function GlobalAIAssistantModal({ isOpen: externalIsOpen, onClose
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [chatHistory, loading]);
 
+  const saveApiKey = (keyToSave: string) => {
+    const clean = keyToSave.trim();
+    localStorage.setItem('sb_deepseek_api_key', clean);
+    setApiKey(clean);
+    setSavedSuccess(true);
+    setTimeout(() => setSavedSuccess(false), 2000);
+  };
+
   const handleSend = async (queryText?: string) => {
     const q = (queryText || inputQuery).trim();
     if (!q || loading) return;
@@ -51,7 +69,10 @@ export default function GlobalAIAssistantModal({ isOpen: externalIsOpen, onClose
       const res = await fetch('/api/ai/query', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ question: q }),
+        body: JSON.stringify({
+          question: q,
+          apiKey: apiKey.trim(),
+        }),
       });
 
       const data = await res.json();
@@ -132,10 +153,67 @@ export default function GlobalAIAssistantModal({ isOpen: externalIsOpen, onClose
                 </div>
               </div>
 
-              <button onClick={handleClose} className="p-2 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition-colors">
-                <X className="w-5 h-5" />
-              </button>
+              <div className="flex items-center gap-1.5">
+                <button
+                  onClick={() => setShowSettings(!showSettings)}
+                  className={`p-2 rounded-lg transition-colors flex items-center gap-1 text-xs ${
+                    showSettings || apiKey ? 'bg-slate-800 text-emerald-400 border border-emerald-500/30' : 'text-slate-400 hover:text-white hover:bg-slate-800'
+                  }`}
+                  title="ตั้งค่า DeepSeek Cloud AI Key"
+                >
+                  <Key className="w-4 h-4" />
+                  <span className="hidden sm:inline text-[11px] font-mono">{apiKey ? 'DeepSeek Key: On' : 'ตั้งค่า Key'}</span>
+                </button>
+
+                <button onClick={handleClose} className="p-2 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition-colors">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
             </div>
+
+            {/* DeepSeek API Key Settings Drawer */}
+            {showSettings && (
+              <div className="bg-slate-900 border-b border-slate-800 p-4 text-white text-xs space-y-3 animate-in slide-in-from-top-2 duration-200">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 font-bold text-emerald-400">
+                    <Key className="w-4 h-4" />
+                    <span>ตั้งค่า DeepSeek Cloud AI API Key (สำหรับใช้งานบนเว็บไซต์)</span>
+                  </div>
+                  {savedSuccess && (
+                    <span className="text-emerald-400 flex items-center gap-1 font-mono text-[11px]">
+                      <Check className="w-3.5 h-3.5" /> บันทึกเรียบร้อย
+                    </span>
+                  )}
+                </div>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="password"
+                    value={apiKey}
+                    onChange={(e) => setApiKey(e.target.value)}
+                    placeholder="วาง DeepSeek API Key (sk-................................)"
+                    className="flex-1 px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-white font-mono text-xs outline-none focus:border-emerald-500"
+                  />
+                  <button
+                    onClick={() => saveApiKey(apiKey)}
+                    className="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold shrink-0 flex items-center gap-1"
+                  >
+                    <span>บันทึก Key</span>
+                  </button>
+                  {apiKey && (
+                    <button
+                      onClick={() => saveApiKey('')}
+                      className="px-2.5 py-2 bg-slate-800 hover:bg-slate-700 text-rose-400 rounded-lg text-xs font-semibold shrink-0"
+                      title="ลบ Key"
+                    >
+                      ลบ
+                    </button>
+                  )}
+                </div>
+                <p className="text-[11px] text-slate-400">
+                  💡 API Key จะถูกบันทึกไว้ใน Browser เพื่อเรียกใช้งาน DeepSeek Cloud AI บนเว็บไซต์ได้โดยตรง (ไม่ต้องติดตั้ง Ollama บนเครื่อง)
+                </p>
+              </div>
+            )}
 
             {/* Chat Body */}
             <div className="flex-1 p-6 overflow-y-auto space-y-4 bg-slate-50">

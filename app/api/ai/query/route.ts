@@ -283,12 +283,23 @@ export async function POST(req: NextRequest) {
     const evidenceText = evidenceList.map((e) => `[${e.id}] ${e.text}`).join('\n');
 
     // 4. Try DeepSeek Cloud API First (Ideal for Web Deployment)
-    const deepseekApiKey = process.env.DEEPSEEK_API_KEY;
-    const deepseekModel = process.env.DEEPSEEK_MODEL || 'deepseek-chat';
+    const { apiKey: clientApiKey = '', model: clientModel = '' } = await req.json().catch(() => ({}));
+    let deepseekApiKey = (clientApiKey || process.env.DEEPSEEK_API_KEY || '').trim();
+
+    if (!deepseekApiKey) {
+      try {
+        const setting = await prisma.companySetting.findFirst();
+        if (setting && (setting as any).deepseekApiKey) {
+          deepseekApiKey = String((setting as any).deepseekApiKey).trim();
+        }
+      } catch {}
+    }
+
+    const deepseekModel = clientModel || process.env.DEEPSEEK_MODEL || 'deepseek-chat';
 
     if (deepseekApiKey && evidenceList.length) {
       try {
-        const dsRes = await fetch('https://api.deepseek.com/chat/completions', {
+        let dsRes = await fetch('https://api.deepseek.com/chat/completions', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -310,6 +321,30 @@ export async function POST(req: NextRequest) {
           }),
         });
 
+        // Fallback retry if json_object response format fails with HTTP 400
+        if (!dsRes.ok && dsRes.status === 400) {
+          dsRes = await fetch('https://api.deepseek.com/chat/completions', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${deepseekApiKey}`,
+            },
+            body: JSON.stringify({
+              model: deepseekModel,
+              messages: [
+                {
+                  role: 'system',
+                  content: `คุณคือ AI ERP Assistant ประจำระบบ S&B Enterprise ERP ภายใต้ FIRE KEEPER Governance\nตอบคำถามภาษาไทยให้อ่านง่าย กระชับ และเป็นธรรมชาติ โดยสรุปจากหลักฐานที่ให้มาเท่านั้น\nหากผู้ใช้ถามจำนวนสินค้า หรือจำนวนเอกสาร หรือภาพรวมระบบ ให้ตอบตามสถิติใน [SYS-METRICS-001] เสมอ ห้ามนำรายการตัวอย่างมานับแทนจำนวนรวมทั้งหมดของระบบ`,
+                },
+                {
+                  role: 'user',
+                  content: `คำถาม: ${query}\n\nหลักฐาน authoritative:\n${evidenceText}`,
+                },
+              ],
+            }),
+          });
+        }
+
         if (dsRes.ok) {
           const dsData = await dsRes.json();
           const rawContent = dsData?.choices?.[0]?.message?.content || '';
@@ -324,9 +359,12 @@ export async function POST(req: NextRequest) {
             source: 'deepseek+firekeeper-validated',
             model: deepseekModel,
           });
+        } else {
+          const errText = await dsRes.text().catch(() => '');
+          console.error('DeepSeek API Error HTTP status:', dsRes.status, errText);
         }
       } catch (e) {
-        console.error('DeepSeek execution fallback:', e);
+        console.error('DeepSeek execution fallback error:', e);
       }
     }
 
