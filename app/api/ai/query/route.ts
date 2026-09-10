@@ -285,7 +285,7 @@ export async function POST(req: NextRequest) {
       if (/หมวดหมู่|หมวด|ประเภท|category|categories/i.test(q)) {
         if (allCategories.length > 0) {
           const catList = allCategories
-            .map((c, idx) => `${idx + 1}. ${c.name} (${(c._count?.products ?? c.count ?? 0).toLocaleString()} สินค้า)`)
+            .map((c, idx) => `${idx + 1}. ${c.name} (${(c._count?.products ?? (c as any).count ?? 0).toLocaleString()} สินค้า)`)
             .join('\n');
           return `หมวดหมู่สินค้าในระบบ S&B Enterprise ERP มีทั้งหมด ${allCategories.length} หมวดหมู่ ดังนี้:\n\n${catList}`;
         }
