@@ -138,15 +138,18 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // 5. Try Local Ollama Instance as a fallback for local development
-    const ollamaBase = process.env.OLLAMA_BASE_URL || process.env.OLLAMA_URL || 'http://localhost:11434';
+    // 5. Try Remote/Local Ollama Instance
+    const ollamaBase = process.env.OLLAMA_BASE_URL || process.env.OLLAMA_URL || 'https://ollama.firekeeper.site';
     const ollamaModel = process.env.OLLAMA_MODEL || 'qwen3:4b';
 
     if (ollamaBase && ollamaModel && rows.length && governed.validation.status === 'PASS') {
       try {
         const response = await fetch(`${ollamaBase.replace(/\/$/, '')}/api/generate`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) S&B-ERP/1.0',
+          },
           body: JSON.stringify({
             model: ollamaModel,
             stream: false,

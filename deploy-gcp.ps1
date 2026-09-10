@@ -14,6 +14,6 @@ if ($env:DEEPSEEK_API_KEY) {
     $ENV_VARS = "--set-env-vars DEEPSEEK_API_KEY=$($env:DEEPSEEK_API_KEY)"
 }
 
-gcloud run deploy $SERVICE_NAME --source . --region $REGION --allow-unauthenticated --port 8080 --cpu 1 --memory 1Gi $ENV_VARS
+gcloud run deploy $SERVICE_NAME --source . --region $REGION --allow-unauthenticated --port 8080 --cpu 1 --memory 1Gi --clear-base-image $ENV_VARS
 
 Write-Host "Deployment completed successfully!" -ForegroundColor Green
