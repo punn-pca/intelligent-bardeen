@@ -268,6 +268,38 @@ export async function POST(req: NextRequest) {
       });
     }
 
+    // Low-Stock Ranking Query: for questions asking "สินค้าไหนสต๊อกน้อย/หมด/ต่ำสุด"
+    const isLowStockQuery = /น้อยที่สุด|น้อย|ต่ำสุด|ใกล้หมด|หมดแล้ว|สต๊อกน้อย|สต๊อกต่ำ|สต๊อกหมด|low.?stock|reorder/i.test(query);
+    let lowStockRanking: Array<{ sku: string; name: string; category: string; onHand: number; minStock: number; warehouse: string }> = [];
+    if (isLowStockQuery) {
+      const allWithInventory = await prisma.product.findMany({
+        where: { isDeleted: false },
+        include: {
+          category: true,
+          inventories: { include: { warehouse: true } },
+        },
+      }).catch(() => []);
+
+      lowStockRanking = allWithInventory
+        .map((p) => {
+          const onHand = p.inventories.reduce((sum, inv) => sum + inv.onHand, 0);
+          const warehouse = p.inventories.map(i => i.warehouse.name).join(', ') || 'ไม่มีคลัง';
+          return { sku: p.sku, name: p.name, category: p.category.name, onHand, minStock: p.minStock || 0, warehouse };
+        })
+        .filter(p => p.onHand >= 0)
+        .sort((a, b) => a.onHand - b.onHand)
+        .slice(0, 15);
+
+      lowStockRanking.forEach((item, idx) => {
+        evidenceRaw.push({ type: 'LOW_STOCK', ...item, rank: idx + 1 });
+        evidenceList.push({
+          id: `LOWSTOCK-${item.sku}`,
+          sourceId: `lowstock:${item.sku}`,
+          text: `[อันดับที่ ${idx + 1} สต๊อกน้อย] ${item.name} [SKU: ${item.sku}] (หมวด: ${item.category}) | สต๊อกคงเหลือ: ${item.onHand} ชิ้น | สต๊อกขั้นต่ำ: ${item.minStock} ชิ้น | คลัง: ${item.warehouse}`,
+        });
+      });
+    }
+
     const naturalSummaryAnswer = (() => {
       const q = query.toLowerCase();
 
@@ -279,6 +311,35 @@ export async function POST(req: NextRequest) {
       // 0.1 Thank you ("ขอบคุณ", "thanks")
       if (/^(ขอบคุณ|ขอบคุณครับ|ขอบคุณค่ะ|thanks|thank you)/i.test(q)) {
         return `ด้วยความยินดีครับ! หากมีข้อสงสัยเกี่ยวกับระบบ ERP หรือคำถามอื่นเพิ่มเติม สอบถามผมได้ตลอดเวลาเลยครับ 😊`;
+      }
+
+      // 0.2 Low-Stock Ranking Query ("สินค้าไหนสต๊อกน้อยที่สุด", "สต๊อกใกล้หมด", "สินค้าต่ำสุด")
+      if (isLowStockQuery && lowStockRanking.length > 0) {
+        const outOfStock = lowStockRanking.filter(p => p.onHand === 0);
+        const critical = lowStockRanking.filter(p => p.onHand > 0 && p.onHand <= p.minStock && p.minStock > 0);
+        const low = lowStockRanking.filter(p => p.onHand > 0 && !(p.onHand <= p.minStock && p.minStock > 0)).slice(0, 10);
+
+        const lines: string[] = [];
+        if (outOfStock.length > 0) {
+          lines.push(`🔴 **สินค้าหมดสต๊อก (0 ชิ้น)** — ${outOfStock.length} รายการ:`);
+          outOfStock.slice(0, 5).forEach((p, i) =>
+            lines.push(`   ${i + 1}. ${p.name} [${p.sku}] | หมวด: ${p.category}`)
+          );
+        }
+        if (critical.length > 0) {
+          lines.push(`\n🟡 **สินค้าต่ำกว่าขั้นต่ำ** — ${critical.length} รายการ:`);
+          critical.slice(0, 5).forEach((p, i) =>
+            lines.push(`   ${i + 1}. ${p.name} [${p.sku}] | สต๊อก: ${p.onHand} ชิ้น (ขั้นต่ำ: ${p.minStock})`)
+          );
+        }
+        if (outOfStock.length === 0 && critical.length === 0 && low.length > 0) {
+          lines.push(`🟢 **สินค้าสต๊อกน้อยที่สุด** (เรียงจากน้อยไปมาก):`);
+          low.slice(0, 10).forEach((p, i) =>
+            lines.push(`   ${i + 1}. ${p.name} [${p.sku}] | สต๊อก: ${p.onHand} ชิ้น | หมวด: ${p.category}`)
+          );
+        }
+
+        return `จากการตรวจสอบระบบ ERP พบข้อมูลสต๊อกสินค้าที่น้อยที่สุด ดังนี้:\n\n${lines.join('\n')}`;
       }
 
       // 1. Category Query ("สินค้ามีหมวดหมู่อะไรบ้าง", "หมวดหมู่สินค้า", "มีกี่หมวดหมู่")
