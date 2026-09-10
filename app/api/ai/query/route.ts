@@ -271,6 +271,16 @@ export async function POST(req: NextRequest) {
     const naturalSummaryAnswer = (() => {
       const q = query.toLowerCase();
 
+      // 0. Greetings ("สวัสดี", "hello", "hi")
+      if (/^(สวัสดี|สวัสดีครับ|สวัสดีค่ะ|หวัดดี|hello|hi|good morning|good afternoon)/i.test(q)) {
+        return `สวัสดีครับ! ผมคือ S&B AI Assistant ผู้ช่วยอัจฉริยะประจำระบบ ERP\n\nผมสามารถช่วยเหลือคุณได้ทั้ง:\n• ตรวจสอบสต๊อกสินค้า สถิติระบบ และรายงานเอกสาร ERP\n• ให้คำแนะนำเรื่องการบริหารจัดการคลังสินค้า เทคนิคการขาย และความรู้ทั่วไปทางธุรกิจ\n\nมีข้อมูลอะไรให้ผมช่วยดูแลในวันนี้ไหมครับ?`;
+      }
+
+      // 0.1 Thank you ("ขอบคุณ", "thanks")
+      if (/^(ขอบคุณ|ขอบคุณครับ|ขอบคุณค่ะ|thanks|thank you)/i.test(q)) {
+        return `ด้วยความยินดีครับ! หากมีข้อสงสัยเกี่ยวกับระบบ ERP หรือคำถามอื่นเพิ่มเติม สอบถามผมได้ตลอดเวลาเลยครับ 😊`;
+      }
+
       // 1. Category Query ("สินค้ามีหมวดหมู่อะไรบ้าง", "หมวดหมู่สินค้า", "มีกี่หมวดหมู่")
       if (/หมวดหมู่|หมวด|ประเภท|category|categories/i.test(q)) {
         if (allCategories.length > 0) {
@@ -313,10 +323,15 @@ export async function POST(req: NextRequest) {
         return `พบเอกสารในระบบ ERP ที่เกี่ยวข้องกับคำถาม "${query}" ดังนี้:\n\n${list}`;
       }
 
-      // 6. General Fallback
+      // 6. Advice / General question fallback when no product/doc matches
+      if (/แนะนำ|วิธี|ทำอย่างไร|ควรทำ|คืออะไร|หลักการ|ประโยชน์|ข้อดี/i.test(q)) {
+        return `ยินดีให้คำแนะนำครับ สำหรับคำถาม "${query}":\n\nคำแนะนำและแนวทางปฏิบัติทั่วไป:\n1. การบริหารจัดการและควบคุมข้อมูล: ควรมั่นใจว่าข้อมูลในระบบ ERP อัปเดตแบบ Real-time เพื่อลดความผิดพลาดในการปฏิบัติงาน\n2. การตรวจสอบสต๊อกคงคลัง: ควรตั้งค่า Reorder Point (จุดสั่งซื้อเติม) และตรวจนับสินค้าคงคลังอย่างสม่ำเสมอ\n3. การเชื่อมโยงข้อมูล: ระบบ ERP ช่วยให้การเชื่อมโยงคลังสินค้าและการออกเอกสารทำงานได้อย่างมีประสิทธิภาพ\n\n(คุณสามารถสอบถามข้อมูลสินค้าหรือเอกสารเฉพาะเจาะจงเพิ่มเติมในระบบได้ตลอดเวลาครับ)`;
+      }
+
+      // 7. General Fallback
       return evidenceList.length
         ? `จากการตรวจสอบฐานข้อมูล ERP พบสถิติระบบดังนี้:\n• สินค้าทั้งหมด: ${totalProductCount.toLocaleString()} รายการ (${allCategories.length} หมวดหมู่)\n• สต๊อกสินค้าคงเหลือรวมทุกคลัง: ${totalStockQty.toLocaleString()} ชิ้น`
-        : 'ไม่พบข้อมูลหลักฐานที่ตรงกับคำถามในระบบ ERP';
+        : 'ยินดีให้บริการครับ สามารถสอบถามข้อมูลเกี่ยวกับสินค้า สต๊อกสินค้า เอกสาร หรือคำถามทั่วไปได้เลยครับ';
     })();
 
     const governed = governInventoryQuery({
@@ -343,7 +358,17 @@ export async function POST(req: NextRequest) {
 
     const deepseekModel = clientModel || process.env.DEEPSEEK_MODEL || 'deepseek-chat';
 
-    if (deepseekApiKey && evidenceList.length) {
+    const systemPromptText = `คุณคือ AI ERP Assistant ผู้เชี่ยวชาญประจำระบบ S&B Enterprise ERP ภายใต้ FIRE KEEPER Governance
+
+แนวทางการตอบคำถาม:
+1. หากเป็นคำถามเกี่ยวกับข้อมูล ERP (สต๊อก, จำนวนสินค้า, เอกสาร, หมวดหมู่, คลังสินค้า):
+   - ให้อ้างอิงและสรุปจากหลักฐาน authoritative ที่กำหนดให้เท่านั้น
+   - หากผู้ใช้ถามจำนวนรวมทั้งหมด หรือภาพรวม ให้ตอบตามสถิติใน [SYS-METRICS-001] เสมอ ห้ามนำรายการตัวอย่างมานับแทน
+2. หากเป็นคำถามทักทาย, คำถามทั่วไป, ความรู้ทางธุรกิจ, เทคนิคการจัดการคลัง/สต๊อก/บัญชี, หรือคำแนะนำเชิงบริหาร:
+   - ให้ใช้ความรู้รอบตัว (General Intelligence) ตอบอย่างฉลาด มีประโยชน์ สุภาพ และชัดเจนเป็นภาษาไทย
+   - ให้สวมบทบาทเป็นผู้ช่วยอัจฉริยะที่รอบรู้ทั้งข้อมูลระบบ ERP และความรู้ทางธุรกิจ/ทั่วไป`;
+
+    if (deepseekApiKey) {
       try {
         let dsRes = await fetch('https://api.deepseek.com/chat/completions', {
           method: 'POST',
@@ -357,7 +382,7 @@ export async function POST(req: NextRequest) {
             messages: [
               {
                 role: 'system',
-                content: `คุณคือ AI ERP Assistant ประจำระบบ S&B Enterprise ERP ภายใต้ FIRE KEEPER Governance\nตอบคำถามภาษาไทยให้อ่านง่าย กระชับ และเป็นธรรมชาติ โดยสรุปจากหลักฐานที่ให้มาเท่านั้น\nหากผู้ใช้ถามจำนวนสินค้า หรือจำนวนเอกสาร หรือภาพรวมระบบ ให้ตอบตามสถิติใน [SYS-METRICS-001] เสมอ ห้ามนำรายการตัวอย่างมานับแทนจำนวนรวมทั้งหมดของระบบ\nสร้าง JSON DecisionObject เท่านั้น ห้ามใส่ markdown\n\nโครงสร้างที่ต้องส่ง:\n{"options":[{"id":"ANSWER","text":"...สรุปคำตอบเป็นภาษาไทยอธิบายอย่างชัดเจน...","rationale":"...เหตุผล...","isRecommended":true}],"risks":[],"uncertainties":[],"consequences":[],"evidence":[],"assumptions":[],"recommendation":{"optionId":"ANSWER","rationale":"..."},"confidence":{"score":0.95,"label":"HIGH","breakdown":{"coverage":1,"reliability":1,"quality":1}},"applicable_policies":[],"policy_conflicts":[],"escalation_required":false,"controlLevel":"LOW"}`,
+                content: `${systemPromptText}\n\nสร้าง JSON DecisionObject เท่านั้น ห้ามใส่ markdown\n\nโครงสร้างที่ต้องส่ง:\n{"options":[{"id":"ANSWER","text":"...สรุปคำตอบเป็นภาษาไทยอธิบายอย่างชัดเจน...","rationale":"...เหตุผล...","isRecommended":true}],"risks":[],"uncertainties":[],"consequences":[],"evidence":[],"assumptions":[],"recommendation":{"optionId":"ANSWER","rationale":"..."},"confidence":{"score":0.95,"label":"HIGH","breakdown":{"coverage":1,"reliability":1,"quality":1}},"applicable_policies":[],"policy_conflicts":[],"escalation_required":false,"controlLevel":"LOW"}`,
               },
               {
                 role: 'user',
@@ -380,7 +405,7 @@ export async function POST(req: NextRequest) {
               messages: [
                 {
                   role: 'system',
-                  content: `คุณคือ AI ERP Assistant ประจำระบบ S&B Enterprise ERP ภายใต้ FIRE KEEPER Governance\nตอบคำถามภาษาไทยให้อ่านง่าย กระชับ และเป็นธรรมชาติ โดยสรุปจากหลักฐานที่ให้มาเท่านั้น\nหากผู้ใช้ถามจำนวนสินค้า หรือจำนวนเอกสาร หรือภาพรวมระบบ ให้ตอบตามสถิติใน [SYS-METRICS-001] เสมอ ห้ามนำรายการตัวอย่างมานับแทนจำนวนรวมทั้งหมดของระบบ`,
+                  content: systemPromptText,
                 },
                 {
                   role: 'user',
@@ -429,7 +454,7 @@ export async function POST(req: NextRequest) {
           body: JSON.stringify({
             model: ollamaModel,
             stream: false,
-            prompt: `คุณคือ AI ERP Assistant ประจำระบบ S&B Enterprise ERP ภายใต้ FIRE KEEPER Governance\nตอบคำถามภาษาไทยให้อ่านง่าย กระชับ และเป็นธรรมชาติ โดยสรุปจากหลักฐานที่ให้มาเท่านั้น\nหากผู้ใช้ถามจำนวนสินค้า หรือจำนวนเอกสาร หรือภาพรวมระบบ ให้ตอบตามสถิติใน [SYS-METRICS-001] เสมอ ห้ามนำรายการตัวอย่างมานับแทนจำนวนรวมทั้งหมดของระบบ\n\nคำถาม: ${query}\n\nหลักฐาน authoritative:\n${evidenceText}\n\nให้ตอบคำถามเป็นภาษาไทยกระชับชัดเจน:`,
+            prompt: `${systemPromptText}\n\nคำถาม: ${query}\n\nหลักฐาน authoritative:\n${evidenceText}\n\nให้ตอบคำถามเป็นภาษาไทยกระชับชัดเจน:`,
           }),
         });
 
