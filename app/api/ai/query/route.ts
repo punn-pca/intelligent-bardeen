@@ -268,10 +268,56 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    const naturalSummaryAnswer = evidenceList.length
-      ? `จากการตรวจสอบฐานข้อมูล ERP สำหรับคำถาม "${query}" พบข้อมูลสถิติและหลักฐานดังนี้:\n\n` +
-        evidenceList.map((e) => `• ${e.text}`).slice(0, 6).join('\n')
-      : 'ไม่พบข้อมูลหลักฐานที่ตรงกับคำถามในระบบ ERP';
+    const naturalSummaryAnswer = (() => {
+      const q = query.toLowerCase();
+
+      // 1. Category Query ("สินค้ามีหมวดหมู่อะไรบ้าง", "หมวดหมู่สินค้า", "มีกี่หมวดหมู่")
+      if (/หมวดหมู่|หมวด|ประเภท|category|categories/i.test(q)) {
+        if (allCategories.length > 0) {
+          const catList = allCategories
+            .map((c, idx) => `${idx + 1}. ${c.name} (${(c._count?.products ?? c.count ?? 0).toLocaleString()} สินค้า)`)
+            .join('\n');
+          return `หมวดหมู่สินค้าในระบบ S&B Enterprise ERP มีทั้งหมด ${allCategories.length} หมวดหมู่ ดังนี้:\n\n${catList}`;
+        }
+      }
+
+      // 2. Count / Total System Stats Query ("จำนวนสินค้าทั้งหมด", "มีกี่รายการ", "ยอดรวมสินค้า", "สต๊อกรวม")
+      if (/ทั้งหมด|กี่รายการ|รวม|ภาพรวม|สถิติ|นับ/i.test(q) && !/หมวด/i.test(q)) {
+        return `ปัจจุบันในระบบ S&B Enterprise ERP มีสินค้าทั้งหมด ${totalProductCount.toLocaleString()} รายการ (${allCategories.length} หมวดหมู่) ใน ${totalWarehouseCount} คลังสินค้า โดยมียอดรวมสต๊อกคงเหลือรวมทุกคลังทั้งหมด ${totalStockQty.toLocaleString()} ชิ้น`;
+      }
+
+      // 3. Stock Ledger Matrix / Movement Columns Query ("ตารางสต๊อกหลัก", "ยอดยกมา", "เบิกลง", "ส่งตัวแทน", "ขาย shopee")
+      const ledgerItems = evidenceRaw.filter(e => e.type === 'LEDGER');
+      if (ledgerItems.length > 0 && /ตาราง|ยอดยกมา|รับเข้า|เบิก|ส่งตัวแทน|shopee|ยอดคงเหลือ/i.test(q)) {
+        const list = ledgerItems.slice(0, 10).map((item, idx) => {
+          return `${idx + 1}. ${item.name} [SKU: ${item.sku}] (หมวด: ${item.category})\n   • ยอดยกมา: ${item.openingBalance} | รับเข้า: +${item.stockIn} | เบิกลง: -${item.stockOut} | ส่งตัวแทน: -${item.dealerOut} | ขาย Shopee: -${item.shopeeOut} | ยอดคงเหลือ: ${item.onHand} ชิ้น`;
+        }).join('\n\n');
+        return `จากการตรวจสอบตารางสต๊อกสินค้าหลัก (Excel Stock Ledger Matrix) พบข้อมูลเคลื่อนไหวสินค้าดังนี้:\n\n${list}`;
+      }
+
+      // 4. Matched Products Query
+      const productItems = evidenceRaw.filter(e => e.type === 'PRODUCT');
+      if (productItems.length > 0) {
+        const list = productItems.slice(0, 8).map((p, idx) => {
+          return `${idx + 1}. ${p.name} [SKU: ${p.sku}] (หมวด: ${p.category || 'ทั่วไป'})\n   • สต๊อกคงเหลือ: ${p.totalStock} ชิ้น (${p.invDetails || 'ไม่มีคลัง'}) | ราคาขาย: ฿${p.sellingPrice || 0}`;
+        }).join('\n\n');
+        return `พบข้อมูลสินค้าในระบบ ERP ที่เกี่ยวข้องกับคำถาม "${query}" ดังนี้:\n\n${list}`;
+      }
+
+      // 5. Matched Documents Query
+      const docItems = evidenceRaw.filter(e => e.type === 'DOCUMENT');
+      if (docItems.length > 0) {
+        const list = docItems.slice(0, 6).map((d, idx) => {
+          return `${idx + 1}. เอกสาร ${d.documentNo} (${d.documentType})\n   • คู่ค้า: ${d.party} | ยอดรวม: ฿${d.grandTotal?.toLocaleString() || 0} | สถานะ: ${d.status}`;
+        }).join('\n\n');
+        return `พบเอกสารในระบบ ERP ที่เกี่ยวข้องกับคำถาม "${query}" ดังนี้:\n\n${list}`;
+      }
+
+      // 6. General Fallback
+      return evidenceList.length
+        ? `จากการตรวจสอบฐานข้อมูล ERP พบสถิติระบบดังนี้:\n• สินค้าทั้งหมด: ${totalProductCount.toLocaleString()} รายการ (${allCategories.length} หมวดหมู่)\n• สต๊อกสินค้าคงเหลือรวมทุกคลัง: ${totalStockQty.toLocaleString()} ชิ้น`
+        : 'ไม่พบข้อมูลหลักฐานที่ตรงกับคำถามในระบบ ERP';
+    })();
 
     const governed = governInventoryQuery({
       question: query,
