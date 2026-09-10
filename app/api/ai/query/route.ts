@@ -404,10 +404,7 @@ export async function POST(req: NextRequest) {
 
     const evidenceText = evidenceList.map((e) => `[${e.id}] ${e.text}`).join('\n');
 
-    // 4. Try Gemini API (Primary LLM - fast, reliable on Cloud Run)
-    const geminiApiKey = (process.env.GEMINI_API_KEY || '').trim();
-    const geminiModel = process.env.GEMINI_MODEL || 'gemini-1.5-flash';
-
+    // 4. Try DeepSeek Cloud API First (Primary LLM Engine)
     const { apiKey: clientApiKey = '', model: clientModel = '' } = await req.json().catch(() => ({}));
     let deepseekApiKey = (clientApiKey || process.env.DEEPSEEK_API_KEY || '').trim();
 
@@ -421,6 +418,8 @@ export async function POST(req: NextRequest) {
     }
 
     const deepseekModel = clientModel || process.env.DEEPSEEK_MODEL || 'deepseek-chat';
+    const geminiApiKey = (process.env.GEMINI_API_KEY || '').trim();
+    const geminiModel = process.env.GEMINI_MODEL || 'gemini-1.5-flash';
 
     const systemPromptText = `คุณคือ AI ERP Assistant ผู้เชี่ยวชาญประจำระบบ S&B Enterprise ERP ภายใต้ FIRE KEEPER Governance
 
@@ -431,51 +430,6 @@ export async function POST(req: NextRequest) {
 2. หากเป็นคำถามทักทาย, คำถามทั่วไป, ความรู้ทางธุรกิจ, เทคนิคการจัดการคลัง/สต๊อก/บัญชี, หรือคำแนะนำเชิงบริหาร:
    - ให้ใช้ความรู้รอบตัว (General Intelligence) ตอบอย่างฉลาด มีประโยชน์ สุภาพ และชัดเจนเป็นภาษาไทย
    - ให้สวมบทบาทเป็นผู้ช่วยอัจฉริยะที่รอบรู้ทั้งข้อมูลระบบ ERP และความรู้ทางธุรกิจ/ทั่วไป`;
-
-    if (geminiApiKey) {
-      try {
-        const geminiRes = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent?key=${geminiApiKey}`,
-          {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              system_instruction: { parts: [{ text: systemPromptText }] },
-              contents: [{
-                role: 'user',
-                parts: [{ text: `คำถาม: ${query}\n\nข้อมูลหลักฐาน ERP (ใช้อ้างอิงเมื่อเกี่ยวข้อง):\n${evidenceText}\n\nตอบเป็นภาษาไทย กระชับ ชัดเจน เป็นธรรมชาติ:` }],
-              }],
-              generationConfig: { temperature: 0.7, maxOutputTokens: 1024 },
-            }),
-          }
-        );
-
-        if (geminiRes.ok) {
-          const geminiData = await geminiRes.json();
-          const rawText = geminiData?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || '';
-          if (rawText) {
-            const llmGoverned = governLLMDecision({
-              question: query,
-              evidence: evidenceList,
-              candidate: { options: [{ id: 'ANSWER', text: rawText, isRecommended: true }] },
-            });
-            const answer = llmGoverned.decision.options.find((o) => o.isRecommended)?.text || rawText;
-            return NextResponse.json({
-              answer,
-              evidence: evidenceRaw,
-              governance: llmGoverned,
-              source: 'gemini+firekeeper-validated',
-              model: geminiModel,
-            });
-          }
-        } else {
-          const errText = await geminiRes.text().catch(() => '');
-          console.error('Gemini API error:', geminiRes.status, errText);
-        }
-      } catch (e) {
-        console.error('Gemini execution error:', e);
-      }
-    }
 
     if (deepseekApiKey) {
       try {
@@ -545,6 +499,49 @@ export async function POST(req: NextRequest) {
         }
       } catch (e) {
         console.error('DeepSeek execution fallback error:', e);
+      }
+    }
+
+    // 4.5. Try Gemini API (Secondary Fallback)
+    if (geminiApiKey) {
+      try {
+        const geminiRes = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent?key=${geminiApiKey}`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              system_instruction: { parts: [{ text: systemPromptText }] },
+              contents: [{
+                role: 'user',
+                parts: [{ text: `คำถาม: ${query}\n\nข้อมูลหลักฐาน ERP (ใช้อ้างอิงเมื่อเกี่ยวข้อง):\n${evidenceText}\n\nตอบเป็นภาษาไทย กระชับ ชัดเจน เป็นธรรมชาติ:` }],
+              }],
+              generationConfig: { temperature: 0.7, maxOutputTokens: 1024 },
+            }),
+          }
+        );
+
+        if (geminiRes.ok) {
+          const geminiData = await geminiRes.json();
+          const rawText = geminiData?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || '';
+          if (rawText) {
+            const llmGoverned = governLLMDecision({
+              question: query,
+              evidence: evidenceList,
+              candidate: { options: [{ id: 'ANSWER', text: rawText, isRecommended: true }] },
+            });
+            const answer = llmGoverned.decision.options.find((o) => o.isRecommended)?.text || rawText;
+            return NextResponse.json({
+              answer,
+              evidence: evidenceRaw,
+              governance: llmGoverned,
+              source: 'gemini+firekeeper-validated',
+              model: geminiModel,
+            });
+          }
+        }
+      } catch (e) {
+        console.error('Gemini execution error:', e);
       }
     }
 
