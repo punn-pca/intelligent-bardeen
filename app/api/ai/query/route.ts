@@ -300,6 +300,26 @@ export async function POST(req: NextRequest) {
       });
     }
 
+    // In-Stock Products Query: for questions asking "สินค้าที่มีสต๊อกคงเหลือ > 0 / มีของพร้อมส่ง / ไม่เป็น 0"
+    const isAvailableStockQuery = /มีสต๊อก|พร้อมขาย|มีของ|มากกว่า 0|> 0|ไม่เหลือ 0|ไม่เป็น 0|ไม่เท่ากับ 0|มีสต๊อกคงเหลือ|มีของอยู่|สต๊อกคงเหลือจริง/i.test(query);
+    const inStockItems = activeLedgerItems.filter(item => item.onHand > 0);
+    if (isAvailableStockQuery) {
+      evidenceList.push({
+        id: 'SYS-METRICS-INSTOCK-SUMMARY',
+        sourceId: 'system:instock-summary',
+        text: `[รายการสินค้าที่มีสต๊อกคงเหลือมากกว่า 0 ชิ้นทั้งหมด] ในระบบมีสินค้าที่มีสต๊อกพร้อมใช้งานรวม ${inStockItems.length} รายการ | ยอดรวมสต๊อกคงเหลือสุทธิ: ${totalLedgerOnHand.toLocaleString()} ชิ้น`,
+      });
+
+      inStockItems.forEach((item, idx) => {
+        evidenceRaw.push({ type: 'INSTOCK', ...item, rank: idx + 1 });
+        evidenceList.push({
+          id: `INSTOCK-${item.sku}`,
+          sourceId: `instock:${item.sku}`,
+          text: `[สินค้ามีสต๊อกคงเหลือ (${idx + 1}/${inStockItems.length})] ${item.name} [SKU: ${item.sku}] (หมวด: ${item.category}) | ยอดคงเหลือ: ${item.onHand} ชิ้น | คลัง: ${item.warehouse}`,
+        });
+      });
+    }
+
     const naturalSummaryAnswer = (() => {
       const q = query.toLowerCase();
 
@@ -340,6 +360,14 @@ export async function POST(req: NextRequest) {
         }
 
         return `จากการตรวจสอบระบบ ERP พบข้อมูลสต๊อกสินค้าที่น้อยที่สุด ดังนี้:\n\n${lines.join('\n')}`;
+      }
+
+      // 0.3 In-Stock Products Query ("สินค้าที่มีสต๊อกคงเหลือ > 0 / มีของอยู่ / มีสต๊อก")
+      if (isAvailableStockQuery && inStockItems.length > 0) {
+        const topList = inStockItems.slice(0, 15).map((item, idx) => {
+          return `${idx + 1}. ${item.name} [SKU: ${item.sku}] (หมวด: ${item.category})\n   • คงเหลือ: ${item.onHand.toLocaleString()} ชิ้น | คลัง: ${item.warehouse}`;
+        }).join('\n\n');
+        return `จากการตรวจสอบตารางสต๊อกสินค้าหลัก (Stock Ledger Matrix) พบสินค้าที่มีสต๊อกคงเหลือมากกว่า 0 ชิ้น ทั้งหมด ${inStockItems.length} รายการ (รวมทุกคลัง ${totalLedgerOnHand.toLocaleString()} ชิ้น) ตัวอย่างรายการสินค้าพร้อมขายมีดังนี้:\n\n${topList}\n\n(มีทั้งหมด ${inStockItems.length} รายการที่มีสต๊อกคงเหลือในระบบ)`;
       }
 
       // 1. Category Query ("สินค้ามีหมวดหมู่อะไรบ้าง", "หมวดหมู่สินค้า", "มีกี่หมวดหมู่")
