@@ -191,17 +191,26 @@ export default function ProductsPage() {
     }
   };
 
+  const [selectedGroup, setSelectedGroup] = useState<'ALL' | 'FINISHED_GOODS' | 'SPARE_PARTS'>('ALL');
+
+  const filteredProducts = products.filter((p) => {
+    const isFinished = p.category?.name?.startsWith('สินค้าสำเร็จรูป');
+    if (selectedGroup === 'FINISHED_GOODS') return isFinished;
+    if (selectedGroup === 'SPARE_PARTS') return !isFinished;
+    return true;
+  });
+
   return (
     <div className="space-y-6 animate-in fade-in duration-200">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      {/* Page Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-5">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
             <Package className="w-7 h-7 text-blue-600 dark:text-blue-400" />
-            <span>แคตตาล็อกสินค้าทั้งหมด ({products.length.toLocaleString()} รายการ)</span>
+            <span>แคตตาล็อกสินค้าและอะไหล่ ({filteredProducts.length.toLocaleString()} รายการ)</span>
           </h1>
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-            รายการสินค้า อะไหล่ และอุปกรณ์ในระบบ <span className="font-bold text-blue-600 dark:text-blue-400">(สิทธิ์แก้ไขและลบสินค้า: เฉพาะ ADMIN)</span>
+            แยกประเภทสินค้าสำเร็จรูปทั้งเครื่อง (เครื่องซักผ้า, ตู้น้ำ, ตู้เติมเงิน) และอะไหล่ชิ้นส่วนอิเล็กทรอนิกส์ <span className="font-bold text-blue-600 dark:text-blue-400">(สิทธิ์แก้ไข/ลบ: เฉพาะ ADMIN)</span>
           </p>
         </div>
 
@@ -236,6 +245,48 @@ export default function ProductsPage() {
         </div>
       )}
 
+      {/* Quick Group Tabs */}
+      <div className="flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-2">
+        <button
+          onClick={() => setSelectedGroup('ALL')}
+          className={`px-4 py-2 text-xs font-extrabold rounded-xl transition-all ${
+            selectedGroup === 'ALL'
+              ? 'bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 shadow-sm'
+              : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+          }`}
+        >
+          รายการทั้งหมด ({products.length})
+        </button>
+
+        <button
+          onClick={() => setSelectedGroup('FINISHED_GOODS')}
+          className={`px-4 py-2 text-xs font-extrabold rounded-xl transition-all flex items-center gap-1.5 ${
+            selectedGroup === 'FINISHED_GOODS'
+              ? 'bg-emerald-600 text-white shadow-sm shadow-emerald-600/30'
+              : 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 hover:bg-emerald-100'
+          }`}
+        >
+          <span>🏭 สินค้าสำเร็จรูปทั้งเครื่อง</span>
+          <span className="px-1.5 py-0.5 rounded-full bg-white/20 text-[10px]">
+            {products.filter((p) => p.category?.name?.startsWith('สินค้าสำเร็จรูป')).length}
+          </span>
+        </button>
+
+        <button
+          onClick={() => setSelectedGroup('SPARE_PARTS')}
+          className={`px-4 py-2 text-xs font-extrabold rounded-xl transition-all flex items-center gap-1.5 ${
+            selectedGroup === 'SPARE_PARTS'
+              ? 'bg-blue-600 text-white shadow-sm shadow-blue-600/30'
+              : 'bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 hover:bg-blue-100'
+          }`}
+        >
+          <span>⚙️ อะไหล่และชิ้นส่วน</span>
+          <span className="px-1.5 py-0.5 rounded-full bg-white/20 text-[10px]">
+            {products.filter((p) => !p.category?.name?.startsWith('สินค้าสำเร็จรูป')).length}
+          </span>
+        </button>
+      </div>
+
       {/* Filter and Search Bar */}
       <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800/80 shadow-xs flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-3 flex-1 min-w-[260px]">
@@ -244,7 +295,7 @@ export default function ProductsPage() {
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="ค้นหา SKU, บาร์โค้ด หรือชื่อสินค้า (จาก 900+ รายการ)..."
+            placeholder="ค้นหา SKU, บาร์โค้ด หรือชื่อสินค้า (จาก 1,600+ รายการ)..."
             className="w-full text-xs outline-none text-slate-800 dark:text-slate-100 font-mono placeholder-slate-400 dark:placeholder-slate-500 bg-transparent"
           />
         </div>
@@ -305,14 +356,14 @@ export default function ProductsPage() {
                     กำลังโหลดแคตตาล็อกสินค้า...
                   </td>
                 </tr>
-              ) : products.length === 0 ? (
+              ) : filteredProducts.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="text-center py-8 text-slate-400 dark:text-slate-500">
                     ไม่พบข้อมูลสินค้าตรงตามเงื่อนไข
                   </td>
                 </tr>
               ) : (
-                products.map((product) => (
+                filteredProducts.map((product) => (
                   <tr key={product.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-all">
                     <td className="p-4 font-mono font-bold text-blue-600 dark:text-blue-400 text-xs">
                       <p>{product.sku}</p>

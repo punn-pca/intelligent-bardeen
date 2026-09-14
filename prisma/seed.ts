@@ -195,54 +195,150 @@ async function main() {
   console.log('✅ Created Supplier and Customer');
 
   // 5. Create Categories
-  const categories = await Promise.all([
-    prisma.category.upsert({
-      where: { name: 'อะไหล่เครื่องซักผ้าและเครื่องอบผ้า (Washing & Dryer Parts)' },
-      update: { description: 'อะไหล่ ชิ้นส่วน และอุปกรณ์สำหรับเครื่องซักผ้าและเครื่องอบผ้าทุกยี่ห้อ (LG, Whirlpool, Samsung, Beko)' },
-      create: { name: 'อะไหล่เครื่องซักผ้าและเครื่องอบผ้า (Washing & Dryer Parts)', description: 'อะไหล่ ชิ้นส่วน และอุปกรณ์สำหรับเครื่องซักผ้าและเครื่องอบผ้าทุกยี่ห้อ (LG, Whirlpool, Samsung, Beko)' },
-    }),
-    prisma.category.upsert({
-      where: { name: 'แผงวงจรและอุปกรณ์อิเล็กทรอนิกส์ (Control Boards & Electronics)' },
-      update: { description: 'แผงควบคุม เมนบอร์ด สล็อตหยอดเหรียญ หน้าจอ และชุดควบคุมตู้อัตโนมัติ' },
-      create: { name: 'แผงวงจรและอุปกรณ์อิเล็กทรอนิกส์ (Control Boards & Electronics)', description: 'แผงควบคุม เมนบอร์ด สล็อตหยอดเหรียญ หน้าจอ และชุดควบคุมตู้อัตโนมัติ' },
-    }),
-    prisma.category.upsert({
-      where: { name: 'อะไหล่ตู้น้ำดื่มและระบบกรองน้ำ (Water Dispenser & Filtration Parts)' },
-      update: { description: 'ไส้กรอง ถังสารกรอง เฮ้าท์ซิ่ง ปั๊มอัด และอะไหล่ระบบกรองน้ำตู้น้ำดื่มอัตโนมัติ' },
-      create: { name: 'อะไหล่ตู้น้ำดื่มและระบบกรองน้ำ (Water Dispenser & Filtration Parts)', description: 'ไส้กรอง ถังสารกรอง เฮ้าท์ซิ่ง ปั๊มอัด และอะไหล่ระบบกรองน้ำตู้น้ำดื่มอัตโนมัติ' },
-    }),
-    prisma.category.upsert({
-      where: { name: 'สายไฟ เต้ารับ และอุปกรณ์ไฟฟ้า (Cables, Sockets & Electrical Accessories)' },
-      update: { description: 'สายไฟฟ้า สายคอนโทรล เต้ารับ ปลั๊ก สวิตซ์ และอุปกรณ์ระบบไฟฟ้า' },
-      create: { name: 'สายไฟ เต้ารับ และอุปกรณ์ไฟฟ้า (Cables, Sockets & Electrical Accessories)', description: 'สายไฟฟ้า สายคอนโทรล เต้ารับ ปลั๊ก สวิตซ์ และอุปกรณ์ระบบไฟฟ้า' },
-    }),
-    prisma.category.upsert({
-      where: { name: 'ข้อต่อ ปั๊ม และท่อน้ำ/สายลม (Fittings, Valves, Pipes & Fasteners)' },
-      update: { description: 'ข้อต่อ PVC สายน้ำ สายลม น๊อต ตะปูรีเวท และอุปกรณ์ฟิตติ้งงานติดตั้ง' },
-      create: { name: 'ข้อต่อ ปั๊ม และท่อน้ำ/สายลม (Fittings, Valves, Pipes & Fasteners)', description: 'ข้อต่อ PVC สายน้ำ สายลม น๊อต ตะปูรีเวท และอุปกรณ์ฟิตติ้งงานติดตั้ง' },
-    }),
-    prisma.category.upsert({
-      where: { name: 'โครงตู้ กล่อง และชิ้นส่วนโครงสร้าง (Cabinets, Boxes & Enclosures)' },
-      update: { description: 'โครงตู้น้ำ โครงตู้เติมเงิน กล่องเหล็ก ลิ้นชัก และงานโครงสร้างตู้หยอดเหรียญ' },
-      create: { name: 'โครงตู้ กล่อง และชิ้นส่วนโครงสร้าง (Cabinets, Boxes & Enclosures)', description: 'โครงตู้น้ำ โครงตู้เติมเงิน กล่องเหล็ก ลิ้นชัก และงานโครงสร้างตู้หยอดเหรียญ' },
-    }),
-    prisma.category.upsert({
-      where: { name: 'สติ๊กเกอร์ ป้าย และคู่มือใช้งาน (Stickers, Labels & Manuals)' },
-      update: { description: 'สติ๊กเกอร์บอกราคา ป้ายหน้ากล่อง สติ๊กเกอร์ช่องหยอดเหรียญ และคู่มือการใช้งาน' },
-      create: { name: 'สติ๊กเกอร์ ป้าย และคู่มือใช้งาน (Stickers, Labels & Manuals)', description: 'สติ๊กเกอร์บอกราคา ป้ายหน้ากล่อง สติ๊กเกอร์ช่องหยอดเหรียญ และคู่มือการใช้งาน' },
-    }),
-    prisma.category.upsert({
-      where: { name: 'งานบริการและค่าบริการ (Services & Maintenance Fees)' },
-      update: { description: 'ค่าบริการซ่อม ล้างเครื่อง ยกตู้ และบริการบำรุงรักษา' },
-      create: { name: 'งานบริการและค่าบริการ (Services & Maintenance Fees)', description: 'ค่าบริการซ่อม ล้างเครื่อง ยกตู้ และบริการบำรุงรักษา' },
-    }),
-    prisma.category.upsert({
-      where: { name: 'ชิ้นส่วนและอุปกรณ์ทั่วไป (General Components & Hardware)' },
-      update: { description: 'ชิ้นส่วนอะไหล่ทั่วไป เทปใส อุปกรณ์แพ็คเกจจิ้ง และฮาร์ดแวร์เบ็ดเตล็ด' },
-      create: { name: 'ชิ้นส่วนและอุปกรณ์ทั่วไป (General Components & Hardware)', description: 'ชิ้นส่วนอะไหล่ทั่วไป เทปใส อุปกรณ์แพ็คเกจจิ้ง และฮาร์ดแวร์เบ็ดเตล็ด' },
-    }),
-  ]);
+  // 5. Create Categories (Separated Finished Goods / Machines vs Spare Parts)
+  const categoryDefs = [
+    // Finished Goods
+    {
+      name: 'สินค้าสำเร็จรูป - เครื่องซักผ้าและเครื่องอบผ้า (Washing & Dryer Machines)',
+      description: 'เครื่องซักผ้าและเครื่องอบผ้าสำเร็จรูปทั้งเครื่อง (LG, Whirlpool, Samsung, Beko, ฯลฯ) พร้อมใช้งานและติดตั้ง',
+    },
+    {
+      name: 'สินค้าสำเร็จรูป - ตู้น้ำหยอดเหรียญ (Water Vending Machines)',
+      description: 'ตู้น้ำดื่มอัตโนมัติหยอดเหรียญและระบบสแกน QR ทั้งเครื่อง (ถัง 100L, 200L, ตู้น้ำพลังแม่เหล็ก)',
+    },
+    {
+      name: 'สินค้าสำเร็จรูป - ตู้เติมเงินและตู้เติมน้ำมัน (Top-Up & Fuel Vending Machines)',
+      description: 'ตู้เติมเงินมือถืออัตโนมัติ, ตู้เติมน้ำมันหยอดเหรียญ และตู้ล้างรถอัตโนมัติทั้งตู้',
+    },
+    {
+      name: 'สินค้าสำเร็จรูป - เครื่องและตู้หยอดเหรียญอื่นๆ (Other Vending & Complete Machines)',
+      description: 'ตู้อัดฉีด, ตู้แลกเหรียญ, เครื่องเดี่ยวอุตสาหกรรม และตู้หยอดเหรียญสำเร็จรูปประเภทอื่นๆ',
+    },
+
+    // Spare Parts
+    {
+      name: 'อะไหล่เครื่องซักผ้าและเครื่องอบผ้า (Washing & Dryer Parts)',
+      description: 'อะไหล่ ชิ้นส่วน และอุปกรณ์สำหรับเครื่องซักผ้าและเครื่องอบผ้าทุกยี่ห้อ (LG, Whirlpool, Samsung, Beko)',
+    },
+    {
+      name: 'แผงวงจรและอุปกรณ์อิเล็กทรอนิกส์ (Control Boards & Electronics)',
+      description: 'แผงควบคุม เมนบอร์ด สล็อตหยอดเหรียญ หน้าจอ และชุดควบคุมตู้อัตโนมัติ',
+    },
+    {
+      name: 'อะไหล่ตู้น้ำดื่มและระบบกรองน้ำ (Water Dispenser & Filtration Parts)',
+      description: 'ไส้กรอง ถังสารกรอง เฮ้าท์ซิ่ง ปั๊มอัด และอะไหล่ระบบกรองน้ำตู้น้ำดื่มอัตโนมัติ',
+    },
+    {
+      name: 'สายไฟ เต้ารับ และอุปกรณ์ไฟฟ้า (Cables, Sockets & Electrical Accessories)',
+      description: 'สายไฟฟ้า สายคอนโทรล เต้ารับ ปลั๊ก สวิตซ์ และอุปกรณ์ระบบไฟฟ้า',
+    },
+    {
+      name: 'ข้อต่อ ปั๊ม และท่อน้ำ/สายลม (Fittings, Valves, Pipes & Fasteners)',
+      description: 'ข้อต่อ PVC สายน้ำ สายลม น๊อต ตะปูรีเวท และอุปกรณ์ฟิตติ้งงานติดตั้ง',
+    },
+    {
+      name: 'โครงตู้ กล่อง และชิ้นส่วนโครงสร้าง (Cabinets, Boxes & Enclosures)',
+      description: 'โครงตู้น้ำ โครงตู้เติมเงิน กล่องเหล็ก ลิ้นชัก และงานโครงสร้างตู้หยอดเหรียญ',
+    },
+    {
+      name: 'สติ๊กเกอร์ ป้าย และคู่มือใช้งาน (Stickers, Labels & Manuals)',
+      description: 'สติ๊กเกอร์บอกราคา ป้ายหน้ากล่อง สติ๊กเกอร์ช่องหยอดเหรียญ และคู่มือการใช้งาน',
+    },
+    {
+      name: 'งานบริการและค่าบริการ (Services & Maintenance Fees)',
+      description: 'ค่าบริการซ่อม ล้างเครื่อง ยกตู้ และบริการบำรุงรักษา',
+    },
+    {
+      name: 'ชิ้นส่วนและอุปกรณ์ทั่วไป (General Components & Hardware)',
+      description: 'ชิ้นส่วนอะไหล่ทั่วไป เทปใส อุปกรณ์แพ็คเกจจิ้ง และฮาร์ดแวร์เบ็ดเตล็ด',
+    },
+  ];
+
+  const categories = await Promise.all(
+    categoryDefs.map((cat) =>
+      prisma.category.upsert({
+        where: { name: cat.name },
+        update: { description: cat.description },
+        create: { name: cat.name, description: cat.description },
+      })
+    )
+  );
   console.log(`✅ Created ${categories.length} categories`);
+
+  // Map categories by name for easy lookup
+  const catMapByName: Record<string, any> = {};
+  categories.forEach((c) => {
+    catMapByName[c.name] = c;
+  });
+
+  const classificationRules = [
+    {
+      catName: 'สินค้าสำเร็จรูป - เครื่องซักผ้าและเครื่องอบผ้า (Washing & Dryer Machines)',
+      test: (name: string) => {
+        const isMachine = ['เครื่องซักผ้า', 'เครื่องอบผ้า'].some((kw) => name.includes(kw));
+        const isPart = ['อะไหล่', 'แผง', 'บอร์ด', 'มอเตอร์', 'วาล์ว', 'จานซัก', 'สวิตช์', 'สวิตช์ประตู', 'ถุงกรอง', 'สายพาน', 'ลูกยาง', 'แกนซัก', 'โช๊ค', 'สายน้ำเข้าตู้อัดฉีด', 'ไส้ไก่', 'บอลวาล์ว', 'ที่แขวน', 'น้ำยา'].some((kw) => name.includes(kw));
+        return isMachine && !isPart;
+      },
+    },
+    {
+      catName: 'สินค้าสำเร็จรูป - ตู้น้ำหยอดเหรียญ (Water Vending Machines)',
+      test: (name: string) => {
+        const isWaterMachine = ['ตู้น้ำถัง', 'ตู้น้ำพลังแม่เหล็ก', 'ตู้น้ำหยอดเหรียญ', 'ตู้น้ำดื่มอัตโนมัติ'].some((kw) => name.includes(kw));
+        const isPart = ['ไส้กรอง', 'เฮ้าท์ซิ่ง', 'ปั๊ม', 'ข้อต่อ', 'แร่', 'ถังสาร', 'อะไหล่', 'เพลส', 'สติ๊กเกอร์', 'ลูกลอย', 'หม้อแปลง', 'ตู้น้ำหน้าตู้'].some((kw) => name.includes(kw));
+        return isWaterMachine && !isPart;
+      },
+    },
+    {
+      catName: 'สินค้าสำเร็จรูป - ตู้เติมเงินและตู้เติมน้ำมัน (Top-Up & Fuel Vending Machines)',
+      test: (name: string) => {
+        const isMachine = ['ตู้เติมเงิน', 'ตู้เติมน้ำมัน', 'ตู้ล้างรถหยอดเหรียญ', 'ตู้ล้างรถ ATM', 'ตู้ล้างรถ 4 ระบบ'].some((kw) => name.includes(kw));
+        const isPart = ['โครง', 'สติ๊กเกอร์', 'แผง', 'สาย', 'หัวฉีด', 'ปั๊ม', 'สล็อต', 'น้ำยา', 'แชมพู'].some((kw) => name.includes(kw));
+        return isMachine && !isPart;
+      },
+    },
+    {
+      catName: 'สินค้าสำเร็จรูป - เครื่องและตู้หยอดเหรียญอื่นๆ (Other Vending & Complete Machines)',
+      test: (name: string) => {
+        const isOtherMachine = ['เครื่องเดี่ยวอุตสาหกรรม', 'ตู้แลกเหรียญ', 'ตู้อัดฉีดหยอดเหรียญ'].some((kw) => name.includes(kw));
+        const isPart = ['สาย', 'ไส้ไก่', 'บอลวาล์ว', 'ที่แขวน', 'สล็อต', 'แผง'].some((kw) => name.includes(kw));
+        return isOtherMachine && !isPart;
+      },
+    },
+    {
+      catName: 'อะไหล่เครื่องซักผ้าและเครื่องอบผ้า (Washing & Dryer Parts)',
+      test: (name: string) => ['ซักผ้า', 'เครื่องซักผ้า', 'อบผ้า', 'ฝาหน้า', 'ฝาบน', 'จานซัก', 'มอเตอร์เดรน', 'lg', 'whirlpool', 'beko', 'samsung'].some((kw) => name.toLowerCase().includes(kw)),
+    },
+    {
+      catName: 'แผงวงจรและอุปกรณ์อิเล็กทรอนิกส์ (Control Boards & Electronics)',
+      test: (name: string) => ['แผงวงจร', 'แผงบน', 'แผงล่าง', 'ebr', 'สล็อต', 'หยอดเหรียญ', 'slot', 'หน้าจอ', 'สล็อตรับเหรียญ', 'jy100'].some((kw) => name.toLowerCase().includes(kw)),
+    },
+    {
+      catName: 'อะไหล่ตู้น้ำดื่มและระบบกรองน้ำ (Water Dispenser & Filtration Parts)',
+      test: (name: string) => ['ตู้น้ำ', 'ไส้กรอง', 'เฮ้าท์ซิ่ง', 'แร่', 'ros', 'ปั๊มอัด', 'flow', 'ตู้อัดฉีด', 'ปั๊มติ๊ก', 'ตู้น้ำถัง'].some((kw) => name.toLowerCase().includes(kw)),
+    },
+    {
+      catName: 'สายไฟ เต้ารับ และอุปกรณ์ไฟฟ้า (Cables, Sockets & Electrical Accessories)',
+      test: (name: string) => ['สายไฟ', 'สายคอนโทรล', 'เต้ารับ', 'ปลั๊ก', 'สวิตซ์', 'หน้ากาก', 'ปลอกหัวแร้ง', 'led', '3 ขา'].some((kw) => name.toLowerCase().includes(kw)),
+    },
+    {
+      catName: 'ข้อต่อ ปั๊ม และท่อน้ำ/สายลม (Fittings, Valves, Pipes & Fasteners)',
+      test: (name: string) => ['pvc', 'ต่อตรง', 'สายลม', 'หุน', 'เกลียวนอก', 'ตรงเกลียว', 'ตะปูยิง', 'รีเวท', 'น๊อต', 'ดอกสว่าน'].some((kw) => name.toLowerCase().includes(kw)),
+    },
+    {
+      catName: 'โครงตู้ กล่อง และชิ้นส่วนโครงสร้าง (Cabinets, Boxes & Enclosures)',
+      test: (name: string) => ['โครงตู้', 'กล่อง', 'ลิ้นชัก', 'ขาตั้ง', 'กล่องพัสดุ', 'ฝาครอบ', 'กระบอกกรองผ้า'].some((kw) => name.toLowerCase().includes(kw)),
+    },
+    {
+      catName: 'สติ๊กเกอร์ ป้าย และคู่มือใช้งาน (Stickers, Labels & Manuals)',
+      test: (name: string) => ['st', 'สติ๊กเกอร์', 'คู่มือ', 'ป้าย', 'หน้ากล่อง', 'ราคา', 'ช่องหยอด'].some((kw) => name.toLowerCase().includes(kw)),
+    },
+    {
+      catName: 'งานบริการและค่าบริการ (Services & Maintenance Fees)',
+      test: (name: string) => ['ค่าบริการ', 'ล้าง', 'ยกเครื่อง', 'ยกตู้'].some((kw) => name.toLowerCase().includes(kw)),
+    },
+  ];
+
+  const defaultFallbackCat = catMapByName['ชิ้นส่วนและอุปกรณ์ทั่วไป (General Components & Hardware)'];
 
   // 6. Seed All Products & Inventories in Bulk from products-seed.json
   const fs = await import('fs');
@@ -265,7 +361,6 @@ async function main() {
       await prisma.product.deleteMany({});
     }
 
-    const defaultCategory = categories[0];
     const defaultUnit = units[0];
 
     const productRecords: any[] = [];
@@ -278,26 +373,13 @@ async function main() {
       const { inventories, createdAt, updatedAt, ...productFields } = prod;
 
       // Dynamic category selection based on product name
-      let matchedCat = defaultCategory;
-      const nameLower = (productFields.name || '').toLowerCase();
+      let matchedCat = defaultFallbackCat;
+      const name = productFields.name || '';
 
-      for (const cat of categories) {
-        if (cat.name.includes('เครื่องซักผ้า') && ['ซักผ้า', 'เครื่องซักผ้า', 'อบผ้า', 'ฝาหน้า', 'ฝาบน', 'จานซัก', 'มอเตอร์เดรน', 'lg', 'whirlpool', 'beko', 'samsung'].some((kw) => nameLower.includes(kw))) {
-          matchedCat = cat; break;
-        } else if (cat.name.includes('แผงวงจร') && ['แผงวงจร', 'แผงบน', 'แผงล่าง', 'ebr', 'สล็อต', 'หยอดเหรียญ', 'slot', 'หน้าจอ', 'สล็อตรับเหรียญ', 'jy100'].some((kw) => nameLower.includes(kw))) {
-          matchedCat = cat; break;
-        } else if (cat.name.includes('ตู้น้ำดื่ม') && ['ตู้น้ำ', 'ไส้กรอง', 'เฮ้าท์ซิ่ง', 'แร่', 'ros', 'ปั๊มอัด', 'flow', 'ตู้อัดฉีด', 'ปั๊มติ๊ก', 'ตู้น้ำถัง'].some((kw) => nameLower.includes(kw))) {
-          matchedCat = cat; break;
-        } else if (cat.name.includes('สายไฟ') && ['สายไฟ', 'สายคอนโทรล', 'เต้ารับ', 'ปลั๊ก', 'สวิตซ์', 'หน้ากาก', 'ปลอกหัวแร้ง', 'led', '3 ขา'].some((kw) => nameLower.includes(kw))) {
-          matchedCat = cat; break;
-        } else if (cat.name.includes('ข้อต่อ') && ['pvc', 'ต่อตรง', 'สายลม', 'หุน', 'เกลียวนอก', 'ตรงเกลียว', 'ตะปูยิง', 'รีเวท', 'น๊อต', 'ดอกสว่าน'].some((kw) => nameLower.includes(kw))) {
-          matchedCat = cat; break;
-        } else if (cat.name.includes('โครงตู้') && ['โครงตู้', 'กล่อง', 'ลิ้นชัก', 'ขาตั้ง', 'กล่องพัสดุ', 'ฝาครอบ', 'กระบอกกรองผ้า'].some((kw) => nameLower.includes(kw))) {
-          matchedCat = cat; break;
-        } else if (cat.name.includes('สติ๊กเกอร์') && ['st', 'สติ๊กเกอร์', 'คู่มือ', 'ป้าย', 'หน้ากล่อง', 'ราคา', 'ช่องหยอด'].some((kw) => nameLower.includes(kw))) {
-          matchedCat = cat; break;
-        } else if (cat.name.includes('งานบริการ') && ['ค่าบริการ', 'ล้าง', 'ยกเครื่อง', 'ยกตู้'].some((kw) => nameLower.includes(kw))) {
-          matchedCat = cat; break;
+      for (const rule of classificationRules) {
+        if (rule.test(name)) {
+          matchedCat = catMapByName[rule.catName] || defaultFallbackCat;
+          break;
         }
       }
 
