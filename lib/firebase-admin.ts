@@ -1,17 +1,15 @@
-import * as admin from 'firebase-admin';
+import { getApps, initializeApp, cert } from 'firebase-admin/app';
+import { getAuth } from 'firebase-admin/auth';
 
-if (!admin.apps.length) {
+if (!getApps().length) {
   try {
-    const serviceAccount = process.env.FIREBASE_SERVICE_ACCOUNT_KEY
-      ? JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY)
-      : undefined;
-
-    if (serviceAccount) {
-      admin.initializeApp({
-        credential: admin.credential.cert(serviceAccount),
+    const serviceAccountKey = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
+    if (serviceAccountKey) {
+      initializeApp({
+        credential: cert(JSON.parse(serviceAccountKey)),
       });
     } else {
-      admin.initializeApp({
+      initializeApp({
         projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || 'sb-erp-app',
       });
     }
@@ -20,7 +18,7 @@ if (!admin.apps.length) {
   }
 }
 
-export const adminAuth = admin.apps.length ? admin.auth() : null;
+export const adminAuth = getApps().length ? getAuth() : null;
 
 export async function verifyFirebaseToken(token: string) {
   if (!adminAuth) return null;
