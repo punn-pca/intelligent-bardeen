@@ -3,6 +3,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Sparkles, X, Send, Bot, ShieldCheck, ArrowRight, Zap, RefreshCw, Key, Check } from 'lucide-react';
 
+import { MarkdownRenderer } from '@/components/common/MarkdownRenderer';
+
 interface GlobalAIAssistantModalProps {
   isOpen?: boolean;
   onClose?: () => void;
@@ -230,7 +232,11 @@ export default function GlobalAIAssistantModal({ isOpen: externalIsOpen, onClose
                       ? 'bg-emerald-600 text-white rounded-br-none'
                       : 'bg-white text-slate-800 border border-slate-200 rounded-bl-none'
                   }`}>
-                    <div className="whitespace-pre-line">{msg.text}</div>
+                    {msg.role === 'assistant' ? (
+                      <MarkdownRenderer content={msg.text} />
+                    ) : (
+                      <div className="whitespace-pre-line">{msg.text}</div>
+                    )}
 
                     {/* Governance Badge for Assistant Response */}
                     {msg.governance && (

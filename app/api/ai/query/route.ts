@@ -413,97 +413,148 @@ export async function POST(req: NextRequest) {
 
       // 0.2 Low-Stock Ranking Query ("สินค้าไหนสต๊อกน้อยที่สุด", "สต๊อกใกล้หมด", "สินค้าต่ำสุด")
       if (isLowStockQuery && lowStockRanking.length > 0) {
-        const outOfStock = lowStockRanking.filter(p => p.onHand === 0);
-        const critical = lowStockRanking.filter(p => p.onHand > 0 && p.onHand <= p.minStock && p.minStock > 0);
-        const low = lowStockRanking.filter(p => p.onHand > 0 && !(p.onHand <= p.minStock && p.minStock > 0)).slice(0, 10);
+        const tableRows = lowStockRanking.slice(0, 15).map((p, i) => {
+          let statusTag = '🔴 หมดสต๊อก';
+          if (p.onHand > 0 && p.onHand <= p.minStock) statusTag = '🟡 ต่ำกว่าขั้นต่ำ';
+          else if (p.onHand > p.minStock) statusTag = '🟢 ปกติ';
+          return `| ${i + 1} | \`${p.sku}\` | ${p.name} | ${p.category} | ${p.onHand.toLocaleString()} ชิ้น | ${p.minStock} ชิ้น | ${statusTag} |`;
+        }).join('\n');
 
-        const lines: string[] = [];
-        if (outOfStock.length > 0) {
-          lines.push(`🔴 **สินค้าหมดสต๊อก (0 ชิ้น)** — ${outOfStock.length} รายการ:`);
-          outOfStock.slice(0, 5).forEach((p, i) =>
-            lines.push(`   ${i + 1}. ${p.name} [${p.sku}] | หมวด: ${p.category}`)
-          );
-        }
-        if (critical.length > 0) {
-          lines.push(`\n🟡 **สินค้าต่ำกว่าขั้นต่ำ** — ${critical.length} รายการ:`);
-          critical.slice(0, 5).forEach((p, i) =>
-            lines.push(`   ${i + 1}. ${p.name} [${p.sku}] | สต๊อก: ${p.onHand} ชิ้น (ขั้นต่ำ: ${p.minStock})`)
-          );
-        }
-        if (outOfStock.length === 0 && critical.length === 0 && low.length > 0) {
-          lines.push(`🟢 **สินค้าสต๊อกน้อยที่สุด** (เรียงจากน้อยไปมาก):`);
-          low.slice(0, 10).forEach((p, i) =>
-            lines.push(`   ${i + 1}. ${p.name} [${p.sku}] | สต๊อก: ${p.onHand} ชิ้น | หมวด: ${p.category}`)
-          );
-        }
+        const outOfStockCount = lowStockRanking.filter(p => p.onHand === 0).length;
 
-        return `จากการตรวจสอบระบบ ERP พบข้อมูลสต๊อกสินค้าที่น้อยที่สุด ดังนี้:\n\n${lines.join('\n')}`;
+        return `### 📊 รายงานอันดับสินค้าที่มีสต๊อกคงเหลือน้อยที่สุด (Low Stock Ranking)
+
+จากการตรวจสอบระบบ S&B Enterprise ERP พบสินค้าที่มีสต๊อกคงเหลือน้อยที่สุด **${lowStockRanking.length} อันดับแรก** ดังนี้:
+
+| อันดับ | SKU | ชื่อสินค้า | หมวดหมู่ | สต๊อกคงเหลือ | สต๊อกขั้นต่ำ | สถานะ |
+| :---: | :--- | :--- | :--- | :---: | :---: | :---: |
+${tableRows}
+
+> [!WARNING]
+> **คำแนะนำบริหารคลัง:** มีสินค้าหมดสต๊อก (0 ชิ้น) รวม **${outOfStockCount} รายการ** ควรพิจารณาสร้างใบสั่งซื้อ (PO Draft) เพื่อเติมสต๊อกโดยด่วน`;
       }
 
       // 0.3 In-Stock Products Query ("สินค้าที่มีสต๊อกคงเหลือ > 0 / มีของอยู่ / มีสต๊อก")
       if (isAvailableStockQuery && inStockItems.length > 0) {
-        const topList = inStockItems.slice(0, 15).map((item, idx) => {
-          return `${idx + 1}. ${item.name} [SKU: ${item.sku}] (หมวด: ${item.category})\n   • คงเหลือ: ${item.onHand.toLocaleString()} ชิ้น | คลัง: ${item.warehouse}`;
-        }).join('\n\n');
-        return `จากการตรวจสอบตารางสต๊อกสินค้าหลัก (Stock Ledger Matrix) พบสินค้าที่มีสต๊อกคงเหลือมากกว่า 0 ชิ้น ทั้งหมด ${inStockItems.length} รายการ (รวมทุกคลัง ${totalLedgerOnHand.toLocaleString()} ชิ้น) ตัวอย่างรายการสินค้าพร้อมขายมีดังนี้:\n\n${topList}\n\n(มีทั้งหมด ${inStockItems.length} รายการที่มีสต๊อกคงเหลือในระบบ)`;
+        const tableRows = inStockItems.slice(0, 15).map((item, idx) => {
+          return `| ${idx + 1} | \`${item.sku}\` | ${item.name} | ${item.category} | ${item.onHand.toLocaleString()} ชิ้น | ${item.warehouse} |`;
+        }).join('\n');
+
+        return `### 📦 รายงานสินค้าที่มีสต๊อกคงเหลือ (> 0 ชิ้น)
+
+จากการตรวจสอบตารางสต๊อกสินค้าหลัก (Stock Ledger Matrix) พบสินค้าที่มีสต๊อกคงเหลือมากกว่า 0 ชิ้น ทั้งหมด **${inStockItems.length} รายการ** (ยอดรวมสุทธิ **${totalLedgerOnHand.toLocaleString()} ชิ้น**) ตัวอย่างรายการสินค้าพร้อมขายมีดังนี้:
+
+| อันดับ | SKU | ชื่อสินค้า | หมวดหมู่ | สต๊อกคงเหลือ | คลังสินค้า |
+| :---: | :--- | :--- | :--- | :---: | :--- |
+${tableRows}
+
+*(มีทั้งหมด ${inStockItems.length} รายการที่มีสต๊อกคงเหลือเคลื่อนไหวในระบบ ERP)*`;
       }
 
       // 0.4 Company Profile Query ("ที่อยู่บริษัท", "ข้อมูลบริษัท", "เลขผู้เสียภาษี", "ติดต่อบริษัท")
       if (/ที่อยู่|ที่ตั้ง|สำนักงาน|บริษัท|เบอร์โทร|เลขผู้เสียภาษี|tax.?id|email|อีเมล|เว็บไซต์|ธนาคาร|เลขบัญชี|ติดต่อ/i.test(q)) {
-        return `🏢 **ข้อมูลบริษัทและที่อยู่สำนักงานใหญ่ในระบบ ERP:**\n\n• **ชื่อบริษัท:** ${comp.name}\n• **เลขประจำตัวผู้เสียภาษี (Tax ID):** ${comp.taxId}\n• **ที่อยู่สำนักงานใหญ่:** ${comp.address}\n• **เบอร์โทรศัพท์:** ${comp.phone}\n• **อีเมล:** ${comp.email}\n• **เว็บไซต์:** ${comp.website}\n• **บัญชีธนาคารชำระเงิน:** ${comp.bankName} เลขที่บัญชี ${comp.bankAccountNo} (ชื่อบัญชี: ${comp.bankAccountName})`;
+        return `### 🏢 ข้อมูลบริษัทและที่อยู่สำนักงานใหญ่ S&B Enterprise ERP
+
+| รายการข้อมูล | รายละเอียด |
+| :--- | :--- |
+| **ชื่อบริษัท** | ${comp.name} |
+| **เลขประจำตัวผู้เสียภาษี (Tax ID)** | \`${comp.taxId}\` |
+| **ที่อยู่สำนักงานใหญ่** | ${comp.address} |
+| **เบอร์โทรศัพท์** | ${comp.phone} |
+| **อีเมลติดต่อ** | ${comp.email} |
+| **เว็บไซต์** | ${comp.website} |
+| **บัญชีธนาคารชำระเงิน** | ${comp.bankName} เลขที่บัญชี \`${comp.bankAccountNo}\` (${comp.bankAccountName}) |`;
       }
 
       // 1. Category Query ("สินค้ามีหมวดหมู่อะไรบ้าง", "หมวดหมู่สินค้า", "มีกี่หมวดหมู่")
       if (/หมวดหมู่|หมวด|ประเภท|category|categories/i.test(q)) {
         if (allCategories.length > 0) {
-          const catList = allCategories
-            .map((c, idx) => `${idx + 1}. ${c.name} (${(c._count?.products ?? (c as any).count ?? 0).toLocaleString()} สินค้า)`)
-            .join('\n');
-          return `หมวดหมู่สินค้าในระบบ S&B Enterprise ERP มีทั้งหมด ${allCategories.length} หมวดหมู่ ดังนี้:\n\n${catList}`;
+          const tableRows = allCategories.map((c, idx) => {
+            const count = (c._count?.products ?? (c as any).count ?? 0).toLocaleString();
+            return `| ${idx + 1} | ${c.name} | ${count} รายการ |`;
+          }).join('\n');
+
+          return `### 🏷️ สรุปหมวดหมู่สินค้าในระบบ S&B Enterprise ERP
+
+หมวดหมู่สินค้าทั้งหมด **${allCategories.length} หมวดหมู่**:
+
+| อันดับ | ชื่อหมวดหมู่ | จำนวนสินค้าในระบบ |
+| :---: | :--- | :---: |
+${tableRows}`;
         }
       }
 
       // 2. Count / Total System Stats Query ("จำนวนสินค้าทั้งหมด", "มีกี่รายการ", "ยอดรวมสินค้า", "สต๊อกรวม")
       if (/ทั้งหมด|กี่รายการ|รวม|ภาพรวม|สถิติ|นับ/i.test(q) && !/หมวด/i.test(q)) {
-        return `ปัจจุบันในระบบ S&B Enterprise ERP มีสินค้าทั้งหมด ${totalProductCount.toLocaleString()} รายการ (${allCategories.length} หมวดหมู่) ใน ${totalWarehouseCount} คลังสินค้า โดยมียอดรวมสต๊อกคงเหลือรวมทุกคลังทั้งหมด ${totalStockQty.toLocaleString()} ชิ้น`;
+        return `### 📊 สรุปสถิติภาพรวมระบบ (ERP System Statistics)
+
+• **จำนวนสินค้าทั้งหมดในระบบ:** **${totalProductCount.toLocaleString()} รายการ** (${allCategories.length} หมวดหมู่)
+• **จำนวนคลังสินค้า:** **${totalWarehouseCount} คลัง**
+• **จำนวนเอกสารในระบบ:** **${totalDocumentCount.toLocaleString()} ใบ**
+• **ยอดรวมสต๊อกคงเหลือรวมทุกคลัง:** **${totalStockQty.toLocaleString()} ชิ้น**`;
       }
 
       // 3. Stock Ledger Matrix / Movement Columns Query ("ตารางสต๊อกหลัก", "ยอดยกมา", "เบิกลง", "ส่งตัวแทน", "ขาย shopee")
       const ledgerItems = evidenceRaw.filter(e => e.type === 'LEDGER');
       if (ledgerItems.length > 0 && /ตาราง|ยอดยกมา|รับเข้า|เบิก|ส่งตัวแทน|shopee|ยอดคงเหลือ/i.test(q)) {
-        const list = ledgerItems.slice(0, 10).map((item, idx) => {
-          return `${idx + 1}. ${item.name} [SKU: ${item.sku}] (หมวด: ${item.category})\n   • ยอดยกมา: ${item.openingBalance} | รับเข้า: +${item.stockIn} | เบิกลง: -${item.stockOut} | ส่งตัวแทน: -${item.dealerOut} | ขาย Shopee: -${item.shopeeOut} | ยอดคงเหลือ: ${item.onHand} ชิ้น`;
-        }).join('\n\n');
-        return `จากการตรวจสอบตารางสต๊อกสินค้าหลัก (Excel Stock Ledger Matrix) พบข้อมูลเคลื่อนไหวสินค้าดังนี้:\n\n${list}`;
+        const tableRows = ledgerItems.slice(0, 10).map((item, idx) => {
+          return `| ${idx + 1} | \`${item.sku}\` | ${item.name} | ${item.openingBalance} | +${item.stockIn} | -${item.stockOut} | -${item.dealerOut} | -${item.shopeeOut} | **${item.onHand} ชิ้น** |`;
+        }).join('\n');
+
+        return `### 📋 ตารางสต๊อกสินค้าหลัก (Excel Stock Ledger Matrix 1:1)
+
+| อันดับ | SKU | ชื่อสินค้า | ยอดยกมา | รับเข้า | เบิกลง | ส่งตัวแทน | ขาย Shopee | คงเหลือสุทธิ |
+| :---: | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
+${tableRows}`;
       }
 
       // 4. Matched Products Query
       const productItems = evidenceRaw.filter(e => e.type === 'PRODUCT');
       if (productItems.length > 0) {
-        const list = productItems.slice(0, 8).map((p, idx) => {
-          return `${idx + 1}. ${p.name} [SKU: ${p.sku}] (หมวด: ${p.category || 'ทั่วไป'})\n   • สต๊อกคงเหลือ: ${p.totalStock} ชิ้น (${p.invDetails || 'ไม่มีคลัง'}) | ราคาขาย: ฿${p.sellingPrice || 0}`;
-        }).join('\n\n');
-        return `พบข้อมูลสินค้าในระบบ ERP ที่เกี่ยวข้องกับคำถาม "${query}" ดังนี้:\n\n${list}`;
+        const tableRows = productItems.slice(0, 10).map((p, idx) => {
+          return `| ${idx + 1} | \`${p.sku}\` | ${p.name} | ${p.category || 'ทั่วไป'} | ฿${(p.sellingPrice || 0).toLocaleString()} | ${p.totalStock} ชิ้น |`;
+        }).join('\n');
+
+        return `### 🔍 ข้อมูลสินค้าที่เกี่ยวข้องในระบบ ERP
+
+พบสินค้าตรงตามคำค้นหา **"${query}"** ดังนี้:
+
+| อันดับ | SKU | ชื่อสินค้า | หมวดหมู่ | ราคาขาย | สต๊อกคงเหลือ |
+| :---: | :--- | :--- | :--- | :---: | :---: |
+${tableRows}`;
       }
 
       // 5. Matched Documents Query
       const docItems = evidenceRaw.filter(e => e.type === 'DOCUMENT');
       if (docItems.length > 0) {
-        const list = docItems.slice(0, 6).map((d, idx) => {
-          return `${idx + 1}. เอกสาร ${d.documentNo} (${d.documentType})\n   • คู่ค้า: ${d.party} | ยอดรวม: ฿${d.grandTotal?.toLocaleString() || 0} | สถานะ: ${d.status}`;
-        }).join('\n\n');
-        return `พบเอกสารในระบบ ERP ที่เกี่ยวข้องกับคำถาม "${query}" ดังนี้:\n\n${list}`;
+        const tableRows = docItems.slice(0, 8).map((d, idx) => {
+          return `| ${idx + 1} | \`${d.documentNo}\` | ${d.documentType} | ${d.party} | ฿${(d.grandTotal || 0).toLocaleString()} | ${d.status} |`;
+        }).join('\n');
+
+        return `### 📄 รายการเอกสาร ERP ที่เกี่ยวข้อง
+
+พบเอกสารตรงตามคำค้นหา **"${query}"** ดังนี้:
+
+| อันดับ | เลขที่เอกสาร | ประเภท | คู่ค้า / ลูกค้า | ยอดเงินรวม | สถานะ |
+| :---: | :--- | :---: | :--- | :---: | :---: |
+${tableRows}`;
       }
 
       // 6. Advice / General question fallback when no product/doc matches
       if (/แนะนำ|วิธี|ทำอย่างไร|ควรทำ|คืออะไร|หลักการ|ประโยชน์|ข้อดี/i.test(q)) {
-        return `ยินดีให้คำแนะนำครับ สำหรับคำถาม "${query}":\n\nคำแนะนำและแนวทางปฏิบัติทั่วไป:\n1. การบริหารจัดการและควบคุมข้อมูล: ควรมั่นใจว่าข้อมูลในระบบ ERP อัปเดตแบบ Real-time เพื่อลดความผิดพลาดในการปฏิบัติงาน\n2. การตรวจสอบสต๊อกคงคลัง: ควรตั้งค่า Reorder Point (จุดสั่งซื้อเติม) และตรวจนับสินค้าคงคลังอย่างสม่ำเสมอ\n3. การเชื่อมโยงข้อมูล: ระบบ ERP ช่วยให้การเชื่อมโยงคลังสินค้าและการออกเอกสารทำงานได้อย่างมีประสิทธิภาพ\n\n(คุณสามารถสอบถามข้อมูลสินค้าหรือเอกสารเฉพาะเจาะจงเพิ่มเติมในระบบได้ตลอดเวลาครับ)`;
+        return `### 💡 คำแนะนำแนวทางปฏิบัติการบริหารจัดการคลังสินค้า
+
+สำหรับคำถาม **"${query}"** ขอแนะนำแนวทางปฏิบัติดังนี้:
+
+1. **การบริหารจัดการข้อมูล:** ควรมั่นใจว่าข้อมูลในระบบ ERP ถูกบันทึกและอัปเดตแบบ Real-time
+2. **จุดสั่งซื้อเติมสต๊อก (Reorder Point):** ควรกำหนดระดับสต๊อกขั้นต่ำ (Min Stock) เพื่อแจ้งเตือนอัตโนมัติก่อนสินค้าหมด
+3. **การเชื่อมโยงระบบ:** ใช้ระบบจัดทำร่างใบสั่งซื้อ (PO Draft) อนุมัติผ่านระบบแบบมี Governance`;
       }
 
       // 7. General Fallback
       return evidenceList.length
-        ? `จากการตรวจสอบฐานข้อมูล ERP พบสถิติระบบดังนี้:\n• สินค้าทั้งหมด: ${totalProductCount.toLocaleString()} รายการ (${allCategories.length} หมวดหมู่)\n• สต๊อกสินค้าคงเหลือรวมทุกคลัง: ${totalStockQty.toLocaleString()} ชิ้น`
-        : 'ยินดีให้บริการครับ สามารถสอบถามข้อมูลเกี่ยวกับสินค้า สต๊อกสินค้า เอกสาร หรือคำถามทั่วไปได้เลยครับ';
+        ? `### 📊 สรุปสถิติระบบ ERP\n\n• **สินค้าทั้งหมด:** **${totalProductCount.toLocaleString()} รายการ** (${allCategories.length} หมวดหมู่)\n• **สต๊อกคงเหลือรวม:** **${totalStockQty.toLocaleString()} ชิ้น**`
+        : 'ยินดีให้บริการครับ สามารถสอบถามข้อมูลสินค้า สต๊อกสินค้า เอกสาร หรือคำแนะนำระบบ ERP ได้ตลอดเวลาครับ';
     })();
 
     const governed = governInventoryQuery({
@@ -534,13 +585,19 @@ export async function POST(req: NextRequest) {
 
     const systemPromptText = `คุณคือ AI ERP Assistant ผู้เชี่ยวชาญประจำระบบ S&B Enterprise ERP ภายใต้ FIRE KEEPER Governance
 
-แนวทางการตอบคำถาม:
-1. หากเป็นคำถามเกี่ยวกับข้อมูล ERP (สต๊อก, จำนวนสินค้า, เอกสาร, หมวดหมู่, คลังสินค้า):
+แนวทางการตอบคำถามและการจัดรูปแบบข้อมูล (Markdown Formatting Rules):
+1. **การจัดรูปแบบคำตอบ (Markdown Tables & Styling)**:
+   - ใช้ Markdown Header (### / ####) กำหนดหัวข้อหลักและหัวข้อย่อยให้ชัดเจน สวยงาม อ่านง่าย
+   - เมื่อตอบคำถามที่มีรายการสินค้า, สต๊อกคงเหลือ, อันดับสต๊อกน้อย, ข้อมูลตารางสต๊อกหลัก หรือรายการเอกสาร **ต้องจัดรูปแบบเป็นตาราง Markdown (Markdown Table)** เสมอ เช่น:
+     | อันดับ | SKU | ชื่อสินค้า | หมวดหมู่ | สต๊อกคงเหลือ | คลังสินค้า | สถานะ |
+     | :---: | :--- | :--- | :--- | :---: | :--- | :---: |
+   - ห้ามเขียนรายการสินค้าต่อกันยาวๆ เป็นความพละ หรือแยกคอมมาในย่อเดียว ให้ใช้ตาราง Markdown เท่านั้น
+   - ใช้ตัวหนา (**Bold**), ไอคอนอีโมจิ (🔴 🟡 🟢 📦 🏢 📄 📊) และ Blockquotes (> [!WARNING]) เพื่อเน้นย้ำคำแนะนำ
+2. หากเป็นคำถามเกี่ยวกับข้อมูล ERP (สต๊อก, จำนวนสินค้า, เอกสาร, หมวดหมู่, คลังสินค้า):
    - ให้อ้างอิงและสรุปจากหลักฐาน authoritative ที่กำหนดให้เท่านั้น
    - หากผู้ใช้ถามจำนวนรวมทั้งหมด หรือภาพรวม ให้ตอบตามสถิติใน [SYS-METRICS-001] เสมอ ห้ามนำรายการตัวอย่างมานับแทน
-2. หากเป็นคำถามทักทาย, คำถามทั่วไป, ความรู้ทางธุรกิจ, เทคนิคการจัดการคลัง/สต๊อก/บัญชี, หรือคำแนะนำเชิงบริหาร:
-   - ให้ใช้ความรู้รอบตัว (General Intelligence) ตอบอย่างฉลาด มีประโยชน์ สุภาพ และชัดเจนเป็นภาษาไทย
-   - ให้สวมบทบาทเป็นผู้ช่วยอัจฉริยะที่รอบรู้ทั้งข้อมูลระบบ ERP และความรู้ทางธุรกิจ/ทั่วไป`;
+3. หากเป็นคำถามทักทาย, คำถามทั่วไป, ความรู้ทางธุรกิจ, เทคนิคการจัดการคลัง/สต๊อก/บัญชี, หรือคำแนะนำเชิงบริหาร:
+   - ให้ใช้ความรู้รอบตัว (General Intelligence) ตอบอย่างฉลาด มีประโยชน์ สุภาพ และจัดรูปแบบสวยงาม`;
 
     if (deepseekApiKey) {
       try {
