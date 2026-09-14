@@ -23,12 +23,10 @@ RUN mkdir -p public
 
 # Set DATABASE_URL and telemetry env vars
 ENV NEXT_TELEMETRY_DISABLED=1
-ENV DATABASE_URL="file:./prisma/dev.db"
+ENV DATABASE_URL="postgresql://postgres:postgres@localhost:5432/sberp?schema=public"
 
-# Generate Prisma Client, build database schema & seed initial data at build time
+# Generate Prisma Client and build application
 RUN npx prisma generate
-RUN npx prisma db push --accept-data-loss
-RUN npx prisma db seed
 RUN npm run build
 
 # Production image, copy standalone output and run server.js
@@ -37,7 +35,6 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
-ENV DATABASE_URL="file:/app/prisma/dev.db"
 ENV PORT=8080
 ENV HOSTNAME="0.0.0.0"
 
