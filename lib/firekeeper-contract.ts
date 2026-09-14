@@ -3,6 +3,15 @@ import { z } from 'zod';
 // Compatibility contract aligned with FIRE KEEPER DecisionObject.
 // ERP must not widen or reinterpret the governance schema.
 export const Severity = z.enum(['LOW', 'MEDIUM', 'HIGH', 'CRITICAL']);
+export const EpistemicStateEnum = z.enum([
+  'SUPPORTED',
+  'PARTIALLY_SUPPORTED',
+  'INSUFFICIENT_EVIDENCE',
+  'CONFLICTING_EVIDENCE',
+  'OUT_OF_SCOPE',
+]);
+export type EpistemicState = z.infer<typeof EpistemicStateEnum>;
+
 export const EvidenceSchema = z.object({ id: z.string(), text: z.string(), sourceId: z.string() });
 export const DecisionObjectSchema = z.object({
   options: z.array(z.object({ id: z.string(), text: z.string(), rationale: z.string(), isRecommended: z.boolean() })),
@@ -13,6 +22,7 @@ export const DecisionObjectSchema = z.object({
   assumptions: z.array(z.string()),
   recommendation: z.object({ id: z.string().optional(), optionId: z.string(), rationale: z.string() }).optional(),
   confidence: z.object({ score: z.number(), label: z.enum(['LOW', 'MEDIUM', 'HIGH']), breakdown: z.record(z.string(), z.number()) }),
+  epistemic_state: EpistemicStateEnum.optional(),
   applicable_policies: z.array(z.object({ id: z.string(), name: z.string() })),
   policy_conflicts: z.array(z.object({ policyId1: z.string(), policyId2: z.string(), severity: Severity, rationale: z.string() })),
   escalation_required: z.boolean(),

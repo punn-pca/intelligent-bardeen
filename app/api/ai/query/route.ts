@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { governInventoryQuery, governLLMDecision, type InventoryEvidence } from '@/lib/firekeeper-adapter';
+import { checkAuth, canReadCost, canReadFinance, canCreatePoDraft } from '@/lib/auth';
+import { createAuditLog } from '@/lib/audit-logger';
+import { createPurchaseOrderDraft } from '@/lib/ai-action-engine';
 
 function extractJsonOrText(text: string): { candidate: unknown; rawText: string } {
   const clean = text.trim();
@@ -17,9 +20,64 @@ function extractJsonOrText(text: string): { candidate: unknown; rawText: string 
 
 export async function POST(req: NextRequest) {
   try {
+    const user = checkAuth(req.headers.get('x-user-role'));
     const { question = '', moduleContext = 'ALL' } = await req.json();
     const query = String(question).trim();
     if (!query) return NextResponse.json({ error: 'กรุณาระบุคำถาม' }, { status: 400 });
+
+    // Handle Action Layer Intent: Creating Purchase Order Drafts (PO Draft)
+    const isPoDraftQuery = /สร้าง.?po|ร่าง.?po|สร้างใบสั่งซื้อ|ขอใบสั่งซื้อ|po.?draft/i.test(query);
+    if (isPoDraftQuery) {
+      if (!canCreatePoDraft(user.role)) {
+        const deniedAnswer = `⚠️ สิทธิ์การใช้งานไม่เพียงพอ: บัญชีผู้ใช้บทบาท (${user.role}) ไม่มีสิทธิ์สร้างร่างใบสั่งซื้อ (PO Draft)`;
+        const deniedGoverned = governInventoryQuery({
+          question: query,
+          evidence: [],
+          answer: deniedAnswer,
+          risk: { text: 'Unauthorized PO draft creation attempt', severity: 'HIGH' },
+        });
+        await createAuditLog({
+          userId: user.id,
+          username: user.username,
+          action: 'AI_QUERY_PO_DRAFT_DENIED',
+          entity: 'PurchaseOrderDraft',
+          entityId: 'UNAUTHORIZED',
+        });
+        return NextResponse.json({
+          answer: deniedAnswer,
+          evidence: [],
+          governance: deniedGoverned,
+          source: 'permission-denied',
+        });
+      }
+
+      const draft = await createPurchaseOrderDraft({ userId: user.id, username: user.username, notes: query });
+      const draftAnswer = `📝 **สร้างร่างใบสั่งซื้อ (PO Draft) เรียบร้อยแล้ว (รอการอนุมัติจากผู้มีสิทธิ์):**\n\n• **เลขที่ร่าง:** ${draft.draftId}\n• **สถานะ:** ${draft.status}\n• **จำนวนรายการ:** ${draft.items.length} รายการ\n• **ประมาณการยอดรวม:** ฿${draft.totalEstimatedAmount.toLocaleString()}\n\n*หมายเหตุ: รายการนี้เป็นเพียงร่างเอกสาร ต้องได้รับการอนุมัติ (Human Approval) ก่อนดำเนินการสั่งซื้อจริง`;
+
+      const draftGoverned = governInventoryQuery({
+        question: query,
+        evidence: [{ id: `DRAFT-${draft.draftId}`, text: draftAnswer, sourceId: `draft:${draft.draftId}` }],
+        answer: draftAnswer,
+        recommendation: 'กรุณาตรวจสอบและอนุมัติร่างเอกสารสั่งซื้อโดยผู้มีอำนาจ',
+      });
+
+      await createAuditLog({
+        userId: user.id,
+        username: user.username,
+        action: 'AI_QUERY_ACTION_DRAFT_PO',
+        entity: 'PurchaseOrderDraft',
+        entityId: draft.draftId,
+        afterData: JSON.stringify({ draftId: draft.draftId, totalAmount: draft.totalEstimatedAmount }),
+      });
+
+      return NextResponse.json({
+        answer: draftAnswer,
+        evidence: [{ type: 'PO_DRAFT', draft }],
+        governance: draftGoverned,
+        source: 'ai-action-engine',
+        draft,
+      });
+    }
 
     const evidenceList: InventoryEvidence[] = [];
     const evidenceRaw: any[] = [];
@@ -539,6 +597,23 @@ export async function POST(req: NextRequest) {
           const validCandidate = candidate || { options: [{ id: 'ANSWER', text: rawText || naturalSummaryAnswer, isRecommended: true }] };
           const llmGoverned = governLLMDecision({ question: query, evidence: evidenceList, candidate: validCandidate });
           const answer = llmGoverned.decision.options.find((o) => o.isRecommended)?.text || llmGoverned.decision.options[0]?.text || naturalSummaryAnswer;
+
+          await createAuditLog({
+            userId: user.id,
+            username: user.username,
+            action: 'AI_QUERY_DEEPSEEK',
+            entity: 'AI_ASSISTANT',
+            entityId: query.slice(0, 30),
+            afterData: JSON.stringify({
+              query,
+              model: deepseekModel,
+              source: 'deepseek+firekeeper-validated',
+              confidence: llmGoverned.decision.confidence,
+              epistemicState: llmGoverned.decision.epistemic_state,
+              evidenceCount: evidenceList.length,
+            }),
+          });
+
           return NextResponse.json({
             answer,
             evidence: evidenceRaw,
@@ -584,6 +659,23 @@ export async function POST(req: NextRequest) {
               candidate: { options: [{ id: 'ANSWER', text: rawText, isRecommended: true }] },
             });
             const answer = llmGoverned.decision.options.find((o) => o.isRecommended)?.text || rawText;
+
+            await createAuditLog({
+              userId: user.id,
+              username: user.username,
+              action: 'AI_QUERY_GEMINI',
+              entity: 'AI_ASSISTANT',
+              entityId: query.slice(0, 30),
+              afterData: JSON.stringify({
+                query,
+                model: geminiModel,
+                source: 'gemini+firekeeper-validated',
+                confidence: llmGoverned.decision.confidence,
+                epistemicState: llmGoverned.decision.epistemic_state,
+                evidenceCount: evidenceList.length,
+              }),
+            });
+
             return NextResponse.json({
               answer,
               evidence: evidenceRaw,
@@ -624,6 +716,23 @@ export async function POST(req: NextRequest) {
             const candidate = extractJsonOrText(rawText).candidate || { options: [{ id: 'ANSWER', text: rawText, isRecommended: true }] };
             const llmGoverned = governLLMDecision({ question: query, evidence: evidenceList, candidate });
             const answer = llmGoverned.decision.options.find((o) => o.isRecommended)?.text || llmGoverned.decision.options[0]?.text || rawText;
+
+            await createAuditLog({
+              userId: user.id,
+              username: user.username,
+              action: 'AI_QUERY_OLLAMA',
+              entity: 'AI_ASSISTANT',
+              entityId: query.slice(0, 30),
+              afterData: JSON.stringify({
+                query,
+                model: ollamaModel,
+                source: 'ollama+firekeeper-validated',
+                confidence: llmGoverned.decision.confidence,
+                epistemicState: llmGoverned.decision.epistemic_state,
+                evidenceCount: evidenceList.length,
+              }),
+            });
+
             return NextResponse.json({
               answer,
               evidence: evidenceRaw,
@@ -637,6 +746,21 @@ export async function POST(req: NextRequest) {
         console.error('Ollama execution fallback:', e);
       }
     }
+
+    await createAuditLog({
+      userId: user.id,
+      username: user.username,
+      action: 'AI_QUERY_DETERMINISTIC_FALLBACK',
+      entity: 'AI_ASSISTANT',
+      entityId: query.slice(0, 30),
+      afterData: JSON.stringify({
+        query,
+        source: 'firekeeper',
+        confidence: governed.decision.confidence,
+        epistemicState: governed.decision.epistemic_state,
+        evidenceCount: evidenceList.length,
+      }),
+    });
 
     return NextResponse.json({
       answer: naturalSummaryAnswer,

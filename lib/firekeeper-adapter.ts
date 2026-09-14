@@ -1,4 +1,4 @@
-import { EvidenceSchema, DecisionObjectSchema, Severity, validateDecisionObject, type Evidence, type DecisionObject, type ValidatorResult } from './firekeeper-contract';
+import { EvidenceSchema, DecisionObjectSchema, Severity, validateDecisionObject, type Evidence, type DecisionObject, type ValidatorResult, type EpistemicState } from './firekeeper-contract';
 import { z } from 'zod';
 
 export const InventoryEvidenceSchema = EvidenceSchema;
@@ -14,12 +14,18 @@ export function governInventoryQuery(input: {
   risk?: { text: string; severity: z.infer<typeof Severity> };
 }): GovernedInventoryDecision {
   const hasEvidence = input.evidence.length > 0;
-  const coverage = Math.min(1, input.evidence.length / 3);
+  const coverage = Math.min(1, input.evidence.length / 5);
   const reliability = hasEvidence ? 1 : 0;
-  const quality = hasEvidence ? 1 : 0;
+  const quality = hasEvidence ? 0.95 : 0;
   const score = hasEvidence ? Number((0.40 * coverage + 0.35 * reliability + 0.25 * quality).toFixed(3)) : 0;
   const label = score >= 0.75 ? 'HIGH' : score >= 0.45 ? 'MEDIUM' : 'LOW';
   const severity = input.risk?.severity || 'LOW';
+
+  const epistemic_state: EpistemicState = !hasEvidence
+    ? 'INSUFFICIENT_EVIDENCE'
+    : coverage >= 0.8
+    ? 'SUPPORTED'
+    : 'PARTIALLY_SUPPORTED';
 
   const decision = {
     options: [{ id: 'ANSWER', text: input.answer, rationale: 'Derived from ERP inventory evidence.', isRecommended: true }],
@@ -29,7 +35,19 @@ export function governInventoryQuery(input: {
     evidence: input.evidence,
     assumptions: [],
     recommendation: input.recommendation ? { optionId: 'ANSWER', rationale: input.recommendation } : undefined,
-    confidence: { score, label, breakdown: { coverage, reliability, quality } },
+    confidence: {
+      score,
+      label,
+      breakdown: {
+        evidence_confidence: Number((reliability * coverage).toFixed(2)),
+        answer_confidence: Number(quality.toFixed(2)),
+        decision_confidence: score,
+        coverage,
+        reliability,
+        quality,
+      },
+    },
+    epistemic_state,
     applicable_policies: [],
     policy_conflicts: [],
     escalation_required: severity === 'CRITICAL',
@@ -69,10 +87,47 @@ export function governLLMDecision(input: {
     candidateObj.options = [{ id: 'ANSWER', text: rawText, rationale: 'LLM generated answer grounded in ERP evidence.', isRecommended: true }];
   }
 
-  // Ensure confidence score is bound
+  // Calculate dynamic non-hardcoded confidence based on evidence coverage
+  const evidenceCount = input.evidence.length;
+  const coverageRatio = Math.min(1, evidenceCount / 5);
+  const dynamicScore = evidenceCount > 0
+    ? Number((0.35 + coverageRatio * 0.60).toFixed(3))
+    : 0.10;
+
+  const dynamicLabel = dynamicScore >= 0.75 ? 'HIGH' : dynamicScore >= 0.45 ? 'MEDIUM' : 'LOW';
+
   if (!candidateObj.confidence || typeof candidateObj.confidence.score !== 'number') {
-    candidateObj.confidence = { score: 0.90, label: 'HIGH', breakdown: { coverage: 1, reliability: 1, quality: 1 } };
+    candidateObj.confidence = {
+      score: dynamicScore,
+      label: dynamicLabel,
+      breakdown: {
+        evidence_confidence: Number((evidenceCount > 0 ? 0.90 * coverageRatio : 0).toFixed(2)),
+        answer_confidence: Number((evidenceCount > 0 ? 0.85 : 0.20).toFixed(2)),
+        decision_confidence: dynamicScore,
+        coverage: coverageRatio,
+      },
+    };
+  } else {
+    // Bound LLM-supplied confidence score by evidence coverage to prevent ungrounded 1.00 score
+    const boundedScore = Number(Math.min(candidateObj.confidence.score, evidenceCount > 0 ? 0.95 : 0.20).toFixed(3));
+    candidateObj.confidence.score = boundedScore;
+    candidateObj.confidence.label = boundedScore >= 0.75 ? 'HIGH' : boundedScore >= 0.45 ? 'MEDIUM' : 'LOW';
+    if (!candidateObj.confidence.breakdown) {
+      candidateObj.confidence.breakdown = {
+        evidence_confidence: Number((coverageRatio * 0.90).toFixed(2)),
+        answer_confidence: 0.85,
+        decision_confidence: boundedScore,
+      };
+    }
   }
+
+  const epistemic_state: EpistemicState = evidenceCount === 0
+    ? 'INSUFFICIENT_EVIDENCE'
+    : coverageRatio >= 0.8
+    ? 'SUPPORTED'
+    : 'PARTIALLY_SUPPORTED';
+
+  candidateObj.epistemic_state = candidateObj.epistemic_state || epistemic_state;
 
   if (!Array.isArray(candidateObj.risks)) candidateObj.risks = [];
   if (!Array.isArray(candidateObj.uncertainties)) candidateObj.uncertainties = [];

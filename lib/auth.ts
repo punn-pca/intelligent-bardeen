@@ -101,3 +101,16 @@ export function checkAuth(reqRoleHeader?: string | null): UserSession {
     role,
   };
 }
+
+export function canReadCost(role: Role): boolean {
+  return role === 'ADMIN' || role === 'MANAGER' || role === 'ACCOUNTING';
+}
+
+export function canReadFinance(role: Role): boolean {
+  return role === 'ADMIN' || role === 'MANAGER' || role === 'ACCOUNTING';
+}
+
+export function canCreatePoDraft(role: Role): boolean {
+  return role === 'ADMIN' || role === 'MANAGER' || role === 'ACCOUNTING';
+}
+

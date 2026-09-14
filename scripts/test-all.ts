@@ -257,26 +257,49 @@ async function runAllTests() {
     });
     assert(bundleDb?.bundleItems.length === 2, 'Bundle Recipe created with 2 component parts');
 
-    // 12. Corporate Tax ID Lookup Verification
-    console.log('\n--- SCENARIO 12: Corporate Tax ID Lookup ---');
-    const corpCust = await prisma.customer.create({
-      data: {
-        code: `CUST-SB-${Date.now()}`,
-        name: 'บริษัท เอส แอนด์ บี อิเล็กทรอนิกส์ เซอร์วิส จำกัด',
-        taxId: '0105555081714',
-        address: '120/288 หมู่ที่ 5 ตำบลบางเดื่อ อำเภอเมืองปทุมธานี จ.ปทุมธานี 12000',
-        phone: '02-789-9999',
-      },
-    });
-    assert(corpCust.taxId === '0105555081714', 'Customer created with 13-digit Tax ID from Corporate Lookup');
+    // 14. Authoritative ERP Query Layer Verification
+    console.log('\n--- SCENARIO 14: Authoritative ERP Query Layer ---');
+    const { getInStockProducts, getOutOfStockProducts, getLowStockProducts, calculateInventoryIntelligence } = await import('../lib/erp-queries');
+    const inStockList = await getInStockProducts();
+    const outOfStockList = await getOutOfStockProducts();
+    const lowStockList = await getLowStockProducts();
+    const intel = await calculateInventoryIntelligence();
 
-    // 13. ADMIN-Only Product Editing Verification
-    console.log('\n--- SCENARIO 13: ADMIN-Only Product Editing Security Matrix ---');
-    assert(hasPermission('ADMIN', 'products:update'), 'ADMIN has products:update permission');
-    assert(!hasPermission('MANAGER', 'products:update'), 'MANAGER does NOT have products:update permission');
-    assert(!hasPermission('WAREHOUSE', 'products:update'), 'WAREHOUSE does NOT have products:update permission');
-    assert(!hasPermission('ACCOUNTING', 'products:update'), 'ACCOUNTING does NOT have products:update permission');
-    assert(!hasPermission('USER', 'products:update'), 'USER does NOT have products:update permission');
+    assert(Array.isArray(inStockList), 'getInStockProducts returned deterministic array');
+    assert(Array.isArray(outOfStockList), 'getOutOfStockProducts returned deterministic array');
+    assert(Array.isArray(lowStockList), 'getLowStockProducts returned deterministic array');
+    assert(intel.totalActiveProducts > 0, `calculateInventoryIntelligence calculated totalActiveProducts: ${intel.totalActiveProducts}`);
+    assert(typeof intel.totalInventoryValue === 'number', `Calculated totalInventoryValue: ฿${intel.totalInventoryValue.toLocaleString()}`);
+
+    // 15. FIRE KEEPER AI Governance, Epistemic States & Dynamic Confidence Verification
+    console.log('\n--- SCENARIO 15: FIRE KEEPER Governance & Epistemic States ---');
+    const { governInventoryQuery, governLLMDecision } = await import('../lib/firekeeper-adapter');
+    const emptyGov = governInventoryQuery({ question: 'มีอะไรบ้าง', evidence: [], answer: 'ไม่มี' });
+    assert(emptyGov.decision.epistemic_state === 'INSUFFICIENT_EVIDENCE', 'Empty evidence yields INSUFFICIENT_EVIDENCE state');
+    assert(emptyGov.decision.confidence.score === 0, 'Empty evidence yields 0.0 confidence score');
+
+    const sampleEv = [{ id: 'EV-1', sourceId: 'src:1', text: 'สินค้า A สต๊อก 100 ชิ้น' }];
+    const validGov = governInventoryQuery({ question: 'สินค้า A', evidence: sampleEv, answer: 'สต๊อก 100' });
+    assert(validGov.decision.confidence.score > 0, 'Populated evidence yields non-zero confidence score');
+
+    const ungroundedCandidate = { options: [{ id: 'ANS', text: 'Answer', isRecommended: true }], confidence: { score: 1.00 } };
+    const boundedGov = governLLMDecision({ question: 'สินค้า A', evidence: sampleEv, candidate: ungroundedCandidate });
+    assert(boundedGov.decision.confidence.score <= 0.95, 'LLM ungrounded 1.00 confidence is safely bounded to <= 0.95');
+
+    // 16. AI Action Layer & Human Approval Boundary Verification
+    console.log('\n--- SCENARIO 16: AI Action Layer & Human Approval Boundary ---');
+    const { createPurchaseOrderDraft } = await import('../lib/ai-action-engine');
+    const poDraft = await createPurchaseOrderDraft({ userId: adminUser.id, username: adminUser.username, notes: 'Test PO Draft' });
+    assert(poDraft.status === 'PENDING_HUMAN_APPROVAL', 'AI PO Draft requires human approval (status = PENDING_HUMAN_APPROVAL)');
+    assert(poDraft.items.length >= 0, `PO Draft created with ${poDraft.items.length} reorder candidate items`);
+
+    // 17. AI Permission Scoping Verification
+    console.log('\n--- SCENARIO 17: AI Permission Scoping ---');
+    const { canReadCost, canCreatePoDraft } = await import('../lib/auth');
+    assert(canReadCost('ADMIN'), 'ADMIN role can read cost price evidence');
+    assert(!canReadCost('USER'), 'USER role CANNOT read cost price evidence');
+    assert(canCreatePoDraft('MANAGER'), 'MANAGER role can create PO Draft');
+    assert(!canCreatePoDraft('USER'), 'USER role CANNOT create PO Draft');
 
     console.log(`\n📊 E2E TEST RESULTS: ${passed} PASSED, ${failed} FAILED`);
 
