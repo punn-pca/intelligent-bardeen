@@ -1,13 +1,16 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Search, QrCode, Shield, User, ChevronDown } from 'lucide-react';
+import Link from 'next/link';
+import { Search, QrCode, Shield, User, ChevronDown, LogOut, LogIn } from 'lucide-react';
 import { useRole } from '@/components/context/RoleContext';
+import { useAuth } from '@/components/context/AuthContext';
 import GlobalSearchModal from '@/components/common/GlobalSearchModal';
 import BarcodeScannerModal from '@/components/common/BarcodeScannerModal';
 
 export default function Navbar() {
   const { currentRole, setCurrentRole } = useRole();
+  const { authUser, logout } = useAuth();
   const [searchOpen, setSearchOpen] = useState(false);
   const [scannerOpen, setScannerOpen] = useState(false);
 
@@ -49,7 +52,7 @@ export default function Navbar() {
 
           {/* Role Switcher Dropdown */}
           <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5">
-            <Shield className="w-4 h-4 text-blue-600" />
+            <Shield className="w-4 h-4 text-emerald-600" />
             <span className="text-xs font-semibold text-slate-500">สิทธิ์:</span>
             <select
               value={currentRole}
@@ -66,14 +69,38 @@ export default function Navbar() {
           </div>
 
           {/* User Profile */}
-          <div className="flex items-center gap-2 pl-2">
-            <div className="w-8 h-8 rounded-full bg-slate-900 text-white flex items-center justify-center text-xs font-bold shadow-2xs">
-              <User className="w-4 h-4" />
-            </div>
-            <div className="hidden sm:block text-left">
-              <p className="text-xs font-bold text-slate-800 leading-tight">Active Session</p>
-              <p className="text-[10px] text-blue-600 font-semibold leading-tight">{currentRole}</p>
-            </div>
+          <div className="flex items-center gap-3 pl-2">
+            {authUser ? (
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-full bg-emerald-700 text-white flex items-center justify-center text-xs font-bold shadow-2xs">
+                  {authUser.displayName?.[0]?.toUpperCase() || <User className="w-4 h-4" />}
+                </div>
+                <div className="hidden sm:block text-left">
+                  <p className="text-xs font-bold text-slate-800 leading-tight">
+                    {authUser.displayName || authUser.email?.split('@')[0]}
+                  </p>
+                  <p className="text-[10px] text-emerald-600 font-semibold leading-tight flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                    <span>Firebase Auth ({authUser.role})</span>
+                  </p>
+                </div>
+                <button
+                  onClick={() => logout()}
+                  className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors ml-1"
+                  title="ออกจากระบบ (Logout)"
+                >
+                  <LogOut className="w-4 h-4" />
+                </button>
+              </div>
+            ) : (
+              <Link
+                href="/login"
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition-colors shadow-2xs"
+              >
+                <LogIn className="w-4 h-4" />
+                <span>เข้าสู่ระบบ (Login)</span>
+              </Link>
+            )}
           </div>
         </div>
       </header>
