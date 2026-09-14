@@ -398,6 +398,43 @@ export async function POST(req: NextRequest) {
       });
     }
 
+    // Out-of-Stock / Zero Stock Query: for questions asking "สินค้าที่มี 0 ชิ้น / หมดสต๊อก / 0 ชิ้น / ไม่มีของ"
+    const isZeroStockQuery = /0\s?ชิ้น|0\s?รายการ|ไม่มีสต๊อก|หมดสต๊อก|สินค้าหมด|0\s?สโต๊ค|out.?of.?stock|zero.?stock|ไม่มีของ|สต๊อกเป็น 0|สต๊อกเท่ากับ 0|เหลือ 0/i.test(query);
+    let zeroStockItems: Array<{ sku: string; name: string; category: string; onHand: number; minStock: number; warehouse: string }> = [];
+
+    if (isZeroStockQuery) {
+      const allWithInventory = await prisma.product.findMany({
+        where: { isDeleted: false },
+        include: {
+          category: true,
+          inventories: { include: { warehouse: true } },
+        },
+      }).catch(() => []);
+
+      zeroStockItems = allWithInventory
+        .map((p) => {
+          const onHand = p.inventories.reduce((sum, inv) => sum + inv.onHand, 0);
+          const warehouse = p.inventories.map(i => i.warehouse.name).join(', ') || 'คลังสินค้าหลัก (Bangkok Main Hub)';
+          return { sku: p.sku, name: p.name, category: p.category.name, onHand, minStock: p.minStock || 0, warehouse };
+        })
+        .filter(p => p.onHand === 0);
+
+      evidenceList.push({
+        id: 'SYS-METRICS-ZEROSTOCK-SUMMARY',
+        sourceId: 'system:zerostock-summary',
+        text: `[รายการสินค้าที่มีสต๊อกคงเหลือ 0 ชิ้นทั้งหมด (Out of Stock)] ในระบบ ERP มีสินค้าที่สต๊อกหมด (0 ชิ้น) ทั้งหมด ${zeroStockItems.length} รายการ`,
+      });
+
+      zeroStockItems.slice(0, 30).forEach((item, idx) => {
+        evidenceRaw.push({ type: 'ZEROSTOCK', ...item, rank: idx + 1 });
+        evidenceList.push({
+          id: `ZEROSTOCK-${item.sku}`,
+          sourceId: `zerostock:${item.sku}`,
+          text: `[สินค้าหมดสต๊อก 0 ชิ้น (${idx + 1}/${zeroStockItems.length})] ${item.name} [SKU: ${item.sku}] (หมวดหมู่: ${item.category}) | สต๊อกคงเหลือ: 0 ชิ้น | ขั้นต่ำ: ${item.minStock} ชิ้น | คลัง: ${item.warehouse}`,
+        });
+      });
+    }
+
     const naturalSummaryAnswer = (() => {
       const q = query.toLowerCase();
 
@@ -409,6 +446,24 @@ export async function POST(req: NextRequest) {
       // 0.1 Thank you ("ขอบคุณ", "thanks")
       if (/^(ขอบคุณ|ขอบคุณครับ|ขอบคุณค่ะ|thanks|thank you)/i.test(q)) {
         return `ด้วยความยินดีครับ! หากมีข้อสงสัยเกี่ยวกับระบบ ERP หรือคำถามอื่นเพิ่มเติม สอบถามผมได้ตลอดเวลาเลยครับ 😊`;
+      }
+
+      // 0.15 Out of Stock Query ("สินค้าที่มี 0 ชิ้น", "ไม่มีสต๊อก", "หมดสต๊อก")
+      if (isZeroStockQuery && zeroStockItems.length > 0) {
+        const tableRows = zeroStockItems.slice(0, 20).map((item, idx) => {
+          return `| ${idx + 1} | \`${item.sku}\` | ${item.name} | ${item.category} | 0 ชิ้น | ${item.minStock} ชิ้น | 🔴 หมดสต๊อก |`;
+        }).join('\n');
+
+        return `### 🔴 รายงานสินค้าที่มีสต๊อกคงเหลือ 0 ชิ้น (Out of Stock Products)
+
+จากการตรวจสอบระบบ S&B Enterprise ERP พบสินค้าที่มีสต๊อกคงเหลือ **0 ชิ้น** ทั้งหมด **${zeroStockItems.length} รายการ** ตัวอย่างรายการสินค้าหมดสต๊อกมีดังนี้:
+
+| อันดับ | SKU | ชื่อสินค้า | หมวดหมู่ | สต๊อกคงเหลือ | สต๊อกขั้นต่ำ | สถานะ |
+| :---: | :--- | :--- | :--- | :---: | :---: | :---: |
+${tableRows}
+
+> [!WARNING]
+> **คำแนะนำบริหารคลัง:** ในระบบมีสินค้าหมดสต๊อกรวม **${zeroStockItems.length} รายการ** ควรพิจารณาสร้างใบสั่งซื้อ (PO Draft) เพื่อเติมสต๊อกโดยด่วน`;
       }
 
       // 0.2 Low-Stock Ranking Query ("สินค้าไหนสต๊อกน้อยที่สุด", "สต๊อกใกล้หมด", "สินค้าต่ำสุด")
