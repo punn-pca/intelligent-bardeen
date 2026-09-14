@@ -68,40 +68,40 @@ export default function SearchableProductSelect({
           setIsOpen(!isOpen);
           setSearchTerm('');
         }}
-        className={`w-full px-3 py-2 border rounded-lg text-xs bg-white flex items-center justify-between gap-2 text-left transition-all font-mono outline-none ${
-          isOpen ? 'border-blue-500 ring-2 ring-blue-100 shadow-md' : 'border-slate-300 hover:border-slate-400'
+        className={`w-full px-3 py-2 border rounded-lg text-xs bg-white dark:bg-slate-800 flex items-center justify-between gap-2 text-left transition-all font-mono outline-none ${
+          isOpen ? 'border-blue-500 ring-2 ring-blue-100 dark:ring-blue-900/30 shadow-md' : 'border-slate-300 dark:border-slate-700 hover:border-slate-400 dark:hover:border-slate-600'
         }`}
       >
         <span className="truncate">
           {selectedProduct ? (
-            <span className="text-slate-900 font-semibold">
-              <span className="text-blue-600 font-bold font-mono">[{selectedProduct.sku}]</span> {selectedProduct.name}
+            <span className="text-slate-900 dark:text-white font-semibold">
+              <span className="text-blue-600 dark:text-blue-400 font-bold font-mono">[{selectedProduct.sku}]</span> {selectedProduct.name}
             </span>
           ) : (
-            <span className="text-slate-400 font-sans">{placeholder}</span>
+            <span className="text-slate-400 dark:text-slate-500 font-sans">{placeholder}</span>
           )}
         </span>
-        <div className="flex items-center gap-1 shrink-0 text-slate-400">
+        <div className="flex items-center gap-1 shrink-0 text-slate-400 dark:text-slate-500">
           {selectedProduct && (
             <span
               onClick={(e) => {
                 e.stopPropagation();
                 onChange('');
               }}
-              className="p-0.5 hover:text-slate-600 hover:bg-slate-100 rounded cursor-pointer"
+              className="p-0.5 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 rounded cursor-pointer"
             >
               <X className="w-3.5 h-3.5" />
             </span>
           )}
-          <ChevronDown className={`w-3.5 h-3.5 transition-transform ${isOpen ? 'rotate-180 text-blue-600' : ''}`} />
+          <ChevronDown className={`w-3.5 h-3.5 transition-transform ${isOpen ? 'rotate-180 text-blue-600 dark:text-blue-400' : ''}`} />
         </div>
       </button>
 
       {/* Searchable Dropdown Overlay (positioned to float freely over tables and cards) */}
       {isOpen && (
-        <div className="absolute top-full left-0 mt-1 w-full min-w-[340px] max-w-[480px] bg-white rounded-xl shadow-2xl border border-slate-200 z-50 overflow-hidden text-xs animate-in fade-in duration-100">
+        <div className="absolute top-full left-0 mt-1 w-full min-w-[340px] max-w-[480px] bg-white dark:bg-slate-900 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-800 z-50 overflow-hidden text-xs animate-in fade-in duration-100">
           {/* Quick Search Input with Icon */}
-          <div className="p-2.5 bg-slate-50 border-b border-slate-200 flex items-center gap-2">
+          <div className="p-2.5 bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-800 flex items-center gap-2">
             <Search className="w-4 h-4 text-slate-400 shrink-0" />
             <input
               type="text"
@@ -109,13 +109,13 @@ export default function SearchableProductSelect({
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="พิมพ์ SKU, บาร์โค้ด หรือชื่อสินค้า..."
-              className="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 outline-none focus:border-blue-500 font-mono shadow-inner"
+              className="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 outline-none focus:border-blue-500 font-mono shadow-inner"
             />
             {searchTerm && (
               <button
                 type="button"
                 onClick={() => setSearchTerm('')}
-                className="text-slate-400 hover:text-slate-600 p-1"
+                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1"
               >
                 <X className="w-3.5 h-3.5" />
               </button>
@@ -123,9 +123,9 @@ export default function SearchableProductSelect({
           </div>
 
           {/* Flat Un-grouped Product List */}
-          <div className="max-h-64 overflow-y-auto divide-y divide-slate-100">
+          <div className="max-h-64 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800">
             {filteredProducts.length === 0 ? (
-              <div className="p-4 text-center text-slate-400 italic">
+              <div className="p-4 text-center text-slate-400 dark:text-slate-500 italic">
                 ไม่พบสินค้าตรงตามคำค้นหา "{searchTerm}"
               </div>
             ) : (
@@ -140,26 +140,26 @@ export default function SearchableProductSelect({
                       setIsOpen(false);
                     }}
                     className={`p-2.5 cursor-pointer flex items-center justify-between transition-colors ${
-                      isSelected ? 'bg-blue-50 text-blue-700 font-semibold' : 'hover:bg-slate-50 text-slate-800'
+                      isSelected ? 'bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 font-semibold' : 'hover:bg-slate-50 dark:hover:bg-slate-800/60 text-slate-800 dark:text-slate-200'
                     }`}
                   >
                     <div className="truncate pr-2">
                       <div className="font-mono font-bold text-xs flex items-center gap-2">
-                        <span className="text-blue-600 shrink-0">[{prod.sku}]</span>
-                        <span className="text-slate-900 font-sans font-semibold truncate">{prod.name}</span>
+                        <span className="text-blue-600 dark:text-blue-400 shrink-0">[{prod.sku}]</span>
+                        <span className="text-slate-900 dark:text-white font-sans font-semibold truncate">{prod.name}</span>
                       </div>
                       {prod.barcode && (
-                        <span className="text-[10px] text-slate-400 font-mono block">Barcode: {prod.barcode}</span>
+                        <span className="text-[10px] text-slate-400 dark:text-slate-500 font-mono block">Barcode: {prod.barcode}</span>
                       )}
                     </div>
 
                     <div className="flex items-center gap-2 shrink-0">
                       {prod.unit && (
-                        <span className="text-[10px] bg-slate-100 px-1.5 py-0.5 rounded text-slate-500 font-sans">
+                        <span className="text-[10px] bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded text-slate-500 dark:text-slate-400 font-sans border border-slate-200 dark:border-slate-700">
                           {prod.unit}
                         </span>
                       )}
-                      {isSelected && <Check className="w-4 h-4 text-blue-600" />}
+                      {isSelected && <Check className="w-4 h-4 text-blue-600 dark:text-blue-400" />}
                     </div>
                   </div>
                 );
@@ -167,7 +167,7 @@ export default function SearchableProductSelect({
             )}
 
             {filteredProducts.length > 100 && (
-              <div className="p-2 bg-slate-50 text-center text-[11px] text-slate-500 border-t border-slate-100 font-sans">
+              <div className="p-2 bg-slate-50 dark:bg-slate-800/60 text-center text-[11px] text-slate-500 dark:text-slate-400 border-t border-slate-100 dark:border-slate-800 font-sans">
                 แสดง 100 รายการแรก พิมพ์คำค้นหาเพิ่มเพื่อเจาะจงสินค้า
               </div>
             )}

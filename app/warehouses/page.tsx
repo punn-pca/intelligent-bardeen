@@ -150,13 +150,13 @@ export default function WarehousesPage() {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-200">
-      <div className="flex items-center justify-between border-b border-slate-200 pb-5">
+      <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-5">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
-            <Warehouse className="w-7 h-7 text-emerald-600" />
-            <span>จัดการคลังสินค้า (Warehouse Management)</span>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
+            <Warehouse className="w-7 h-7 text-emerald-600 dark:text-emerald-400" />
+            <span>คลังสินค้าทั้งหมด (Warehouse Management)</span>
           </h1>
-          <p className="text-sm text-slate-500 mt-1">รองรับหลายคลังสินค้า (Multi-Warehouse) เพิ่มคลังใหม่ แก้ไขข้อมูลคลังสินค้า ลบคลังสินค้า และผู้รับผิดชอบ</p>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">จัดการคลังสินค้า สาขา และผู้รับผิดชอบดูแลคลัง</p>
         </div>
 
         {canManage && (
@@ -172,18 +172,18 @@ export default function WarehousesPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {loading ? (
-          <div className="col-span-full py-8 text-center text-slate-400">กำลังโหลดรายการคลังสินค้า...</div>
+          <div className="col-span-full py-8 text-center text-slate-400 dark:text-slate-500">กำลังโหลดรายการคลังสินค้า...</div>
         ) : (
           warehouses.map((wh) => (
-            <div key={wh.id} className="bg-white p-6 rounded-xl border border-slate-200 shadow-xs space-y-4 relative group">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+            <div key={wh.id} className="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs space-y-4 relative group">
+              <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-slate-900 text-emerald-400 rounded-xl flex items-center justify-center font-mono font-bold text-base shadow-sm">
+                  <div className="w-12 h-12 bg-slate-900 dark:bg-slate-800 text-emerald-400 border border-slate-800 dark:border-slate-700 rounded-xl flex items-center justify-center font-mono font-bold text-base shadow-xs">
                     {wh.code}
                   </div>
                   <div>
-                    <h3 className="font-bold text-slate-900 text-lg">{wh.name}</h3>
-                    <span className={`text-xs font-semibold px-2 py-0.5 rounded border ${wh.active !== false ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-slate-100 text-slate-500 border-slate-200'}`}>
+                    <h3 className="font-bold text-slate-900 dark:text-white text-lg">{wh.name}</h3>
+                    <span className={`text-xs font-semibold px-2 py-0.5 rounded border ${wh.active !== false ? 'bg-emerald-50 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700'}`}>
                       {wh.active !== false ? 'ACTIVE' : 'INACTIVE'}
                     </span>
                   </div>
@@ -193,7 +193,7 @@ export default function WarehousesPage() {
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => openEditModal(wh)}
-                      className="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors flex items-center gap-1 text-xs font-medium border border-slate-200"
+                      className="p-2 text-slate-400 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-slate-800 rounded-lg transition-colors flex items-center gap-1 text-xs font-medium border border-slate-200 dark:border-slate-700"
                       title="แก้ไขคลังสินค้า"
                     >
                       <Edit className="w-4 h-4" />
@@ -202,7 +202,7 @@ export default function WarehousesPage() {
 
                     <button
                       onClick={() => setDeletingWarehouse(wh)}
-                      className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors flex items-center gap-1 text-xs font-medium border border-slate-200"
+                      className="p-2 text-slate-400 dark:text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/60 rounded-lg transition-colors flex items-center gap-1 text-xs font-medium border border-slate-200 dark:border-slate-700"
                       title="ลบคลังสินค้า"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -212,14 +212,14 @@ export default function WarehousesPage() {
                 )}
               </div>
 
-              <div className="space-y-2 text-sm text-slate-600">
+              <div className="space-y-2 text-sm text-slate-600 dark:text-slate-400">
                 <div className="flex items-start gap-2">
-                  <MapPin className="w-4 h-4 text-slate-400 shrink-0 mt-0.5" />
+                  <MapPin className="w-4 h-4 text-slate-400 dark:text-slate-500 shrink-0 mt-0.5" />
                   <span>{wh.address || 'ไม่ได้ระบุที่อยู่'}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <UserCheck className="w-4 h-4 text-slate-400 shrink-0" />
-                  <span>ผู้รับผิดชอบ: <strong className="text-slate-800">{wh.managerName || 'ไม่ได้ระบุ'}</strong></span>
+                  <UserCheck className="w-4 h-4 text-slate-400 dark:text-slate-500 shrink-0" />
+                  <span>ผู้รับผิดชอบ: <strong className="text-slate-800 dark:text-slate-200">{wh.managerName || 'ไม่ได้ระบุ'}</strong></span>
                 </div>
               </div>
             </div>
@@ -230,8 +230,8 @@ export default function WarehousesPage() {
       {/* Add Modal */}
       {showAddModal && (
         <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full overflow-hidden border border-slate-100">
-            <div className="bg-slate-900 text-white px-6 py-4 flex items-center justify-between">
+          <div className="bg-white dark:bg-slate-900 rounded-xl shadow-2xl max-w-md w-full overflow-hidden border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white">
+            <div className="bg-slate-900 text-white px-6 py-4 flex items-center justify-between border-b border-slate-800">
               <h3 className="font-semibold text-lg">เพิ่มคลังสินค้าใหม่</h3>
               <button onClick={() => setShowAddModal(false)} className="text-slate-400 hover:text-white">
                 ✕
@@ -240,63 +240,63 @@ export default function WarehousesPage() {
 
             <form onSubmit={handleCreateWarehouse} className="p-6 space-y-4">
               {errorMsg && (
-                <div className="bg-rose-50 border border-rose-200 text-rose-700 p-3 rounded-lg text-sm flex items-center gap-2">
-                  <AlertCircle className="w-4 h-4 shrink-0" />
+                <div className="bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300 p-3 rounded-lg text-sm flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 shrink-0 text-rose-600 dark:text-rose-400" />
                   <span>{errorMsg}</span>
                 </div>
               )}
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">รหัสคลัง (Warehouse Code) *</label>
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">รหัสคลัง (Warehouse Code) *</label>
                 <input
                   type="text"
                   required
                   value={code}
                   onChange={(e) => setCode(e.target.value.toUpperCase())}
                   placeholder="เช่น BRANCH-01"
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm outline-none font-mono uppercase focus:border-emerald-500"
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg text-sm outline-none font-mono uppercase focus:border-emerald-500"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">ชื่อคลังสินค้า *</label>
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">ชื่อคลังสินค้า *</label>
                 <input
                   type="text"
                   required
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="เช่น คลังสินค้าสาขาปิ่นเกล้า"
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm outline-none focus:border-emerald-500"
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg text-sm outline-none focus:border-emerald-500"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">ผู้รับผิดชอบคลัง</label>
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">ผู้รับผิดชอบคลัง</label>
                 <input
                   type="text"
                   value={managerName}
                   onChange={(e) => setManagerName(e.target.value)}
                   placeholder="เช่น นายสมชาย สายตรง"
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm outline-none focus:border-emerald-500"
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg text-sm outline-none focus:border-emerald-500"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">ที่อยู่คลังสินค้า</label>
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">ที่อยู่คลังสินค้า</label>
                 <textarea
                   rows={2}
                   value={address}
                   onChange={(e) => setAddress(e.target.value)}
                   placeholder="ที่ตั้งคลังสินค้า..."
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm outline-none focus:border-emerald-500"
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 rounded-lg text-sm outline-none focus:border-emerald-500"
                 />
               </div>
 
-              <div className="pt-4 border-t border-slate-100 flex items-center justify-end gap-3">
+              <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end gap-3">
                 <button
                   type="button"
                   onClick={() => setShowAddModal(false)}
-                  className="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-lg text-sm"
+                  className="px-4 py-2 border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-sm"
                 >
                   ยกเลิก
                 </button>
@@ -315,8 +315,8 @@ export default function WarehousesPage() {
       {/* Edit Modal */}
       {editingWarehouse && (
         <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full overflow-hidden border border-slate-100">
-            <div className="bg-slate-900 text-white px-6 py-4 flex items-center justify-between">
+          <div className="bg-white dark:bg-slate-900 rounded-xl shadow-2xl max-w-md w-full overflow-hidden border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white">
+            <div className="bg-slate-900 text-white px-6 py-4 flex items-center justify-between border-b border-slate-800">
               <h3 className="font-semibold text-lg flex items-center gap-2">
                 <Edit className="w-5 h-5 text-emerald-400" />
                 <span>แก้ไขข้อมูลคลังสินค้า</span>
@@ -328,59 +328,59 @@ export default function WarehousesPage() {
 
             <form onSubmit={handleUpdateWarehouse} className="p-6 space-y-4">
               {editErrorMsg && (
-                <div className="bg-rose-50 border border-rose-200 text-rose-700 p-3 rounded-lg text-sm flex items-center gap-2">
-                  <AlertCircle className="w-4 h-4 shrink-0" />
+                <div className="bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300 p-3 rounded-lg text-sm flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 shrink-0 text-rose-600 dark:text-rose-400" />
                   <span>{editErrorMsg}</span>
                 </div>
               )}
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">รหัสคลัง (Warehouse Code) *</label>
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">รหัสคลัง (Warehouse Code) *</label>
                 <input
                   type="text"
                   required
                   value={editCode}
                   onChange={(e) => setEditCode(e.target.value.toUpperCase())}
                   placeholder="เช่น MAIN"
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm outline-none font-mono uppercase focus:border-emerald-500"
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg text-sm outline-none font-mono uppercase focus:border-emerald-500"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">ชื่อคลังสินค้า *</label>
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">ชื่อคลังสินค้า *</label>
                 <input
                   type="text"
                   required
                   value={editName}
                   onChange={(e) => setEditName(e.target.value)}
                   placeholder="ชื่อคลังสินค้า..."
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm outline-none focus:border-emerald-500"
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg text-sm outline-none focus:border-emerald-500"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">ผู้รับผิดชอบคลัง</label>
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">ผู้รับผิดชอบคลัง</label>
                 <input
                   type="text"
                   value={editManagerName}
                   onChange={(e) => setEditManagerName(e.target.value)}
                   placeholder="ชื่อผู้รับผิดชอบคลัง..."
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm outline-none focus:border-emerald-500"
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg text-sm outline-none focus:border-emerald-500"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">ที่อยู่คลังสินค้า</label>
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">ที่อยู่คลังสินค้า</label>
                 <textarea
                   rows={2}
                   value={editAddress}
                   onChange={(e) => setEditAddress(e.target.value)}
                   placeholder="ที่ตั้งคลังสินค้า..."
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm outline-none focus:border-emerald-500"
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg text-sm outline-none focus:border-emerald-500"
                 />
               </div>
 
-              <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
+              <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
                 <button
                   type="button"
                   onClick={() => {
@@ -388,7 +388,7 @@ export default function WarehousesPage() {
                     setEditingWarehouse(null);
                     setDeletingWarehouse(wh);
                   }}
-                  className="px-3 py-2 text-rose-600 hover:bg-rose-50 rounded-lg text-xs font-bold flex items-center gap-1 border border-rose-200"
+                  className="px-3 py-2 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/60 rounded-lg text-xs font-bold flex items-center gap-1 border border-rose-200 dark:border-rose-800"
                 >
                   <Trash2 className="w-4 h-4" />
                   <span>ลบคลังสินค้านี้</span>
@@ -398,7 +398,7 @@ export default function WarehousesPage() {
                   <button
                     type="button"
                     onClick={() => setEditingWarehouse(null)}
-                    className="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-lg text-sm"
+                    className="px-4 py-2 border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-sm"
                   >
                     ยกเลิก
                   </button>
@@ -418,16 +418,16 @@ export default function WarehousesPage() {
       {/* Delete Confirmation Modal */}
       {deletingWarehouse && (
         <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 space-y-4 border border-slate-100">
-            <div className="flex items-center gap-3 text-rose-600 border-b border-slate-100 pb-3">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl max-w-md w-full p-6 space-y-4 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white">
+            <div className="flex items-center gap-3 text-rose-600 dark:text-rose-400 border-b border-slate-100 dark:border-slate-800 pb-3">
               <AlertCircle className="w-6 h-6 shrink-0" />
-              <h3 className="font-bold text-lg text-slate-900">ยืนยันการลบคลังสินค้า</h3>
+              <h3 className="font-bold text-lg text-slate-900 dark:text-white">ยืนยันการลบคลังสินค้า</h3>
             </div>
 
-            <p className="text-sm text-slate-600 leading-relaxed">
-              คุณต้องการลบคลังสินค้า <strong className="text-slate-900">[{deletingWarehouse.code}] {deletingWarehouse.name}</strong> ใช่หรือไม่?
+            <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+              คุณต้องการลบคลังสินค้า <strong className="text-slate-900 dark:text-white font-bold">[{deletingWarehouse.code}] {deletingWarehouse.name}</strong> ใช่หรือไม่?
             </p>
-            <p className="text-xs text-slate-500 bg-slate-50 p-3 rounded-lg border border-slate-200">
+            <p className="text-xs text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-800 p-3 rounded-lg border border-slate-200 dark:border-slate-700">
               * ระบบจะทำการปิดสถานะ (Deactivate) คลังสินค้านี้เพื่อรักษาสภาพข้อมูลย้อนหลัง และซ่อนคลังสินค้าจากการใช้งานใหม่
             </p>
 
@@ -435,7 +435,7 @@ export default function WarehousesPage() {
               <button
                 type="button"
                 onClick={() => setDeletingWarehouse(null)}
-                className="px-4 py-2 border border-slate-300 text-slate-600 rounded-xl text-sm font-semibold hover:bg-slate-50"
+                className="px-4 py-2 border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-400 rounded-xl text-sm font-semibold hover:bg-slate-50 dark:hover:bg-slate-800"
               >
                 ยกเลิก
               </button>

@@ -194,14 +194,14 @@ export default function ProductsPage() {
   return (
     <div className="space-y-6 animate-in fade-in duration-200">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
-            <Package className="w-7 h-7 text-blue-600" />
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+            <Package className="w-7 h-7 text-blue-600 dark:text-blue-400" />
             <span>แคตตาล็อกสินค้าทั้งหมด ({products.length.toLocaleString()} รายการ)</span>
           </h1>
-          <p className="text-sm text-slate-500 mt-1">
-            รายการสินค้า อะไหล่ และอุปกรณ์ในระบบ <span className="font-bold text-blue-600">(สิทธิ์แก้ไขและลบสินค้า: เฉพาะ ADMIN)</span>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+            รายการสินค้า อะไหล่ และอุปกรณ์ในระบบ <span className="font-bold text-blue-600 dark:text-blue-400">(สิทธิ์แก้ไขและลบสินค้า: เฉพาะ ADMIN)</span>
           </p>
         </div>
 
@@ -223,40 +223,40 @@ export default function ProductsPage() {
       </div>
 
       {successMsg && (
-        <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 p-3.5 rounded-xl text-xs font-bold flex items-center gap-2">
-          <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600" />
+        <div className="bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 p-3.5 rounded-xl text-xs font-bold flex items-center gap-2">
+          <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
           <span>{successMsg}</span>
         </div>
       )}
 
       {errorMsg && (
-        <div className="bg-rose-50 border border-rose-200 text-rose-700 p-3.5 rounded-xl text-xs font-bold flex items-center gap-2">
-          <ShieldAlert className="w-4 h-4 shrink-0 text-rose-600" />
+        <div className="bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300 p-3.5 rounded-xl text-xs font-bold flex items-center gap-2">
+          <ShieldAlert className="w-4 h-4 shrink-0 text-rose-600 dark:text-rose-400" />
           <span>{errorMsg}</span>
         </div>
       )}
 
       {/* Filter and Search Bar */}
-      <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs flex flex-wrap items-center justify-between gap-4">
+      <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800/80 shadow-xs flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-3 flex-1 min-w-[260px]">
-          <Search className="w-4 h-4 text-slate-400" />
+          <Search className="w-4 h-4 text-slate-400 dark:text-slate-500" />
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="ค้นหา SKU, บาร์โค้ด หรือชื่อสินค้า (จาก 900+ รายการ)..."
-            className="w-full text-xs outline-none text-slate-800 font-mono placeholder-slate-400"
+            className="w-full text-xs outline-none text-slate-800 dark:text-slate-100 font-mono placeholder-slate-400 dark:placeholder-slate-500 bg-transparent"
           />
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
           <div className="flex items-center gap-2 text-xs">
-            <Filter className="w-3.5 h-3.5 text-slate-400" />
-            <span className="font-semibold text-slate-600">หมวดหมู่:</span>
+            <Filter className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
+            <span className="font-semibold text-slate-600 dark:text-slate-400">หมวดหมู่:</span>
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
-              className="px-3 py-1.5 border border-slate-300 rounded-lg text-xs outline-none bg-white font-medium"
+              className="px-3 py-1.5 border border-slate-300 dark:border-slate-700 rounded-lg text-xs outline-none bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 font-medium"
             >
               <option value="">ทั้งหมด</option>
               {categories.map((c) => (
@@ -268,11 +268,11 @@ export default function ProductsPage() {
           </div>
 
           <div className="flex items-center gap-2 text-xs">
-            <span className="font-semibold text-slate-600">สถานะสต็อก:</span>
+            <span className="font-semibold text-slate-600 dark:text-slate-400">สถานะสต็อก:</span>
             <select
               value={selectedStatus}
               onChange={(e) => setSelectedStatus(e.target.value)}
-              className="px-3 py-1.5 border border-slate-300 rounded-lg text-xs outline-none bg-white font-medium"
+              className="px-3 py-1.5 border border-slate-300 dark:border-slate-700 rounded-lg text-xs outline-none bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 font-medium"
             >
               <option value="">ทั้งหมด</option>
               <option value="active">เปิดใช้งาน (Active)</option>
@@ -284,10 +284,10 @@ export default function ProductsPage() {
       </div>
 
       {/* Products Table */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
+      <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
-            <thead className="bg-slate-50 text-slate-500 uppercase text-xs border-b border-slate-200">
+            <thead className="bg-slate-50 dark:bg-slate-800/60 text-slate-500 dark:text-slate-400 uppercase text-xs border-b border-slate-200 dark:border-slate-800">
               <tr>
                 <th className="p-4">SKU / บาร์โค้ด</th>
                 <th className="p-4">ชื่อสินค้า</th>
@@ -298,40 +298,40 @@ export default function ProductsPage() {
                 <th className="p-4 text-center">จัดการ</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
               {loading ? (
                 <tr>
-                  <td colSpan={7} className="text-center py-8 text-slate-400">
+                  <td colSpan={7} className="text-center py-8 text-slate-400 dark:text-slate-500">
                     กำลังโหลดแคตตาล็อกสินค้า...
                   </td>
                 </tr>
               ) : products.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="text-center py-8 text-slate-400">
+                  <td colSpan={7} className="text-center py-8 text-slate-400 dark:text-slate-500">
                     ไม่พบข้อมูลสินค้าตรงตามเงื่อนไข
                   </td>
                 </tr>
               ) : (
                 products.map((product) => (
-                  <tr key={product.id} className="hover:bg-slate-50/80 transition-all">
-                    <td className="p-4 font-mono font-bold text-blue-600 text-xs">
+                  <tr key={product.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-all">
+                    <td className="p-4 font-mono font-bold text-blue-600 dark:text-blue-400 text-xs">
                       <p>{product.sku}</p>
-                      <p className="text-[10px] text-slate-400">{product.barcode}</p>
+                      <p className="text-[10px] text-slate-400 dark:text-slate-500">{product.barcode}</p>
                     </td>
-                    <td className="p-4 font-semibold text-slate-800 text-xs">{product.name}</td>
-                    <td className="p-4 text-xs text-slate-500">{product.category?.name || '-'}</td>
-                    <td className="p-4 text-right font-mono font-bold text-xs text-slate-900">
+                    <td className="p-4 font-semibold text-slate-800 dark:text-slate-200 text-xs">{product.name}</td>
+                    <td className="p-4 text-xs text-slate-500 dark:text-slate-400">{product.category?.name || '-'}</td>
+                    <td className="p-4 text-right font-mono font-bold text-xs text-slate-900 dark:text-white">
                       {product.totalOnHand?.toLocaleString()}
                     </td>
-                    <td className="p-4 text-center text-xs text-slate-500">{product.unit}</td>
+                    <td className="p-4 text-center text-xs text-slate-500 dark:text-slate-400">{product.unit}</td>
                     <td className="p-4 text-center">
                       <span
                         className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
                           product.stockStatus === 'OUT_OF_STOCK'
-                            ? 'bg-rose-100 text-rose-700'
+                            ? 'bg-rose-100 dark:bg-rose-950/80 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800'
                             : product.stockStatus === 'LOW_STOCK'
-                            ? 'bg-amber-100 text-amber-700'
-                            : 'bg-emerald-100 text-emerald-700'
+                            ? 'bg-amber-100 dark:bg-amber-950/80 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800'
+                            : 'bg-emerald-100 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800'
                         }`}
                       >
                         {product.stockStatus === 'OUT_OF_STOCK'
@@ -344,7 +344,7 @@ export default function ProductsPage() {
                     <td className="p-4 text-center space-x-1">
                       <Link
                         href={`/products/${product.id}`}
-                        className="p-1.5 text-slate-500 hover:text-blue-600 inline-block transition-colors"
+                        className="p-1.5 text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 inline-block transition-colors"
                         title="ดูรายละเอียดสินค้า"
                       >
                         <Eye className="w-4 h-4" />
@@ -354,10 +354,10 @@ export default function ProductsPage() {
                       {isAdmin && (
                         <button
                           onClick={() => handleOpenEditModal(product)}
-                          className="p-1.5 text-slate-500 hover:text-indigo-600 inline-block transition-colors"
+                          className="p-1.5 text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 inline-block transition-colors"
                           title="แก้ไขข้อมูลสินค้า (ADMIN Only)"
                         >
-                          <Edit2 className="w-4 h-4 text-indigo-600" />
+                          <Edit2 className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
                         </button>
                       )}
 
@@ -365,10 +365,10 @@ export default function ProductsPage() {
                       {isAdmin && (
                         <button
                           onClick={() => handleOpenDeleteModal(product)}
-                          className="p-1.5 text-slate-500 hover:text-rose-600 inline-block transition-colors"
+                          className="p-1.5 text-slate-500 dark:text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 inline-block transition-colors"
                           title="ลบสินค้า (ADMIN Only)"
                         >
-                          <Trash2 className="w-4 h-4 text-rose-600" />
+                          <Trash2 className="w-4 h-4 text-rose-600 dark:text-rose-400" />
                         </button>
                       )}
                     </td>
@@ -382,16 +382,16 @@ export default function ProductsPage() {
 
       {/* Modal 1: Add Product */}
       {showAddModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4">
-          <div className="bg-white rounded-xl shadow-xl border border-slate-200 w-full max-w-lg p-6 space-y-4">
-            <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2 border-b border-slate-100 pb-3">
-              <Package className="w-5 h-5 text-blue-600" />
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4">
+          <div className="bg-white dark:bg-slate-900 rounded-xl shadow-xl border border-slate-200 dark:border-slate-800 w-full max-w-lg p-6 space-y-4">
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-3">
+              <Package className="w-5 h-5 text-blue-600 dark:text-blue-400" />
               <span>เพิ่มสินค้าใหม่</span>
             </h3>
 
             {errorMsg && (
-              <div className="bg-rose-50 border border-rose-200 text-rose-700 p-3 rounded text-xs flex items-center gap-2">
-                <AlertCircle className="w-4 h-4 shrink-0" />
+              <div className="bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300 p-3 rounded text-xs flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 shrink-0 text-rose-600 dark:text-rose-400" />
                 <span>{errorMsg}</span>
               </div>
             )}
@@ -399,45 +399,45 @@ export default function ProductsPage() {
             <form onSubmit={handleCreateProduct} className="space-y-3 text-xs">
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">รหัสสินค้า (SKU) *</label>
+                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">รหัสสินค้า (SKU) *</label>
                   <input
                     type="text"
                     required
                     value={formData.sku}
                     onChange={(e) => setFormData({ ...formData, sku: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none focus:border-blue-500 font-mono"
+                    className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg outline-none focus:border-blue-500 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-mono"
                   />
                 </div>
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">บาร์โค้ด (Barcode) *</label>
+                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">บาร์โค้ด (Barcode) *</label>
                   <input
                     type="text"
                     required
                     value={formData.barcode}
                     onChange={(e) => setFormData({ ...formData, barcode: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none focus:border-blue-500 font-mono"
+                    className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg outline-none focus:border-blue-500 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-mono"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">ชื่อสินค้า *</label>
+                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">ชื่อสินค้า *</label>
                 <input
                   type="text"
                   required
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg outline-none focus:border-blue-500 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">หมวดหมู่ *</label>
+                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">หมวดหมู่ *</label>
                   <select
                     value={formData.categoryId}
                     onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none focus:border-blue-500 font-medium"
+                    className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg outline-none focus:border-blue-500 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-medium"
                   >
                     {categories.map((c) => (
                       <option key={c.id} value={c.id}>
@@ -447,13 +447,13 @@ export default function ProductsPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">หน่วยนับ *</label>
+                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">หน่วยนับ *</label>
                   <input
                     type="text"
                     required
                     value={formData.unit}
                     onChange={(e) => setFormData({ ...formData, unit: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg outline-none focus:border-blue-500 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
                   />
                 </div>
               </div>
@@ -462,7 +462,7 @@ export default function ProductsPage() {
                 <button
                   type="button"
                   onClick={() => setShowAddModal(false)}
-                  className="px-4 py-2 border border-slate-300 rounded-lg text-slate-600 font-semibold"
+                  className="px-4 py-2 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 font-semibold"
                 >
                   ยกเลิก
                 </button>
@@ -481,16 +481,16 @@ export default function ProductsPage() {
 
       {/* Modal 2: Edit Product (ADMIN ONLY) */}
       {showEditModal && isAdmin && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4">
-          <div className="bg-white rounded-2xl shadow-xl border border-slate-200 w-full max-w-lg p-6 space-y-4">
-            <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2 border-b border-slate-100 pb-3">
-              <Edit2 className="w-5 h-5 text-indigo-600" />
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-800 w-full max-w-lg p-6 space-y-4">
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-3">
+              <Edit2 className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
               <span>แก้ไขข้อมูลสินค้า (สิทธิ์ ADMIN)</span>
             </h3>
 
             {errorMsg && (
-              <div className="bg-rose-50 border border-rose-200 text-rose-700 p-3 rounded-lg text-xs flex items-center gap-2">
-                <AlertCircle className="w-4 h-4 shrink-0" />
+              <div className="bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300 p-3 rounded-lg text-xs flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 shrink-0 text-rose-600 dark:text-rose-400" />
                 <span>{errorMsg}</span>
               </div>
             )}
@@ -498,45 +498,45 @@ export default function ProductsPage() {
             <form onSubmit={handleUpdateProduct} className="space-y-3 text-xs">
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">รหัสสินค้า (SKU) *</label>
+                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">รหัสสินค้า (SKU) *</label>
                   <input
                     type="text"
                     required
                     value={formData.sku}
                     onChange={(e) => setFormData({ ...formData, sku: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none focus:border-indigo-500 font-mono font-bold text-blue-600"
+                    className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg outline-none focus:border-indigo-500 bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 font-mono font-bold"
                   />
                 </div>
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">บาร์โค้ด (Barcode) *</label>
+                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">บาร์โค้ด (Barcode) *</label>
                   <input
                     type="text"
                     required
                     value={formData.barcode}
                     onChange={(e) => setFormData({ ...formData, barcode: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none focus:border-indigo-500 font-mono"
+                    className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg outline-none focus:border-indigo-500 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-mono"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">ชื่อสินค้า *</label>
+                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">ชื่อสินค้า *</label>
                 <input
                   type="text"
                   required
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none focus:border-indigo-500 font-semibold"
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg outline-none focus:border-indigo-500 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-semibold"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">หมวดหมู่ *</label>
+                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">หมวดหมู่ *</label>
                   <select
                     value={formData.categoryId}
                     onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none focus:border-indigo-500 font-medium"
+                    className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg outline-none focus:border-indigo-500 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-medium"
                   >
                     {categories.map((c) => (
                       <option key={c.id} value={c.id}>
@@ -546,57 +546,57 @@ export default function ProductsPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">หน่วยนับ *</label>
+                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">หน่วยนับ *</label>
                   <input
                     type="text"
                     required
                     value={formData.unit}
                     onChange={(e) => setFormData({ ...formData, unit: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none focus:border-indigo-500"
+                    className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg outline-none focus:border-indigo-500 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">ราคาทุน (Cost Price)</label>
+                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">ราคาทุน (Cost Price)</label>
                   <input
                     type="number"
                     step="0.01"
                     value={formData.costPrice}
                     onChange={(e) => setFormData({ ...formData, costPrice: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none focus:border-indigo-500 font-mono font-bold"
+                    className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg outline-none focus:border-indigo-500 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-mono font-bold"
                   />
                 </div>
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">ราคาขาย (Selling Price)</label>
+                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">ราคาขาย (Selling Price)</label>
                   <input
                     type="number"
                     step="0.01"
                     value={formData.sellingPrice}
                     onChange={(e) => setFormData({ ...formData, sellingPrice: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none focus:border-indigo-500 font-mono font-bold text-emerald-600"
+                    className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg outline-none focus:border-indigo-500 bg-white dark:bg-slate-800 text-emerald-600 dark:text-emerald-400 font-mono font-bold"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">ขั้นต่ำเตือนภัย (Min Stock)</label>
+                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">ขั้นต่ำเตือนภัย (Min Stock)</label>
                   <input
                     type="number"
                     value={formData.minStock}
                     onChange={(e) => setFormData({ ...formData, minStock: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none focus:border-indigo-500 font-mono"
+                    className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg outline-none focus:border-indigo-500 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-mono"
                   />
                 </div>
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">ขั้นสูงเตือนภัย (Max Stock)</label>
+                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">ขั้นสูงเตือนภัย (Max Stock)</label>
                   <input
                     type="number"
                     value={formData.maxStock}
                     onChange={(e) => setFormData({ ...formData, maxStock: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none focus:border-indigo-500 font-mono"
+                    className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg outline-none focus:border-indigo-500 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-mono"
                   />
                 </div>
               </div>
@@ -605,7 +605,7 @@ export default function ProductsPage() {
                 <button
                   type="button"
                   onClick={() => setShowEditModal(false)}
-                  className="px-4 py-2 border border-slate-300 rounded-lg text-slate-600 font-semibold"
+                  className="px-4 py-2 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 font-semibold"
                 >
                   ยกเลิก
                 </button>
@@ -625,17 +625,17 @@ export default function ProductsPage() {
       {/* Modal 3: Delete Product (ADMIN ONLY) */}
       {showDeleteModal && deletingProduct && isAdmin && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4">
-          <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-md p-6 space-y-4">
-            <div className="flex items-center gap-3 text-rose-600 border-b border-slate-100 pb-3">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 w-full max-w-md p-6 space-y-4">
+            <div className="flex items-center gap-3 text-rose-600 dark:text-rose-400 border-b border-slate-100 dark:border-slate-800 pb-3">
               <AlertCircle className="w-6 h-6 shrink-0" />
-              <h3 className="font-bold text-lg text-slate-900">ยืนยันการลบสินค้า (ADMIN Only)</h3>
+              <h3 className="font-bold text-lg text-slate-900 dark:text-white">ยืนยันการลบสินค้า (ADMIN Only)</h3>
             </div>
 
-            <p className="text-sm text-slate-600 leading-relaxed">
-              คุณต้องการลบสินค้า <strong className="text-slate-900">[{deletingProduct.sku}] {deletingProduct.name}</strong> ใช่หรือไม่?
+            <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+              คุณต้องการลบสินค้า <strong className="text-slate-900 dark:text-white font-bold">[{deletingProduct.sku}] {deletingProduct.name}</strong> ใช่หรือไม่?
             </p>
 
-            <div className="bg-rose-50 p-3 rounded-lg border border-rose-200 text-xs text-rose-800 leading-relaxed">
+            <div className="bg-rose-50 dark:bg-rose-950/60 p-3 rounded-lg border border-rose-200 dark:border-rose-800 text-xs text-rose-800 dark:text-rose-300 leading-relaxed">
               ⚠️ การลบสินค้าจะทำการปรับสถานะสินค้าเป็นซ่อน/ลบออกจากระบบแคตตาล็อก (Soft Delete) โดยยังคงประวัติการทำรายการเดิมไว้ใน Audit Trail
             </div>
 
@@ -643,7 +643,7 @@ export default function ProductsPage() {
               <button
                 type="button"
                 onClick={() => setShowDeleteModal(false)}
-                className="px-4 py-2 border border-slate-300 text-slate-600 rounded-xl text-xs font-semibold hover:bg-slate-50"
+                className="px-4 py-2 border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-400 rounded-xl text-xs font-semibold hover:bg-slate-50 dark:hover:bg-slate-800"
               >
                 ยกเลิก
               </button>

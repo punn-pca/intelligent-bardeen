@@ -11,7 +11,6 @@ interface BarcodeScannerModalProps {
 
 export default function BarcodeScannerModal({ onClose, onScan }: BarcodeScannerModalProps) {
   const [manualBarcode, setManualBarcode] = useState('');
-  const [isSimulatingCamera, setIsSimulatingCamera] = useState(true);
   const [scannedResult, setScannedResult] = useState<string | null>(null);
   const router = useRouter();
 
@@ -67,9 +66,9 @@ export default function BarcodeScannerModal({ onClose, onScan }: BarcodeScannerM
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-      <div className="bg-white rounded-xl shadow-2xl max-w-lg w-full overflow-hidden border border-slate-100 animate-in fade-in zoom-in duration-200">
-        <div className="bg-slate-900 text-white px-6 py-4 flex items-center justify-between">
+    <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-4">
+      <div className="bg-white dark:bg-slate-900 rounded-xl shadow-2xl max-w-lg w-full overflow-hidden border border-slate-200 dark:border-slate-800 animate-in fade-in zoom-in duration-200">
+        <div className="bg-slate-900 dark:bg-slate-950 text-white px-6 py-4 flex items-center justify-between border-b border-slate-800">
           <div className="flex items-center gap-2">
             <Barcode className="w-5 h-5 text-emerald-400" />
             <h3 className="font-semibold text-lg">เครื่องสแกนบาร์โค้ด (Barcode Scanner)</h3>
@@ -103,7 +102,7 @@ export default function BarcodeScannerModal({ onClose, onScan }: BarcodeScannerM
 
           {/* Manual Barcode Input Fallback */}
           <div>
-            <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
+            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
               หรือป้อนรหัส Barcode / SKU ด้วยตนเอง
             </label>
             <div className="flex gap-2">
@@ -113,7 +112,7 @@ export default function BarcodeScannerModal({ onClose, onScan }: BarcodeScannerM
                 onChange={(e) => setManualBarcode(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleLookupProduct()}
                 placeholder="เช่น 8850001000011 หรือ SKU-001"
-                className="flex-1 px-3 py-2 border border-slate-300 rounded-lg text-sm font-mono focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none"
+                className="flex-1 px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 rounded-lg text-sm font-mono focus:ring-2 focus:ring-emerald-500 outline-none"
               />
               <button
                 onClick={handleLookupProduct}
@@ -126,14 +125,14 @@ export default function BarcodeScannerModal({ onClose, onScan }: BarcodeScannerM
           </div>
 
           {/* Preset Test Barcodes */}
-          <div className="bg-slate-50 p-3 rounded-lg border border-slate-200 text-xs">
-            <p className="font-semibold text-slate-600 mb-2">ตัวอย่าง Barcode สำหรับทดสอบสแกนเร็ว:</p>
+          <div className="bg-slate-50 dark:bg-slate-800/60 p-3 rounded-lg border border-slate-200 dark:border-slate-700 text-xs">
+            <p className="font-semibold text-slate-600 dark:text-slate-300 mb-2">ตัวอย่าง Barcode สำหรับทดสอบสแกนเร็ว:</p>
             <div className="flex flex-wrap gap-2">
               {['8850001000011', '8850001000028', '8850001000059', '8850001000172'].map((code) => (
                 <button
                   key={code}
                   onClick={() => handleBarcodeScanned(code)}
-                  className="bg-white hover:bg-emerald-50 text-slate-700 hover:text-emerald-700 font-mono px-2 py-1 rounded border border-slate-200 shadow-2xs"
+                  className="bg-white dark:bg-slate-900 hover:bg-emerald-50 dark:hover:bg-emerald-950/60 text-slate-700 dark:text-slate-300 hover:text-emerald-700 dark:hover:text-emerald-400 font-mono px-2 py-1 rounded border border-slate-200 dark:border-slate-700 shadow-2xs"
                 >
                   {code}
                 </button>
@@ -143,12 +142,12 @@ export default function BarcodeScannerModal({ onClose, onScan }: BarcodeScannerM
         </div>
 
         {/* Footer */}
-        <div className="bg-slate-50 px-6 py-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
-          <span>กด <kbd className="bg-slate-200 px-1 rounded text-slate-700 font-mono">ESC</kbd> เพื่อปิด</span>
+        <div className="bg-slate-50 dark:bg-slate-800/40 px-6 py-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+          <span>กด <kbd className="bg-slate-200 dark:bg-slate-700 px-1 rounded text-slate-700 dark:text-slate-200 font-mono">ESC</kbd> เพื่อปิด</span>
           {scannedResult && (
             <button
               onClick={() => setScannedResult(null)}
-              className="text-emerald-600 hover:underline font-medium"
+              className="text-emerald-600 dark:text-emerald-400 hover:underline font-medium"
             >
               สแกนรหัสใหม่
             </button>

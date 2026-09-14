@@ -231,25 +231,25 @@ export default function CreateDocumentPage() {
 
   return (
     <div className="max-w-4xl mx-auto space-y-6 animate-in fade-in duration-200">
-      <div className="flex items-center justify-between border-b border-slate-200 pb-5">
+      <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-5">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
-            <FilePlus className="w-7 h-7 text-blue-600" />
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
+            <FilePlus className="w-7 h-7 text-blue-600 dark:text-blue-400" />
             <span>สร้างเอกสารใหม่ (Create Document)</span>
           </h1>
-          <p className="text-sm text-slate-500 mt-1">ออกเอกสารซื้อ-ขาย คลังสินค้า และบัญชี พร้อมสร้างเลขที่เอกสารอัตโนมัติ</p>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">ออกเอกสารซื้อ-ขาย คลังสินค้า และบัญชี พร้อมสร้างเลขที่เอกสารอัตโนมัติ</p>
         </div>
-        <Link href="/documents" className="text-xs font-semibold text-slate-500 hover:text-slate-800 flex items-center gap-1">
+        <Link href="/documents" className="text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white flex items-center gap-1">
           <ArrowLeft className="w-4 h-4" />
           <span>ย้อนกลับ</span>
         </Link>
       </div>
 
-      <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-xs">
+      <div className="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs">
         <form onSubmit={handleSubmit} className="space-y-6">
           {errorMsg && (
-            <div className="bg-rose-50 border border-rose-200 text-rose-700 p-3.5 rounded-lg text-sm flex items-center gap-2">
-              <AlertCircle className="w-5 h-5 shrink-0" />
+            <div className="bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300 p-3.5 rounded-lg text-sm flex items-center gap-2">
+              <AlertCircle className="w-5 h-5 shrink-0 text-rose-600 dark:text-rose-400" />
               <span>{errorMsg}</span>
             </div>
           )}
@@ -257,11 +257,11 @@ export default function CreateDocumentPage() {
           {/* Form Top Header */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">เลือกประเภทเอกสาร *</label>
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">เลือกประเภทเอกสาร *</label>
               <select
                 value={documentType}
                 onChange={(e) => setDocumentType(e.target.value)}
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white outline-none font-bold text-blue-600 focus:border-blue-500"
+                className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg text-sm bg-white dark:bg-slate-800 outline-none font-bold text-blue-600 dark:text-blue-400 focus:border-blue-500"
               >
                 <option value="PR">PR - ใบขอซื้อ (Purchase Requisition)</option>
                 <option value="PO">PO - ใบสั่งซื้อ (Purchase Order)</option>
@@ -280,11 +280,11 @@ export default function CreateDocumentPage() {
             {['PO', 'GRN', 'PR'].includes(documentType) && (
               <div>
                 <div className="flex items-center justify-between mb-1">
-                  <label className="block text-xs font-semibold text-slate-700">เลือกซัพพลายเออร์ / คู่ค้า *</label>
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">เลือกซัพพลายเออร์ / คู่ค้า *</label>
                   <button
                     type="button"
                     onClick={() => openQuickAddModal('SUPPLIER')}
-                    className="text-xs text-blue-600 hover:text-blue-800 font-semibold flex items-center gap-0.5"
+                    className="text-xs text-blue-600 dark:text-blue-400 hover:underline font-semibold flex items-center gap-0.5"
                   >
                     <Plus className="w-3.5 h-3.5" />
                     <span>+ เพิ่มซัพพลายเออร์</span>
@@ -293,7 +293,7 @@ export default function CreateDocumentPage() {
                 <select
                   value={supplierId}
                   onChange={(e) => setSupplierId(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white outline-none font-medium"
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-white outline-none font-medium"
                 >
                   <option value="">-- เลือกซัพพลายเออร์ --</option>
                   {suppliers.map((s) => (
@@ -308,11 +308,11 @@ export default function CreateDocumentPage() {
             {['QUOTATION', 'SO', 'INVOICE', 'RECEIPT', 'DELIVERY_NOTE'].includes(documentType) && (
               <div>
                 <div className="flex items-center justify-between mb-1">
-                  <label className="block text-xs font-semibold text-slate-700">เลือกลูกค้า / ผู้สั่งซื้อ *</label>
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">เลือกลูกค้า / ผู้สั่งซื้อ *</label>
                   <button
                     type="button"
                     onClick={() => openQuickAddModal('CUSTOMER')}
-                    className="text-xs text-blue-600 hover:text-blue-800 font-semibold flex items-center gap-0.5"
+                    className="text-xs text-blue-600 dark:text-blue-400 hover:underline font-semibold flex items-center gap-0.5"
                   >
                     <Plus className="w-3.5 h-3.5" />
                     <span>+ เพิ่มลูกค้าใหม่</span>
@@ -321,7 +321,7 @@ export default function CreateDocumentPage() {
                 <select
                   value={customerId}
                   onChange={(e) => setCustomerId(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white outline-none font-medium"
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-white outline-none font-medium"
                 >
                   <option value="">-- เลือกลูกค้า --</option>
                   {customers.map((c) => (
@@ -334,11 +334,11 @@ export default function CreateDocumentPage() {
             )}
 
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">คลังสินค้าต้นทาง *</label>
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">คลังสินค้าต้นทาง *</label>
               <select
                 value={warehouseId}
                 onChange={(e) => setWarehouseId(e.target.value)}
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white outline-none font-medium"
+                className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-white outline-none font-medium"
               >
                 {warehouses.map((w) => (
                   <option key={w.id} value={w.id}>
@@ -352,20 +352,20 @@ export default function CreateDocumentPage() {
           {/* Table Items */}
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <h3 className="text-xs font-bold text-slate-700 uppercase tracking-wider">ตารางรายการสินค้า (Document Items)</h3>
+              <h3 className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">ตารางรายการสินค้า (Document Items)</h3>
               <button
                 type="button"
                 onClick={handleAddItem}
-                className="text-xs text-blue-600 hover:underline font-semibold flex items-center gap-1"
+                className="text-xs text-blue-600 dark:text-blue-400 hover:underline font-semibold flex items-center gap-1"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>+ เพิ่มรายการสินค้า</span>
               </button>
             </div>
 
-            <div className="border border-slate-200 rounded-lg overflow-visible bg-white">
+            <div className="border border-slate-200 dark:border-slate-800 rounded-lg overflow-visible bg-white dark:bg-slate-900">
               <table className="w-full text-left text-sm overflow-visible">
-                <thead className="bg-slate-50 text-slate-500 text-xs border-b border-slate-200">
+                <thead className="bg-slate-50 dark:bg-slate-800/60 text-slate-500 dark:text-slate-400 text-xs border-b border-slate-200 dark:border-slate-800">
                   <tr>
                     <th className="p-3">สินค้า (มีช่องค้นหา SKU/บาร์โค้ด/ชื่อสินค้า) *</th>
                     <th className="p-3 w-28 text-right">จำนวน *</th>
@@ -375,7 +375,7 @@ export default function CreateDocumentPage() {
                     <th className="p-3 w-12 text-center"></th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100 overflow-visible">
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-800 overflow-visible">
                   {items.map((item, idx) => {
                     const rowTotal = item.quantity * item.unitPrice - item.discount;
                     const rowZIndex = items.length - idx + 10;
@@ -397,7 +397,7 @@ export default function CreateDocumentPage() {
                             required
                             value={item.quantity}
                             onChange={(e) => handleItemChange(idx, 'quantity', e.target.value)}
-                            className="w-full px-2 py-1.5 border border-slate-300 rounded text-xs text-right font-mono outline-none focus:border-blue-500"
+                            className="w-full px-2 py-1.5 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded text-xs text-right font-mono outline-none focus:border-blue-500"
                           />
                         </td>
                         <td className="p-2">
@@ -406,7 +406,7 @@ export default function CreateDocumentPage() {
                             step="0.01"
                             value={item.unitPrice}
                             onChange={(e) => handleItemChange(idx, 'unitPrice', e.target.value)}
-                            className="w-full px-2 py-1.5 border border-slate-300 rounded text-xs text-right font-mono outline-none focus:border-blue-500"
+                            className="w-full px-2 py-1.5 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded text-xs text-right font-mono outline-none focus:border-blue-500"
                           />
                         </td>
                         <td className="p-2">
@@ -415,17 +415,17 @@ export default function CreateDocumentPage() {
                             step="0.01"
                             value={item.discount}
                             onChange={(e) => handleItemChange(idx, 'discount', e.target.value)}
-                            className="w-full px-2 py-1.5 border border-slate-300 rounded text-xs text-right font-mono outline-none focus:border-blue-500"
+                            className="w-full px-2 py-1.5 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded text-xs text-right font-mono outline-none focus:border-blue-500"
                           />
                         </td>
-                        <td className="p-3 text-right font-mono font-bold text-xs text-slate-800">
+                        <td className="p-3 text-right font-mono font-bold text-xs text-slate-800 dark:text-white">
                           ฿{rowTotal.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                         </td>
                         <td className="p-2 text-center">
                           <button
                             type="button"
                             onClick={() => handleRemoveItem(idx)}
-                            className="text-slate-400 hover:text-rose-600 transition-all"
+                            className="text-slate-400 dark:text-slate-500 hover:text-rose-600 dark:hover:text-rose-400 transition-all"
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
@@ -439,51 +439,51 @@ export default function CreateDocumentPage() {
           </div>
 
           {/* Summary & Notes */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-slate-100">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-slate-100 dark:border-slate-800">
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">หมายเหตุเพิ่มเติม (Notes)</label>
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">หมายเหตุเพิ่มเติม (Notes)</label>
               <textarea
                 rows={4}
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 placeholder="ระบุเงื่อนไขการชำระเงิน นโยบายการรับประกันสินค้า..."
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs outline-none focus:border-blue-500"
+                className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 rounded-lg text-xs outline-none focus:border-blue-500"
               />
             </div>
 
-            <div className="bg-slate-50 p-4 rounded-xl space-y-2 border border-slate-200/80 text-xs">
-              <div className="flex justify-between text-slate-600">
+            <div className="bg-slate-50 dark:bg-slate-800/60 p-4 rounded-xl space-y-2 border border-slate-200/80 dark:border-slate-800 text-xs">
+              <div className="flex justify-between text-slate-600 dark:text-slate-400">
                 <span>ยอดรวมสินค้า (Subtotal):</span>
-                <span className="font-mono font-bold">฿{subtotal.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                <span className="font-mono font-bold text-slate-900 dark:text-white">฿{subtotal.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
               </div>
 
               <div className="flex items-center justify-between gap-4">
-                <span className="text-slate-600">ส่วนลดการค้า (Discount):</span>
+                <span className="text-slate-600 dark:text-slate-400">ส่วนลดการค้า (Discount):</span>
                 <div className="flex items-center gap-1">
-                  <span>฿</span>
+                  <span className="text-slate-600 dark:text-slate-400">฿</span>
                   <input
                     type="number"
                     step="0.01"
                     value={discount}
                     onChange={(e) => setDiscount(e.target.value)}
-                    className="w-24 px-2 py-1 border border-slate-300 rounded text-right font-mono font-bold text-rose-600"
+                    className="w-24 px-2 py-1 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 rounded text-right font-mono font-bold text-rose-600 dark:text-rose-400"
                   />
                 </div>
               </div>
 
-              <div className="flex justify-between text-slate-600 pt-1 border-t border-slate-200">
-                <span className="font-bold text-slate-900 text-sm">ยอดเงินรวมทั้งสิ้น (Grand Total):</span>
-                <span className="font-mono font-black text-blue-600 text-base">
+              <div className="flex justify-between text-slate-600 dark:text-slate-400 pt-1 border-t border-slate-200 dark:border-slate-700">
+                <span className="font-bold text-slate-900 dark:text-white text-sm">ยอดเงินรวมทั้งสิ้น (Grand Total):</span>
+                <span className="font-mono font-black text-blue-600 dark:text-blue-400 text-base">
                   ฿{grandTotal.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                 </span>
               </div>
             </div>
           </div>
 
-          <div className="flex justify-end gap-3 pt-4 border-t border-slate-200">
+          <div className="flex justify-end gap-3 pt-4 border-t border-slate-200 dark:border-slate-800">
             <Link
               href="/documents"
-              className="px-5 py-2.5 border border-slate-300 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-50"
+              className="px-5 py-2.5 border border-slate-300 dark:border-slate-700 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800"
             >
               ยกเลิก
             </Link>
@@ -502,8 +502,8 @@ export default function CreateDocumentPage() {
       {/* Quick Add Partner / Customer Modal */}
       {showPartnerModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4">
-          <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-lg overflow-hidden">
-            <div className="bg-slate-900 text-white px-6 py-4 flex items-center justify-between">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 w-full max-w-lg overflow-hidden text-slate-900 dark:text-white">
+            <div className="bg-slate-900 text-white px-6 py-4 flex items-center justify-between border-b border-slate-800">
               <h3 className="font-bold text-base flex items-center gap-2">
                 <UserPlus className="w-5 h-5 text-blue-400" />
                 <span>{partnerType === 'CUSTOMER' ? 'เพิ่มข้อมูลลูกค้าใหม่' : 'เพิ่มซัพพลายเออร์ใหม่'}</span>
@@ -519,101 +519,101 @@ export default function CreateDocumentPage() {
 
             <form onSubmit={handleCreatePartner} className="p-6 space-y-4 text-xs">
               {partnerModalError && (
-                <div className="bg-rose-50 border border-rose-200 text-rose-700 p-3 rounded-lg flex items-center gap-2">
-                  <AlertCircle className="w-4 h-4 shrink-0" />
+                <div className="bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300 p-3 rounded-lg flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 shrink-0 text-rose-600 dark:text-rose-400" />
                   <span>{partnerModalError}</span>
                 </div>
               )}
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">รหัส {partnerType === 'CUSTOMER' ? 'ลูกค้า' : 'ซัพพลายเออร์'} *</label>
+                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">รหัส {partnerType === 'CUSTOMER' ? 'ลูกค้า' : 'ซัพพลายเออร์'} *</label>
                   <input
                     type="text"
                     required
                     value={partnerCode}
                     onChange={(e) => setPartnerCode(e.target.value.toUpperCase())}
                     placeholder="เช่น CUST-001"
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none font-mono uppercase focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg outline-none font-mono uppercase focus:border-blue-500"
                   />
                 </div>
 
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">เลขประจำตัวผู้เสียภาษี (13 หลัก)</label>
+                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">เลขประจำตัวผู้เสียภาษี (13 หลัก)</label>
                   <input
                     type="text"
                     maxLength={13}
                     value={partnerTaxId}
                     onChange={(e) => setPartnerTaxId(e.target.value)}
                     placeholder="เลขผู้เสียภาษี..."
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none font-mono focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg outline-none font-mono focus:border-blue-500"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">ชื่อ {partnerType === 'CUSTOMER' ? 'ลูกค้า / บริษัทผู้สั่งซื้อ' : 'ซัพพลายเออร์ / ร้านค้า'} *</label>
+                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">ชื่อ {partnerType === 'CUSTOMER' ? 'ลูกค้า / บริษัทผู้สั่งซื้อ' : 'ซัพพลายเออร์ / ร้านค้า'} *</label>
                 <input
                   type="text"
                   required
                   value={partnerName}
                   onChange={(e) => setPartnerName(e.target.value)}
                   placeholder="เช่น บริษัท เอส แอนด์ บี อิเล็กทรอนิกส์ จำกัด หรือ นายสมชาย สายตรง"
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none font-bold text-slate-900 focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg outline-none font-bold focus:border-blue-500"
                 />
               </div>
 
               <div className="grid grid-cols-3 gap-3">
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">ชื่อผู้ติดต่อ</label>
+                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">ชื่อผู้ติดต่อ</label>
                   <input
                     type="text"
                     value={partnerContactPerson}
                     onChange={(e) => setPartnerContactPerson(e.target.value)}
                     placeholder="ชื่อผู้ติดต่อ..."
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg outline-none focus:border-blue-500"
                   />
                 </div>
 
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">เบอร์โทรศัพท์</label>
+                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">เบอร์โทรศัพท์</label>
                   <input
                     type="text"
                     value={partnerPhone}
                     onChange={(e) => setPartnerPhone(e.target.value)}
                     placeholder="081-234-5678"
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg outline-none focus:border-blue-500"
                   />
                 </div>
 
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">อีเมล</label>
+                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">อีเมล</label>
                   <input
                     type="email"
                     value={partnerEmail}
                     onChange={(e) => setPartnerEmail(e.target.value)}
                     placeholder="contact@company.com"
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg outline-none focus:border-blue-500"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">ที่อยู่ (ที่อยู่ออกใบกำกับภาษี / ที่อยู่จัดส่ง)</label>
+                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">ที่อยู่ (ที่อยู่ออกใบกำกับภาษี / ที่อยู่จัดส่ง)</label>
                 <textarea
                   rows={2}
                   value={partnerAddress}
                   onChange={(e) => setPartnerAddress(e.target.value)}
                   placeholder="ระบุที่อยู่ เลขที่ ถนน แขวง/ตำบล เขต/อำเภอ จังหวัด..."
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg outline-none focus:border-blue-500"
                 />
               </div>
 
-              <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-3">
+              <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end gap-3">
                 <button
                   type="button"
                   onClick={() => setShowPartnerModal(false)}
-                  className="px-4 py-2 border border-slate-300 text-slate-600 rounded-lg font-semibold hover:bg-slate-50"
+                  className="px-4 py-2 border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-400 rounded-lg font-semibold hover:bg-slate-50 dark:hover:bg-slate-800"
                 >
                   ยกเลิก
                 </button>

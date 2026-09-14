@@ -73,19 +73,19 @@ export default function ARPage() {
   return (
     <div className="space-y-6 animate-in fade-in duration-200">
       {/* Header */}
-      <div className="border-b border-slate-200 pb-5">
-        <h1 className="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
-          <Landmark className="w-7 h-7 text-blue-600" />
+      <div className="border-b border-slate-200 dark:border-slate-800 pb-5">
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
+          <Landmark className="w-7 h-7 text-blue-600 dark:text-blue-400" />
           <span>บัญชีลูกหนี้การค้า & การรับชำระเงิน (Accounts Receivable - AR Workbench)</span>
         </h1>
-        <p className="text-sm text-slate-500 mt-1">
+        <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
           ระบบติดตามใบแจ้งหนี้ลูกหนี้การค้า รับชำระเงินเต็มจำนวน/ชำระบางส่วน (Partial Payment) และติดตามยอดคงค้าง
         </p>
       </div>
 
       {payMsg && (
-        <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 p-4 rounded-xl text-sm flex items-center gap-2 font-semibold">
-          <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+        <div className="bg-emerald-50 dark:bg-emerald-950/80 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 p-4 rounded-xl text-sm flex items-center gap-2 font-semibold">
+          <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0" />
           <span>{payMsg}</span>
         </div>
       )}
@@ -93,44 +93,44 @@ export default function ARPage() {
       {/* Summary Cards */}
       {summary && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs">
-            <p className="text-xs text-slate-500 font-semibold uppercase">ยอดตั้งหนี้ทั้งหมด (Total AR)</p>
-            <p className="text-xl font-bold text-slate-900 mt-1">฿{summary.totalAR.toLocaleString('th-TH')}</p>
+          <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs">
+            <p className="text-xs text-slate-500 dark:text-slate-400 font-semibold uppercase">ยอดตั้งหนี้ทั้งหมด (Total AR)</p>
+            <p className="text-xl font-bold text-slate-900 dark:text-white mt-1">฿{summary.totalAR.toLocaleString('th-TH')}</p>
           </div>
-          <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs">
-            <p className="text-xs text-slate-500 font-semibold uppercase">รับชำระแล้ว (Total Paid)</p>
-            <p className="text-xl font-bold text-emerald-600 mt-1">฿{summary.totalPaid.toLocaleString('th-TH')}</p>
+          <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs">
+            <p className="text-xs text-slate-500 dark:text-slate-400 font-semibold uppercase">รับชำระแล้ว (Total Paid)</p>
+            <p className="text-xl font-bold text-emerald-600 dark:text-emerald-400 mt-1">฿{summary.totalPaid.toLocaleString('th-TH')}</p>
           </div>
-          <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs">
-            <p className="text-xs text-slate-500 font-semibold uppercase">ยอดค้างชำระสุทธิ (Outstanding)</p>
-            <p className="text-xl font-bold text-rose-600 mt-1">฿{summary.totalOutstanding.toLocaleString('th-TH')}</p>
+          <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs">
+            <p className="text-xs text-slate-500 dark:text-slate-400 font-semibold uppercase">ยอดค้างชำระสุทธิ (Outstanding)</p>
+            <p className="text-xl font-bold text-rose-600 dark:text-rose-400 mt-1">฿{summary.totalOutstanding.toLocaleString('th-TH')}</p>
           </div>
-          <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs">
-            <p className="text-xs text-slate-500 font-semibold uppercase">จำนวนบิลรอรับชำระ</p>
-            <p className="text-xl font-bold text-amber-600 mt-1">{summary.unpaidCount} บิล</p>
+          <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs">
+            <p className="text-xs text-slate-500 dark:text-slate-400 font-semibold uppercase">จำนวนบิลรอรับชำระ</p>
+            <p className="text-xl font-bold text-amber-600 dark:text-amber-400 mt-1">{summary.unpaidCount} บิล</p>
           </div>
         </div>
       )}
 
       {/* Filter */}
-      <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs flex items-center justify-between">
+      <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs flex items-center justify-between">
         <div className="flex items-center gap-3 flex-1 max-w-md">
-          <Search className="w-4 h-4 text-slate-400" />
+          <Search className="w-4 h-4 text-slate-400 dark:text-slate-500" />
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="ค้นหาเลขที่บิล, ชื่อลูกค้า..."
-            className="w-full text-sm outline-none font-mono text-slate-800"
+            className="w-full text-sm outline-none font-mono bg-transparent text-slate-800 dark:text-white placeholder-slate-400 dark:placeholder-slate-500"
           />
         </div>
       </div>
 
       {/* AR Table */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
+      <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
-            <thead className="bg-slate-50 text-slate-600 uppercase font-bold border-b border-slate-200">
+            <thead className="bg-slate-50 dark:bg-slate-800/60 text-slate-600 dark:text-slate-400 uppercase font-bold border-b border-slate-200 dark:border-slate-800">
               <tr>
                 <th className="p-3">เลขที่เอกสาร</th>
                 <th className="p-3">ชื่อลูกค้า / สาขา</th>
@@ -141,39 +141,39 @@ export default function ARPage() {
                 <th className="p-3 text-center">รับชำระเงิน</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 font-mono">
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-800 font-mono">
               {loading ? (
                 <tr>
-                  <td colSpan={7} className="text-center py-8 text-slate-400">
+                  <td colSpan={7} className="text-center py-8 text-slate-400 dark:text-slate-500">
                     กำลังโหลดข้อมูลลูกหนี้การค้า...
                   </td>
                 </tr>
               ) : items.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="text-center py-8 text-slate-400">
+                  <td colSpan={7} className="text-center py-8 text-slate-400 dark:text-slate-500">
                     ไม่พบรายการลูกหนี้การค้า
                   </td>
                 </tr>
               ) : (
                 items.map((item) => (
-                  <tr key={item.id} className="hover:bg-slate-50">
-                    <td className="p-3 font-bold text-blue-600">
+                  <tr key={item.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-all">
+                    <td className="p-3 font-bold text-blue-600 dark:text-blue-400">
                       <Link href={`/documents?search=${item.documentNo}`} className="hover:underline">
                         {item.documentNo}
                       </Link>
                     </td>
-                    <td className="p-3 font-sans font-semibold text-slate-800">{item.customerName}</td>
-                    <td className="p-3 text-right font-bold text-slate-900">฿{item.grandTotal.toLocaleString('th-TH')}</td>
-                    <td className="p-3 text-right text-emerald-600">฿{item.paidAmount.toLocaleString('th-TH')}</td>
-                    <td className="p-3 text-right font-bold text-rose-600">฿{item.dueAmount.toLocaleString('th-TH')}</td>
+                    <td className="p-3 font-sans font-semibold text-slate-800 dark:text-slate-200">{item.customerName}</td>
+                    <td className="p-3 text-right font-bold text-slate-900 dark:text-white">฿{item.grandTotal.toLocaleString('th-TH')}</td>
+                    <td className="p-3 text-right text-emerald-600 dark:text-emerald-400">฿{item.paidAmount.toLocaleString('th-TH')}</td>
+                    <td className="p-3 text-right font-bold text-rose-600 dark:text-rose-400">฿{item.dueAmount.toLocaleString('th-TH')}</td>
                     <td className="p-3 text-center font-sans">
                       <span
                         className={`px-2 py-0.5 rounded text-[10px] font-bold border ${
                           item.status === 'PAID'
-                            ? 'bg-emerald-100 text-emerald-700 border-emerald-200'
+                            ? 'bg-emerald-50 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800'
                             : item.status === 'PARTIAL'
-                            ? 'bg-amber-100 text-amber-700 border-amber-200'
-                            : 'bg-rose-100 text-rose-700 border-rose-200'
+                            ? 'bg-amber-50 dark:bg-amber-950/80 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800'
+                            : 'bg-rose-50 dark:bg-rose-950/80 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-800'
                         }`}
                       >
                         {item.status === 'PAID' ? 'ชำระแล้ว' : item.status === 'PARTIAL' ? 'ชำระบางส่วน' : 'รอชำระ'}
@@ -203,22 +203,22 @@ export default function ARPage() {
 
       {/* Record Payment Modal */}
       {selectedDoc && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4">
-          <div className="bg-white rounded-2xl shadow-xl border border-slate-200 w-full max-w-md p-6 space-y-4 text-xs">
-            <h3 className="text-base font-bold text-slate-900 border-b border-slate-100 pb-3 flex items-center gap-2">
-              <CircleDollarSign className="w-5 h-5 text-emerald-600" />
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 dark:bg-slate-950/80 backdrop-blur-xs p-4">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-800 w-full max-w-md p-6 space-y-4 text-xs">
+            <h3 className="text-base font-bold text-slate-900 dark:text-white border-b border-slate-100 dark:border-slate-800 pb-3 flex items-center gap-2">
+              <CircleDollarSign className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
               <span>บันทึกการรับชำระเงิน: [{selectedDoc.documentNo}]</span>
             </h3>
 
             <form onSubmit={handleRecordPayment} className="space-y-4">
-              <div className="bg-slate-50 p-3 rounded-xl space-y-1">
-                <p className="text-slate-500">ลูกค้า: <strong className="text-slate-900">{selectedDoc.customerName}</strong></p>
-                <p className="text-slate-500">ยอดรวมบิล: <strong className="text-slate-900">฿{selectedDoc.grandTotal.toLocaleString('th-TH')}</strong></p>
-                <p className="text-rose-600 font-bold">ยอดค้างชำระปัจจุบัน: ฿{selectedDoc.dueAmount.toLocaleString('th-TH')}</p>
+              <div className="bg-slate-50 dark:bg-slate-800/60 p-3 rounded-xl space-y-1 border border-slate-100 dark:border-slate-800">
+                <p className="text-slate-500 dark:text-slate-400">ลูกค้า: <strong className="text-slate-900 dark:text-white">{selectedDoc.customerName}</strong></p>
+                <p className="text-slate-500 dark:text-slate-400">ยอดรวมบิล: <strong className="text-slate-900 dark:text-white">฿{selectedDoc.grandTotal.toLocaleString('th-TH')}</strong></p>
+                <p className="text-rose-600 dark:text-rose-400 font-bold">ยอดค้างชำระปัจจุบัน: ฿{selectedDoc.dueAmount.toLocaleString('th-TH')}</p>
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">จำนวนเงินที่รับชำระ (บาท) *</label>
+                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">จำนวนเงินที่รับชำระ (บาท) *</label>
                 <input
                   type="number"
                   step="0.01"
@@ -226,17 +226,17 @@ export default function ARPage() {
                   required
                   value={payAmount}
                   onChange={(e) => setPayAmount(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none font-mono font-bold text-base text-emerald-600"
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-lg outline-none font-mono font-bold text-base text-emerald-600 dark:text-emerald-400 focus:border-emerald-500"
                 />
-                <span className="text-[11px] text-slate-400 mt-1 block">* ระบุจำนวนเงินเต็ม หรือระบุเพื่อชำระบางส่วน (Partial)</span>
+                <span className="text-[11px] text-slate-400 dark:text-slate-500 mt-1 block">* ระบุจำนวนเงินเต็ม หรือระบุเพื่อชำระบางส่วน (Partial)</span>
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">ช่องทางชำระเงิน</label>
+                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">ช่องทางชำระเงิน</label>
                 <select
                   value={payMethod}
                   onChange={(e) => setPayMethod(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none font-semibold"
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg outline-none bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-semibold focus:border-emerald-500"
                 >
                   <option value="BANK_TRANSFER">โอนเงินผ่านธนาคาร (Bank Transfer)</option>
                   <option value="CASH">เงินสด (Cash)</option>
@@ -245,21 +245,21 @@ export default function ARPage() {
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">หมายเหตุ</label>
+                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">หมายเหตุ</label>
                 <input
                   type="text"
                   value={payNotes}
                   onChange={(e) => setPayNotes(e.target.value)}
                   placeholder="เช่น สลิปโอนเงิน KBANK, อ้างอิงใบเสร็จ..."
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none"
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg outline-none bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:border-emerald-500"
                 />
               </div>
 
-              <div className="flex justify-end gap-2 pt-2">
+              <div className="flex justify-end gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
                 <button
                   type="button"
                   onClick={() => setSelectedDoc(null)}
-                  className="px-4 py-2 border border-slate-300 rounded-lg text-slate-600 font-semibold"
+                  className="px-4 py-2 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-semibold"
                 >
                   ยกเลิก
                 </button>

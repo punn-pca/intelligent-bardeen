@@ -155,29 +155,29 @@ export default function StockAuditWorkstationPage({ params }: { params: { id: st
   return (
     <div className="space-y-6 animate-in fade-in duration-200">
       {/* Top Header Navigation */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-5">
         <div>
           <Link
             href="/stock-audit"
-            className="text-xs text-indigo-600 font-semibold hover:underline flex items-center gap-1 mb-2"
+            className="text-xs text-indigo-600 dark:text-indigo-400 font-semibold hover:underline flex items-center gap-1 mb-2"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
             <span>กลับไปรายการรอบนับสต็อก</span>
           </Link>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
-            <ClipboardList className="w-7 h-7 text-indigo-600" />
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
+            <ClipboardList className="w-7 h-7 text-indigo-600 dark:text-indigo-400" />
             <span>รอบนับสต็อก: {audit.auditNo}</span>
             <span
               className={`text-xs px-3 py-1 rounded-full font-bold border ${
                 audit.status === 'COMPLETED'
-                  ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                  : 'bg-amber-50 text-amber-700 border-amber-200'
+                  ? 'bg-emerald-50 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800'
+                  : 'bg-amber-50 dark:bg-amber-950/80 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800'
               }`}
             >
               {audit.status}
             </span>
           </h1>
-          <p className="text-xs text-slate-500 mt-1">
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
             คลัง: <strong>{audit.warehouse.code} - {audit.warehouse.name}</strong> | เริ่มเมื่อ:{' '}
             {new Date(audit.startedAt).toLocaleString('th-TH')}
           </p>
@@ -196,7 +196,7 @@ export default function StockAuditWorkstationPage({ params }: { params: { id: st
       </div>
 
       {errorMsg && (
-        <div className="bg-rose-50 border border-rose-200 text-rose-700 p-3.5 rounded-lg text-sm flex items-center gap-2">
+        <div className="bg-rose-50 dark:bg-rose-950/80 border border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300 p-3.5 rounded-lg text-sm flex items-center gap-2">
           <AlertTriangle className="w-5 h-5 shrink-0" />
           <span>{errorMsg}</span>
         </div>
@@ -204,7 +204,7 @@ export default function StockAuditWorkstationPage({ params }: { params: { id: st
 
       {/* Barcode Scanner Input Bar */}
       {audit.status === 'IN_PROGRESS' && (
-        <div className="bg-slate-900 text-white p-4 rounded-2xl shadow-md space-y-2">
+        <div className="bg-slate-900 dark:bg-slate-900 border border-slate-800 text-white p-4 rounded-2xl shadow-md space-y-2">
           <form onSubmit={handleBarcodeSubmit} className="flex items-center gap-3">
             <div className="w-9 h-9 bg-indigo-600 rounded-xl flex items-center justify-center shrink-0">
               <QrCode className="w-5 h-5 text-white" />
@@ -235,36 +235,36 @@ export default function StockAuditWorkstationPage({ params }: { params: { id: st
 
       {/* Summary Variance Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs">
-          <p className="text-xs font-semibold text-slate-500">สต็อกในระบบรวม (System)</p>
-          <p className="text-xl font-bold font-mono text-slate-900 mt-1">{totalSystemQty.toLocaleString()} ชิ้น</p>
+        <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs">
+          <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">สต็อกในระบบรวม (System)</p>
+          <p className="text-xl font-bold font-mono text-slate-900 dark:text-white mt-1">{totalSystemQty.toLocaleString()} ชิ้น</p>
         </div>
 
-        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs">
-          <p className="text-xs font-semibold text-slate-500">นับได้จริงรวม (Counted)</p>
-          <p className="text-xl font-bold font-mono text-indigo-600 mt-1">{totalCountedQty.toLocaleString()} ชิ้น</p>
+        <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs">
+          <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">นับได้จริงรวม (Counted)</p>
+          <p className="text-xl font-bold font-mono text-indigo-600 dark:text-indigo-400 mt-1">{totalCountedQty.toLocaleString()} ชิ้น</p>
         </div>
 
-        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs">
-          <p className="text-xs font-semibold text-slate-500">ผลต่างรวม (Variance Qty)</p>
+        <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs">
+          <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">ผลต่างรวม (Variance Qty)</p>
           <p
             className={`text-xl font-bold font-mono mt-1 ${
               totalVarianceQty < 0
-                ? 'text-rose-600'
+                ? 'text-rose-600 dark:text-rose-400'
                 : totalVarianceQty > 0
-                ? 'text-emerald-600'
-                : 'text-slate-900'
+                ? 'text-emerald-600 dark:text-emerald-400'
+                : 'text-slate-900 dark:text-white'
             }`}
           >
             {totalVarianceQty > 0 ? `+${totalVarianceQty.toLocaleString()}` : totalVarianceQty.toLocaleString()} ชิ้น
           </p>
         </div>
 
-        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs">
-          <p className="text-xs font-semibold text-slate-500">มูลค่าผลต่างรวม (Variance Value)</p>
+        <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs">
+          <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">มูลค่าผลต่างรวม (Variance Value)</p>
           <p
             className={`text-xl font-bold font-mono mt-1 ${
-              totalVarianceValue < 0 ? 'text-rose-600' : 'text-emerald-600'
+              totalVarianceValue < 0 ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'
             }`}
           >
             ฿{totalVarianceValue.toLocaleString(undefined, { minimumFractionDigits: 2 })}
@@ -273,25 +273,25 @@ export default function StockAuditWorkstationPage({ params }: { params: { id: st
       </div>
 
       {/* Filter and Search Bar */}
-      <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs flex flex-wrap items-center justify-between gap-4">
+      <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-3 flex-1 min-w-[240px]">
-          <Search className="w-4 h-4 text-slate-400" />
+          <Search className="w-4 h-4 text-slate-400 shrink-0" />
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="ค้นหา SKU, บาร์โค้ด, หรือชื่อสินค้าในตารางนับสต็อก..."
-            className="w-full text-xs outline-none text-slate-800 font-mono placeholder-slate-400"
+            className="w-full text-xs outline-none text-slate-800 dark:text-white bg-transparent font-mono placeholder-slate-400 dark:placeholder-slate-500"
           />
         </div>
 
         <div className="flex items-center gap-3">
-          <label className="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer">
+          <label className="flex items-center gap-2 text-xs font-semibold text-slate-700 dark:text-slate-300 cursor-pointer">
             <input
               type="checkbox"
               checked={filterVarianceOnly}
               onChange={(e) => setFilterVarianceOnly(e.target.checked)}
-              className="rounded text-indigo-600"
+              className="rounded text-indigo-600 focus:ring-indigo-500 bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-700"
             />
             <span>แสดงเฉพาะรายการที่มีผลต่าง (Variance ≠ 0)</span>
           </label>
@@ -299,10 +299,10 @@ export default function StockAuditWorkstationPage({ params }: { params: { id: st
       </div>
 
       {/* Items Count Table */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
+      <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
-            <thead className="bg-slate-50 text-slate-500 uppercase text-xs border-b border-slate-200">
+            <thead className="bg-slate-50 dark:bg-slate-800/60 text-slate-500 dark:text-slate-400 uppercase text-xs border-b border-slate-200 dark:border-slate-800">
               <tr>
                 <th className="p-4">SKU / บาร์โค้ด</th>
                 <th className="p-4">รายการสินค้า</th>
@@ -313,10 +313,10 @@ export default function StockAuditWorkstationPage({ params }: { params: { id: st
                 <th className="p-4 text-right">มูลค่าผลต่าง</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
               {filteredItems.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="text-center py-8 text-slate-400">
+                  <td colSpan={7} className="text-center py-8 text-slate-400 dark:text-slate-500">
                     ไม่พบรายการสินค้าที่ค้นหา
                   </td>
                 </tr>
@@ -327,16 +327,16 @@ export default function StockAuditWorkstationPage({ params }: { params: { id: st
                   return (
                     <tr
                       key={item.id}
-                      className={`hover:bg-slate-50/80 transition-all ${
-                        isVar ? 'bg-amber-50/40' : ''
+                      className={`hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-all ${
+                        isVar ? 'bg-amber-50/40 dark:bg-amber-950/20' : ''
                       }`}
                     >
-                      <td className="p-4 font-mono font-bold text-slate-900 text-xs">
+                      <td className="p-4 font-mono font-bold text-slate-900 dark:text-white text-xs">
                         <p>{item.product.sku}</p>
-                        <p className="text-[10px] text-slate-400">{item.product.barcode}</p>
+                        <p className="text-[10px] text-slate-400 dark:text-slate-500">{item.product.barcode}</p>
                       </td>
-                      <td className="p-4 font-semibold text-slate-800 text-xs">{item.product.name}</td>
-                      <td className="p-4 text-right font-mono text-xs text-slate-600">
+                      <td className="p-4 font-semibold text-slate-800 dark:text-slate-200 text-xs">{item.product.name}</td>
+                      <td className="p-4 text-right font-mono text-xs text-slate-600 dark:text-slate-300">
                         {item.systemQty.toLocaleString()} {item.product.unit}
                       </td>
                       <td className="p-4 text-right">
@@ -346,10 +346,10 @@ export default function StockAuditWorkstationPage({ params }: { params: { id: st
                             min="0"
                             value={item.countedQty}
                             onChange={(e) => handleCountChange(item.productId, parseInt(e.target.value) || 0)}
-                            className="w-24 px-2.5 py-1.5 border border-slate-300 rounded-lg text-right font-mono font-bold text-xs text-indigo-600 bg-white outline-none focus:border-indigo-500 shadow-2xs"
+                            className="w-24 px-2.5 py-1.5 border border-slate-300 dark:border-slate-700 rounded-lg text-right font-mono font-bold text-xs text-indigo-600 dark:text-indigo-400 bg-white dark:bg-slate-800 outline-none focus:border-indigo-500 shadow-2xs"
                           />
                         ) : (
-                          <span className="font-mono font-bold text-xs text-indigo-600">
+                          <span className="font-mono font-bold text-xs text-indigo-600 dark:text-indigo-400">
                             {item.countedQty.toLocaleString()} {item.product.unit}
                           </span>
                         )}
@@ -358,21 +358,21 @@ export default function StockAuditWorkstationPage({ params }: { params: { id: st
                         <span
                           className={`px-2 py-0.5 rounded ${
                             item.varianceQty < 0
-                              ? 'bg-rose-100 text-rose-700'
+                              ? 'bg-rose-100 dark:bg-rose-950/80 text-rose-700 dark:text-rose-300'
                               : item.varianceQty > 0
-                              ? 'bg-emerald-100 text-emerald-700'
-                              : 'text-slate-400'
+                              ? 'bg-emerald-100 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300'
+                              : 'text-slate-400 dark:text-slate-500'
                           }`}
                         >
                           {item.varianceQty > 0 ? `+${item.varianceQty}` : item.varianceQty}
                         </span>
                       </td>
-                      <td className="p-4 text-right font-mono text-xs text-slate-500">
+                      <td className="p-4 text-right font-mono text-xs text-slate-500 dark:text-slate-400">
                         ฿{item.unitCost.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                       </td>
                       <td
                         className={`p-4 text-right font-mono font-bold text-xs ${
-                          item.varianceValue < 0 ? 'text-rose-600' : item.varianceValue > 0 ? 'text-emerald-600' : 'text-slate-400'
+                          item.varianceValue < 0 ? 'text-rose-600 dark:text-rose-400' : item.varianceValue > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400 dark:text-slate-500'
                         }`}
                       >
                         ฿{item.varianceValue.toLocaleString(undefined, { minimumFractionDigits: 2 })}

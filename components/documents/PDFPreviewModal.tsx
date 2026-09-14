@@ -60,16 +60,16 @@ export default function PDFPreviewModal({ document, onClose }: PDFPreviewModalPr
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 animate-in fade-in duration-200">
-      <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden">
+      <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden text-slate-900 dark:text-white">
         {/* Header */}
-        <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+        <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-slate-800/80">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center">
+            <div className="w-10 h-10 bg-blue-100 dark:bg-blue-950/80 text-blue-600 dark:text-blue-400 rounded-xl flex items-center justify-center">
               <FileText className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-slate-900">{document.documentNo} - PDF Preview</h2>
-              <p className="text-xs text-slate-500">{document.documentType} ({document.status})</p>
+              <h2 className="text-lg font-bold text-slate-900 dark:text-white">{document.documentNo} - PDF Preview</h2>
+              <p className="text-xs text-slate-500 dark:text-slate-400">{document.documentType} ({document.status})</p>
             </div>
           </div>
 
@@ -92,7 +92,7 @@ export default function PDFPreviewModal({ document, onClose }: PDFPreviewModalPr
 
             <button
               onClick={onClose}
-              className="p-2 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-200/50 transition-all"
+              className="p-2 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 rounded-lg hover:bg-slate-200/50 dark:hover:bg-slate-800 transition-all"
             >
               <X className="w-5 h-5" />
             </button>
@@ -100,7 +100,7 @@ export default function PDFPreviewModal({ document, onClose }: PDFPreviewModalPr
         </div>
 
         {/* Live HTML Document Preview Frame */}
-        <div className="flex-1 p-6 bg-slate-100 overflow-y-auto">
+        <div className="flex-1 p-6 bg-slate-100 dark:bg-slate-950 overflow-y-auto">
           <div className="bg-white shadow-md rounded-xl p-6 border border-slate-200 max-w-3xl mx-auto">
             <iframe
               srcDoc={htmlContent}

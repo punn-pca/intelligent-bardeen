@@ -54,13 +54,13 @@ export default function ReportsPage() {
   return (
     <div className="space-y-6 animate-in fade-in duration-200">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-5">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
-            <FileBarChart className="w-7 h-7 text-emerald-600" />
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
+            <FileBarChart className="w-7 h-7 text-emerald-600 dark:text-emerald-400" />
             <span>รายงานสรุปสต็อกสินค้า (Inventory Reports)</span>
           </h1>
-          <p className="text-sm text-slate-500 mt-1">รายงานสรุปมูลค่าสต็อก สินค้าใกล้หมด สต็อกแยกตามคลัง และการส่งออกข้อมูลเป็น CSV / Excel</p>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">รายงานสรุปมูลค่าสต็อก สินค้าใกล้หมด สต็อกแยกตามคลัง และการส่งออกข้อมูลเป็น CSV / Excel</p>
         </div>
 
         <button
@@ -73,7 +73,7 @@ export default function ReportsPage() {
       </div>
 
       {/* Report Type Tabs */}
-      <div className="flex flex-wrap items-center gap-2 bg-slate-100 p-1.5 rounded-xl border border-slate-200">
+      <div className="flex flex-wrap items-center gap-2 bg-slate-100 dark:bg-slate-900 p-1.5 rounded-xl border border-slate-200 dark:border-slate-800">
         {[
           { id: 'valuation', label: '1. Inventory Valuation (มูลค่าสต็อก)' },
           { id: 'current', label: '2. Current Stock Report (สต็อกปัจจุบัน)' },
@@ -85,8 +85,8 @@ export default function ReportsPage() {
             onClick={() => setReportType(tab.id)}
             className={`px-4 py-2 rounded-lg text-xs font-semibold transition-all ${
               reportType === tab.id
-                ? 'bg-white text-emerald-700 shadow-xs'
-                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
+                ? 'bg-white dark:bg-slate-800 text-emerald-700 dark:text-emerald-400 shadow-xs'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/60 dark:hover:bg-slate-800/60'
             }`}
           >
             {tab.label}
@@ -95,12 +95,12 @@ export default function ReportsPage() {
       </div>
 
       {/* Filter Bar */}
-      <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs flex items-center gap-4">
-        <Filter className="w-4 h-4 text-slate-400" />
+      <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs flex items-center gap-4">
+        <Filter className="w-4 h-4 text-slate-400 dark:text-slate-500" />
         <select
           value={selectedWarehouse}
           onChange={(e) => setSelectedWarehouse(e.target.value)}
-          className="text-xs border border-slate-300 rounded-lg px-3 py-2 bg-slate-50 outline-none"
+          className="text-xs border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white outline-none"
         >
           <option value="">ทุกคลังสินค้า</option>
           {warehouses.map((w) => (
@@ -113,7 +113,7 @@ export default function ReportsPage() {
         <select
           value={selectedCategory}
           onChange={(e) => setSelectedCategory(e.target.value)}
-          className="text-xs border border-slate-300 rounded-lg px-3 py-2 bg-slate-50 outline-none"
+          className="text-xs border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white outline-none"
         >
           <option value="">ทุกหมวดหมู่</option>
           {categories.map((c) => (
@@ -127,17 +127,17 @@ export default function ReportsPage() {
       {/* Summary Banner */}
       {reportData && (
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs">
-            <p className="text-xs text-slate-500 font-semibold uppercase">จำนวนรายการในรายงาน</p>
-            <p className="text-xl font-bold text-slate-900 mt-1">{reportData.totalItems} รายการ</p>
+          <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs">
+            <p className="text-xs text-slate-500 dark:text-slate-400 font-semibold uppercase">จำนวนรายการในรายงาน</p>
+            <p className="text-xl font-bold text-slate-900 dark:text-white mt-1">{reportData.totalItems} รายการ</p>
           </div>
-          <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs">
-            <p className="text-xs text-slate-500 font-semibold uppercase">จำนวนชิ้นรวม (On Hand)</p>
-            <p className="text-xl font-bold text-slate-900 mt-1">{reportData.totalOnHand} ชิ้น</p>
+          <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs">
+            <p className="text-xs text-slate-500 dark:text-slate-400 font-semibold uppercase">จำนวนชิ้นรวม (On Hand)</p>
+            <p className="text-xl font-bold text-slate-900 dark:text-white mt-1">{reportData.totalOnHand} ชิ้น</p>
           </div>
-          <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs">
-            <p className="text-xs text-slate-500 font-semibold uppercase">มูลค่าสต็อกรวม</p>
-            <p className="text-xl font-bold text-emerald-600 mt-1">
+          <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs">
+            <p className="text-xs text-slate-500 dark:text-slate-400 font-semibold uppercase">มูลค่าสต็อกรวม</p>
+            <p className="text-xl font-bold text-emerald-600 dark:text-emerald-400 mt-1">
               ฿{reportData.totalValuation.toLocaleString('th-TH')}
             </p>
           </div>
@@ -145,10 +145,10 @@ export default function ReportsPage() {
       )}
 
       {/* Report Results Table */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
+      <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
-            <thead className="bg-slate-50 text-slate-500 uppercase text-xs border-b border-slate-200">
+            <thead className="bg-slate-50 dark:bg-slate-800/60 text-slate-500 dark:text-slate-400 uppercase text-xs border-b border-slate-200 dark:border-slate-800">
               <tr>
                 <th className="p-4">SKU</th>
                 <th className="p-4">Barcode</th>
@@ -162,41 +162,41 @@ export default function ReportsPage() {
                 <th className="p-4">สถานะ</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
               {loading ? (
                 <tr>
-                  <td colSpan={10} className="text-center py-8 text-slate-400">
+                  <td colSpan={10} className="text-center py-8 text-slate-400 dark:text-slate-500">
                     กำลังสร้างรายงาน...
                   </td>
                 </tr>
               ) : !reportData || reportData.rows.length === 0 ? (
                 <tr>
-                  <td colSpan={10} className="text-center py-8 text-slate-400">
+                  <td colSpan={10} className="text-center py-8 text-slate-400 dark:text-slate-500">
                     ไม่พบข้อมูลสำหรับรายงานนี้
                   </td>
                 </tr>
               ) : (
                 reportData.rows.map((row: any, idx: number) => (
-                  <tr key={idx} className="hover:bg-slate-50/80 transition-all">
-                    <td className="p-4 font-mono font-semibold text-slate-900">{row.sku}</td>
-                    <td className="p-4 font-mono text-slate-500 text-xs">{row.barcode}</td>
-                    <td className="p-4 font-medium text-slate-800">{row.productName}</td>
-                    <td className="p-4 text-slate-600 text-xs">{row.category}</td>
-                    <td className="p-4 font-mono text-xs font-semibold text-slate-700">{row.warehouseCode}</td>
-                    <td className="p-4 text-right font-bold text-slate-900">{row.onHand}</td>
-                    <td className="p-4 text-right text-emerald-600 font-semibold">{row.available}</td>
-                    <td className="p-4 text-right font-mono text-slate-600">฿{row.costPrice.toLocaleString('th-TH')}</td>
-                    <td className="p-4 text-right font-mono font-bold text-emerald-700">
+                  <tr key={idx} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-all">
+                    <td className="p-4 font-mono font-semibold text-slate-900 dark:text-white">{row.sku}</td>
+                    <td className="p-4 font-mono text-slate-500 dark:text-slate-400 text-xs">{row.barcode}</td>
+                    <td className="p-4 font-medium text-slate-800 dark:text-slate-200">{row.productName}</td>
+                    <td className="p-4 text-slate-600 dark:text-slate-400 text-xs">{row.category}</td>
+                    <td className="p-4 font-mono text-xs font-semibold text-slate-700 dark:text-slate-300">{row.warehouseCode}</td>
+                    <td className="p-4 text-right font-bold text-slate-900 dark:text-white">{row.onHand}</td>
+                    <td className="p-4 text-right text-emerald-600 dark:text-emerald-400 font-semibold">{row.available}</td>
+                    <td className="p-4 text-right font-mono text-slate-600 dark:text-slate-400">฿{row.costPrice.toLocaleString('th-TH')}</td>
+                    <td className="p-4 text-right font-mono font-bold text-emerald-700 dark:text-emerald-300">
                       ฿{row.totalValuation.toLocaleString('th-TH')}
                     </td>
                     <td className="p-4">
                       <span
                         className={`px-2 py-0.5 rounded text-xs font-semibold border ${
                           row.status === 'OUT_OF_STOCK'
-                            ? 'bg-rose-50 text-rose-600 border-rose-200'
+                            ? 'bg-rose-50 dark:bg-rose-950/80 text-rose-600 dark:text-rose-300 border-rose-200 dark:border-rose-800'
                             : row.status === 'LOW_STOCK'
-                            ? 'bg-amber-50 text-amber-600 border-amber-200'
-                            : 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                            ? 'bg-amber-50 dark:bg-amber-950/80 text-amber-600 dark:text-amber-300 border-amber-200 dark:border-amber-800'
+                            : 'bg-emerald-50 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800'
                         }`}
                       >
                         {row.status}

@@ -125,13 +125,13 @@ export default function SuppliersPage() {
   return (
     <div className="space-y-6 animate-in fade-in duration-200">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-5">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
-            <Truck className="w-7 h-7 text-blue-600" />
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
+            <Truck className="w-7 h-7 text-blue-600 dark:text-blue-400" />
             <span>จัดการซัพพลายเออร์ (Supplier Management)</span>
           </h1>
-          <p className="text-sm text-slate-500 mt-1">
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
             ทะเบียนคู่ค้า/ผู้ขาย เลขประจำตัวผู้เสียภาษี ช่องทางติดต่อ ที่อยู่จดทะเบียน และดึงข้อมูลอัตโนมัติจากเลขนิติบุคคล 13 หลัก
           </p>
         </div>
@@ -163,24 +163,24 @@ export default function SuppliersPage() {
       </div>
 
       {/* Filter and Search Bar */}
-      <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs flex items-center justify-between gap-4">
+      <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800/80 shadow-xs flex items-center justify-between gap-4">
         <div className="flex items-center gap-3 flex-1 min-w-[260px]">
-          <Search className="w-4 h-4 text-slate-400" />
+          <Search className="w-4 h-4 text-slate-400 dark:text-slate-500" />
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="ค้นหาตามรหัสซัพพลายเออร์, ชื่อคู่ค้า, เลขผู้เสียภาษี, เบอร์โทร..."
-            className="w-full text-xs outline-none text-slate-800 font-mono placeholder-slate-400"
+            className="w-full text-xs outline-none text-slate-800 dark:text-slate-100 font-mono placeholder-slate-400 dark:placeholder-slate-500 bg-transparent"
           />
         </div>
       </div>
 
       {/* Suppliers Table */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
+      <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
-            <thead className="bg-slate-50 text-slate-500 uppercase text-xs border-b border-slate-200">
+            <thead className="bg-slate-50 dark:bg-slate-800/60 text-slate-500 dark:text-slate-400 uppercase text-xs border-b border-slate-200 dark:border-slate-800">
               <tr>
                 <th className="p-4">รหัสคู่ค้า</th>
                 <th className="p-4">ชื่อซัพพลายเออร์ / นิติบุคคล</th>
@@ -190,32 +190,32 @@ export default function SuppliersPage() {
                 <th className="p-4 text-center">จัดการ</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
               {loading ? (
                 <tr>
-                  <td colSpan={6} className="text-center py-8 text-slate-400">
+                  <td colSpan={6} className="text-center py-8 text-slate-400 dark:text-slate-500">
                     กำลังโหลดข้อมูลซัพพลายเออร์...
                   </td>
                 </tr>
               ) : suppliers.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="text-center py-8 text-slate-400">
+                  <td colSpan={6} className="text-center py-8 text-slate-400 dark:text-slate-500">
                     ยังไม่มีข้อมูลซัพพลายเออร์ในระบบ
                   </td>
                 </tr>
               ) : (
                 suppliers.map((s) => (
-                  <tr key={s.id} className="hover:bg-slate-50/80 transition-all">
-                    <td className="p-4 font-mono font-bold text-blue-600 text-xs">{s.code}</td>
-                    <td className="p-4 font-semibold text-slate-900 text-xs">
+                  <tr key={s.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-all">
+                    <td className="p-4 font-mono font-bold text-blue-600 dark:text-blue-400 text-xs">{s.code}</td>
+                    <td className="p-4 font-semibold text-slate-900 dark:text-white text-xs">
                       <p>{s.name}</p>
-                      <p className="text-[10px] text-slate-400 font-normal truncate max-w-xs">{s.address || '-'}</p>
+                      <p className="text-[10px] text-slate-400 dark:text-slate-500 font-normal truncate max-w-xs">{s.address || '-'}</p>
                     </td>
-                    <td className="p-4 font-mono text-xs text-slate-700">{s.taxId || '-'}</td>
-                    <td className="p-4 text-xs text-slate-700 font-medium">{s.contactPerson || '-'}</td>
-                    <td className="p-4 text-xs text-slate-600">
+                    <td className="p-4 font-mono text-xs text-slate-700 dark:text-slate-300">{s.taxId || '-'}</td>
+                    <td className="p-4 text-xs text-slate-700 dark:text-slate-300 font-medium">{s.contactPerson || '-'}</td>
+                    <td className="p-4 text-xs text-slate-600 dark:text-slate-400">
                       <p>{s.phone || '-'}</p>
-                      <p className="text-[10px] text-slate-400">{s.email || ''}</p>
+                      <p className="text-[10px] text-slate-400 dark:text-slate-500">{s.email || ''}</p>
                     </td>
                     <td className="p-4 text-center">
                       {canEdit && (
@@ -236,7 +236,7 @@ export default function SuppliersPage() {
                             setErrorMsg('');
                             setShowModal(true);
                           }}
-                          className="p-1.5 text-slate-500 hover:text-blue-600 inline-block transition-colors"
+                          className="p-1.5 text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 inline-block transition-colors"
                         >
                           <Edit2 className="w-4 h-4" />
                         </button>
@@ -252,24 +252,24 @@ export default function SuppliersPage() {
 
       {/* Add / Edit Supplier Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4">
-          <div className="bg-white rounded-2xl shadow-xl border border-slate-200 w-full max-w-xl p-6 space-y-4">
-            <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2 border-b border-slate-100 pb-3">
-              <Truck className="w-5 h-5 text-blue-600" />
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-800 w-full max-w-xl p-6 space-y-4 text-slate-900 dark:text-white">
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-3">
+              <Truck className="w-5 h-5 text-blue-600 dark:text-blue-400" />
               <span>{editingId ? 'แก้ไขข้อมูลซัพพลายเออร์' : 'เพิ่มซัพพลายเออร์ใหม่'}</span>
             </h3>
 
             {errorMsg && (
-              <div className="bg-rose-50 border border-rose-200 text-rose-700 p-3 rounded-lg text-xs flex items-center gap-2">
-                <AlertCircle className="w-4 h-4 shrink-0" />
+              <div className="bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300 p-3 rounded-lg text-xs flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 shrink-0 text-rose-600 dark:text-rose-400" />
                 <span>{errorMsg}</span>
               </div>
             )}
 
             {/* Corporate Tax ID Quick Lookup Bar */}
-            <div className="bg-blue-50/70 border border-blue-200 p-3.5 rounded-xl space-y-2">
-              <label className="block text-xs font-bold text-blue-900 flex items-center gap-1.5">
-                <Building2 className="w-4 h-4 text-blue-600" />
+            <div className="bg-blue-50/70 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 p-3.5 rounded-xl space-y-2">
+              <label className="block text-xs font-bold text-blue-900 dark:text-blue-300 flex items-center gap-1.5">
+                <Building2 className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                 <span>ดึงข้อมูลอัตโนมัติจากเลขนิติบุคคล (Corporate Tax ID Lookup)</span>
               </label>
               <div className="flex gap-2">
@@ -278,7 +278,7 @@ export default function SuppliersPage() {
                   value={lookupTaxId}
                   onChange={(e) => setLookupTaxId(e.target.value)}
                   placeholder="ป้อน/วาง เลขนิติบุคคล 13 หลัก (เช่น 0105550001111)..."
-                  className="flex-1 px-3 py-2 bg-white border border-blue-300 rounded-lg text-xs font-mono text-slate-900 outline-none focus:border-blue-600"
+                  className="flex-1 px-3 py-2 bg-white dark:bg-slate-800 border border-blue-300 dark:border-slate-700 rounded-lg text-xs font-mono text-slate-900 dark:text-white outline-none focus:border-blue-600"
                 />
                 <button
                   type="button"
@@ -292,8 +292,8 @@ export default function SuppliersPage() {
               </div>
 
               {lookupMsg && (
-                <p className="text-xs font-bold text-emerald-700 flex items-center gap-1">
-                  <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600" />
+                <p className="text-xs font-bold text-emerald-700 dark:text-emerald-400 flex items-center gap-1">
+                  <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
                   <span>{lookupMsg}</span>
                 </p>
               )}
@@ -302,74 +302,74 @@ export default function SuppliersPage() {
             <form onSubmit={handleSubmit} className="space-y-3 text-xs">
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">รหัสคู่ค้า *</label>
+                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">รหัสคู่ค้า *</label>
                   <input
                     type="text"
                     required
                     value={formData.code}
                     onChange={(e) => setFormData({ ...formData, code: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none focus:border-blue-500 font-mono font-bold text-slate-900"
+                    className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg outline-none focus:border-blue-500 font-mono font-bold"
                   />
                 </div>
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">เลขประจำตัวผู้เสียภาษี (Tax ID)</label>
+                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">เลขประจำตัวผู้เสียภาษี (Tax ID)</label>
                   <input
                     type="text"
                     value={formData.taxId}
                     onChange={(e) => setFormData({ ...formData, taxId: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none focus:border-blue-500 font-mono"
+                    className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg outline-none focus:border-blue-500 font-mono"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">ชื่อซัพพลายเออร์ / นิติบุคคล *</label>
+                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">ชื่อซัพพลายเออร์ / นิติบุคคล *</label>
                 <input
                   type="text"
                   required
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none focus:border-blue-500 font-semibold text-slate-900"
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg outline-none focus:border-blue-500 font-semibold"
                 />
               </div>
 
               <div className="grid grid-cols-3 gap-3">
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">ผู้ติดต่อ</label>
+                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">ผู้ติดต่อ</label>
                   <input
                     type="text"
                     value={formData.contactPerson}
                     onChange={(e) => setFormData({ ...formData, contactPerson: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg outline-none focus:border-blue-500"
                   />
                 </div>
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">เบอร์โทรศัพท์</label>
+                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">เบอร์โทรศัพท์</label>
                   <input
                     type="text"
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg outline-none focus:border-blue-500"
                   />
                 </div>
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">อีเมล</label>
+                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">อีเมล</label>
                   <input
                     type="email"
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg outline-none focus:border-blue-500"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">ที่อยู่จดทะเบียนนิติบุคคล / ที่อยู่จัดส่ง</label>
+                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">ที่อยู่จดทะเบียนนิติบุคคล / ที่อยู่จัดส่ง</label>
                 <textarea
                   rows={2}
                   value={formData.address}
                   onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 rounded-lg outline-none focus:border-blue-500"
                 />
               </div>
 
@@ -377,7 +377,7 @@ export default function SuppliersPage() {
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="px-4 py-2 border border-slate-300 rounded-lg text-slate-600 font-semibold"
+                  className="px-4 py-2 border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-400 rounded-lg font-semibold hover:bg-slate-50 dark:hover:bg-slate-800"
                 >
                   ยกเลิก
                 </button>

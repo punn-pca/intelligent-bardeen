@@ -60,14 +60,14 @@ export default function IntegrityPage() {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-200">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-5">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
-            <ShieldCheck className="w-7 h-7 text-emerald-600" />
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
+            <ShieldCheck className="w-7 h-7 text-emerald-600 dark:text-emerald-400" />
             <span>ตรวจสอบความถูกต้องของสต็อก (Data Consistency Check)</span>
           </h1>
-          <p className="text-sm text-slate-500 mt-1">
-            คำนวณยอดรวมของ Stock Movements ทั้งหมด (+Stock In, -Stock Out, ±Transfer, ±Adjustment) เปรียบเทียบกับ <code className="bg-slate-100 text-slate-800 px-2 py-0.5 rounded font-mono text-xs">inventory.on_hand</code> ในฐานข้อมูล
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+            คำนวณยอดรวมของ Stock Movements ทั้งหมด (+Stock In, -Stock Out, ±Transfer, ±Adjustment) เปรียบเทียบกับ <code className="bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 px-2 py-0.5 rounded font-mono text-xs border border-slate-200 dark:border-slate-700">inventory.on_hand</code> ในฐานข้อมูล
           </p>
         </div>
 
@@ -82,38 +82,38 @@ export default function IntegrityPage() {
       </div>
 
       {successMsg && (
-        <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 p-4 rounded-xl text-sm flex items-center gap-2">
-          <CheckCircle2 className="w-5 h-5 shrink-0 text-emerald-600" />
+        <div className="bg-emerald-50 dark:bg-emerald-950/80 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 p-4 rounded-xl text-sm flex items-center gap-2">
+          <CheckCircle2 className="w-5 h-5 shrink-0 text-emerald-600 dark:text-emerald-400" />
           <span className="font-semibold">{successMsg}</span>
         </div>
       )}
 
       {errorMsg && (
-        <div className="bg-rose-50 border border-rose-200 text-rose-700 p-4 rounded-xl text-sm flex items-center gap-2">
-          <AlertTriangle className="w-5 h-5 shrink-0 text-rose-600" />
+        <div className="bg-rose-50 dark:bg-rose-950/80 border border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300 p-4 rounded-xl text-sm flex items-center gap-2">
+          <AlertTriangle className="w-5 h-5 shrink-0 text-rose-600 dark:text-rose-400" />
           <span className="font-semibold">{errorMsg}</span>
         </div>
       )}
 
       {loading ? (
-        <div className="bg-white p-12 rounded-xl border border-slate-200 shadow-xs text-center text-slate-400">
-          <RefreshCw className="w-8 h-8 text-emerald-600 animate-spin mx-auto mb-3" />
-          <p className="font-medium text-slate-700">กำลังตรวจสอบความถูกต้องของระบบสต็อกทั้งหมด...</p>
+        <div className="bg-white dark:bg-slate-900 p-12 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs text-center text-slate-400 dark:text-slate-500">
+          <RefreshCw className="w-8 h-8 text-emerald-600 dark:text-emerald-400 animate-spin mx-auto mb-3" />
+          <p className="font-medium text-slate-700 dark:text-slate-300">กำลังตรวจสอบความถูกต้องของระบบสต็อกทั้งหมด...</p>
         </div>
       ) : result && result.isValid ? (
-        <div className="bg-emerald-50 border-2 border-emerald-200 p-8 rounded-xl text-center space-y-3">
+        <div className="bg-emerald-50 dark:bg-emerald-950/40 border-2 border-emerald-200 dark:border-emerald-800 p-8 rounded-xl text-center space-y-3">
           <div className="w-16 h-16 bg-emerald-500 text-white rounded-full flex items-center justify-center mx-auto shadow-md shadow-emerald-500/20">
             <CheckCircle2 className="w-10 h-10" />
           </div>
-          <h2 className="text-2xl font-bold text-emerald-900">ALL STOCKS INTEGRITY VERIFIED</h2>
-          <p className="text-sm text-emerald-700 max-w-lg mx-auto">
+          <h2 className="text-2xl font-bold text-emerald-900 dark:text-emerald-200">ALL STOCKS INTEGRITY VERIFIED</h2>
+          <p className="text-sm text-emerald-700 dark:text-emerald-300 max-w-lg mx-auto">
             ตรวจสอบครบถ้วน {result.totalAudited} รายการในคลังสินค้า ยอดรวมใน Stock Movements สอดคล้องกับ On Hand ปัจจุบัน 100% ไม่พบข้อผิดพลาด
           </p>
         </div>
       ) : (
-        <div className="bg-rose-50 border-2 border-rose-200 p-8 rounded-xl space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-rose-200 pb-4">
-            <div className="flex items-center gap-3 text-rose-700">
+        <div className="bg-rose-50 dark:bg-rose-950/40 border-2 border-rose-200 dark:border-rose-800 p-8 rounded-xl space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-rose-200 dark:border-rose-800 pb-4">
+            <div className="flex items-center gap-3 text-rose-700 dark:text-rose-300">
               <AlertTriangle className="w-8 h-8 shrink-0" />
               <div>
                 <h2 className="text-xl font-bold">STOCK INTEGRITY ERROR</h2>
@@ -133,9 +133,9 @@ export default function IntegrityPage() {
             )}
           </div>
 
-          <div className="bg-white rounded-lg border border-rose-200 overflow-hidden">
+          <div className="bg-white dark:bg-slate-900 rounded-lg border border-rose-200 dark:border-rose-800 overflow-hidden">
             <table className="w-full text-left text-sm">
-              <thead className="bg-rose-100/50 text-rose-900 uppercase text-xs">
+              <thead className="bg-rose-100/50 dark:bg-rose-950/80 text-rose-900 dark:text-rose-200 uppercase text-xs">
                 <tr>
                   <th className="p-3">SKU</th>
                   <th className="p-3">สินค้า</th>
@@ -145,15 +145,15 @@ export default function IntegrityPage() {
                   <th className="p-3 text-right">ส่วนต่าง (Diff)</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-rose-100">
+              <tbody className="divide-y divide-rose-100 dark:divide-rose-900/50">
                 {result?.discrepancies?.map((item: any, idx: number) => (
-                  <tr key={idx} className="font-mono text-xs text-rose-900">
+                  <tr key={idx} className="font-mono text-xs text-rose-900 dark:text-rose-200">
                     <td className="p-3 font-bold">{item.productSku}</td>
                     <td className="p-3 font-sans">{item.productName}</td>
                     <td className="p-3 font-bold">{item.warehouseCode}</td>
                     <td className="p-3 text-right font-bold">{item.currentOnHand}</td>
                     <td className="p-3 text-right">{item.calculatedOnHand}</td>
-                    <td className="p-3 text-right font-bold text-rose-600">{item.diff}</td>
+                    <td className="p-3 text-right font-bold text-rose-600 dark:text-rose-400">{item.diff}</td>
                   </tr>
                 ))}
               </tbody>

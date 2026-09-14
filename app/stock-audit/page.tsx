@@ -76,13 +76,13 @@ export default function StockAuditListPage() {
   return (
     <div className="space-y-6 animate-in fade-in duration-200">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-5">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
-            <ClipboardList className="w-7 h-7 text-indigo-600" />
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
+            <ClipboardList className="w-7 h-7 text-indigo-600 dark:text-indigo-400" />
             <span>โปรแกรมนับสต็อกสินค้าจริง (Physical Stock Count & Audit)</span>
           </h1>
-          <p className="text-sm text-slate-500 mt-1">
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
             เปิดรอบตรวจนับสินค้าคงเหลือในคลัง สแกนบาร์โค้ด ตรวจจับผลต่าง (Variance) และกระทบยอดสต็อกอัตโนมัติ
           </p>
         </div>
@@ -97,9 +97,9 @@ export default function StockAuditListPage() {
       </div>
 
       {/* Audit Sessions Table */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
+      <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs overflow-hidden">
         <table className="w-full text-left text-sm">
-          <thead className="bg-slate-50 text-slate-500 uppercase text-xs border-b border-slate-200">
+          <thead className="bg-slate-50 dark:bg-slate-800/60 text-slate-500 dark:text-slate-400 uppercase text-xs border-b border-slate-200 dark:border-slate-800">
             <tr>
               <th className="p-4">เลขที่รอบนับ (Audit No)</th>
               <th className="p-4">คลังสินค้า</th>
@@ -110,16 +110,16 @@ export default function StockAuditListPage() {
               <th className="p-4 text-center">เข้าสู่นำนับ / จัดการ</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100">
+          <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
             {loading ? (
               <tr>
-                <td colSpan={7} className="text-center py-8 text-slate-400">
+                <td colSpan={7} className="text-center py-8 text-slate-400 dark:text-slate-500">
                   กำลังโหลดรายการรอบนับสต็อก...
                 </td>
               </tr>
             ) : audits.length === 0 ? (
               <tr>
-                <td colSpan={7} className="text-center py-8 text-slate-400">
+                <td colSpan={7} className="text-center py-8 text-slate-400 dark:text-slate-500">
                   ยังไม่มีรอบการนับสต็อกในระบบ
                 </td>
               </tr>
@@ -128,33 +128,33 @@ export default function StockAuditListPage() {
                 const dateStr = new Date(a.startedAt).toLocaleString('th-TH');
 
                 return (
-                  <tr key={a.id} className="hover:bg-slate-50/80 transition-all">
-                    <td className="p-4 font-mono font-bold text-indigo-600 text-xs">{a.auditNo}</td>
-                    <td className="p-4 font-semibold text-slate-800 text-xs">
+                  <tr key={a.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-all">
+                    <td className="p-4 font-mono font-bold text-indigo-600 dark:text-indigo-400 text-xs">{a.auditNo}</td>
+                    <td className="p-4 font-semibold text-slate-800 dark:text-slate-200 text-xs">
                       {a.warehouse.code} - {a.warehouse.name}
                     </td>
                     <td className="p-4">
                       <span
                         className={`px-2.5 py-0.5 rounded-full text-xs font-semibold border ${
                           a.status === 'COMPLETED'
-                            ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                            ? 'bg-emerald-50 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800'
                             : a.status === 'CANCELLED'
-                            ? 'bg-rose-50 text-rose-700 border-rose-200'
-                            : 'bg-amber-50 text-amber-700 border-amber-200 animate-pulse'
+                            ? 'bg-rose-50 dark:bg-rose-950/80 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-800'
+                            : 'bg-amber-50 dark:bg-amber-950/80 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800 animate-pulse'
                         }`}
                       >
                         {a.status === 'IN_PROGRESS' ? 'กำลังตรวจนับ (In Progress)' : a.status}
                       </span>
                     </td>
-                    <td className="p-4 text-xs font-mono font-semibold text-slate-700">
+                    <td className="p-4 text-xs font-mono font-semibold text-slate-700 dark:text-slate-300">
                       {a._count?.items || 0} รายการ
                     </td>
-                    <td className="p-4 text-xs text-slate-500">{dateStr}</td>
-                    <td className="p-4 text-xs text-slate-700 font-medium">{a.createdBy?.name || '-'}</td>
+                    <td className="p-4 text-xs text-slate-500 dark:text-slate-400">{dateStr}</td>
+                    <td className="p-4 text-xs text-slate-700 dark:text-slate-300 font-medium">{a.createdBy?.name || '-'}</td>
                     <td className="p-4 text-center">
                       <Link
                         href={`/stock-audit/${a.id}`}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-lg text-xs font-semibold transition-all border border-indigo-200"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 dark:bg-indigo-950/80 hover:bg-indigo-100 dark:hover:bg-indigo-900/80 text-indigo-700 dark:text-indigo-300 rounded-lg text-xs font-semibold transition-all border border-indigo-200 dark:border-indigo-800"
                       >
                         <span>เข้าสู่นำนับสินค้า</span>
                         <ArrowRight className="w-3.5 h-3.5" />
@@ -170,15 +170,15 @@ export default function StockAuditListPage() {
 
       {/* New Audit Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4">
-          <div className="bg-white rounded-xl shadow-xl border border-slate-200 w-full max-w-md p-6 space-y-4">
-            <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-              <ClipboardList className="w-5 h-5 text-indigo-600" />
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 dark:bg-slate-950/80 backdrop-blur-xs p-4">
+          <div className="bg-white dark:bg-slate-900 rounded-xl shadow-xl border border-slate-200 dark:border-slate-800 w-full max-w-md p-6 space-y-4">
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-3">
+              <ClipboardList className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
               <span>เปิดรอบนับสต็อกใหม่</span>
             </h3>
 
             {errorMsg && (
-              <div className="bg-rose-50 border border-rose-200 text-rose-700 p-3 rounded text-xs flex items-center gap-2">
+              <div className="bg-rose-50 dark:bg-rose-950/80 border border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300 p-3 rounded text-xs flex items-center gap-2">
                 <AlertCircle className="w-4 h-4 shrink-0" />
                 <span>{errorMsg}</span>
               </div>
@@ -186,11 +186,11 @@ export default function StockAuditListPage() {
 
             <form onSubmit={handleCreateAudit} className="space-y-4 text-xs">
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">เลือกคลังสินค้าที่ต้องการตรวจนับ *</label>
+                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">เลือกคลังสินค้าที่ต้องการตรวจนับ *</label>
                 <select
                   value={selectedWarehouseId}
                   onChange={(e) => setSelectedWarehouseId(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none focus:border-indigo-500 font-semibold"
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg outline-none bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:border-indigo-500 font-semibold"
                 >
                   {warehouses.map((w) => (
                     <option key={w.id} value={w.id}>
@@ -201,21 +201,21 @@ export default function StockAuditListPage() {
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">หมายเหตุรอบการนับ</label>
+                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">หมายเหตุรอบการนับ</label>
                 <textarea
                   rows={3}
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                   placeholder="เช่น ตรวจนับสินค้าประจำสิ้นเดือน หรือตรวจนับคลังหลัก..."
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none focus:border-indigo-500"
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg outline-none bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:border-indigo-500"
                 />
               </div>
 
-              <div className="flex justify-end gap-2 pt-2">
+              <div className="flex justify-end gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="px-4 py-2 border border-slate-300 rounded-lg text-slate-600 font-semibold"
+                  className="px-4 py-2 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-semibold"
                 >
                   ยกเลิก
                 </button>

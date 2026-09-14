@@ -136,8 +136,8 @@ export default function GlobalAIAssistantModal({ isOpen: externalIsOpen, onClose
 
       {/* Floating AI Modal / Drawer */}
       {isOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in duration-200">
-          <div className="bg-white rounded-t-3xl sm:rounded-2xl shadow-2xl border border-slate-200 w-full max-w-2xl h-[85vh] sm:h-[650px] flex flex-col overflow-hidden">
+        <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in duration-200">
+          <div className="bg-white dark:bg-slate-900 rounded-t-3xl sm:rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 w-full max-w-2xl h-[85vh] sm:h-[650px] flex flex-col overflow-hidden text-slate-900 dark:text-slate-100">
             {/* Header */}
             <div className="bg-slate-900 text-white px-6 py-4 flex items-center justify-between border-b border-slate-800">
               <div className="flex items-center gap-3">

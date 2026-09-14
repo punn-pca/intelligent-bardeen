@@ -58,34 +58,34 @@ function MovementsContent() {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-200">
-      <div className="border-b border-slate-200 pb-5">
-        <h1 className="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
-          <History className="w-7 h-7 text-purple-600" />
+      <div className="border-b border-slate-200 dark:border-slate-800 pb-5">
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
+          <History className="w-7 h-7 text-purple-600 dark:text-purple-400" />
           <span>ประวัติการเคลื่อนไหวสินค้า (Stock Movement History)</span>
         </h1>
-        <p className="text-sm text-slate-500 mt-1">ประวัติ Transaction ทั้งหมดแบบเรียงตามลำดับเวลา ตรวจสอบย้อนหลังได้ทุกรายการ</p>
+        <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">ประวัติ Transaction ทั้งหมดแบบเรียงตามลำดับเวลา ตรวจสอบย้อนหลังได้ทุกรายการ</p>
       </div>
 
       {/* Filter Bar */}
-      <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs space-y-3">
+      <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800/80 shadow-xs space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-3 flex-1 min-w-[240px]">
-            <Search className="w-4 h-4 text-slate-400" />
+            <Search className="w-4 h-4 text-slate-400 dark:text-slate-500" />
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="ค้นหา Transaction ID, SKU, ชื่อสินค้า, Ref, เหตุผล..."
-              className="w-full text-sm outline-none text-slate-800 placeholder-slate-400 font-mono"
+              className="w-full text-sm outline-none text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 font-mono bg-transparent"
             />
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
-            <Filter className="w-4 h-4 text-slate-400" />
+            <Filter className="w-4 h-4 text-slate-400 dark:text-slate-500" />
             <select
               value={selectedType}
               onChange={(e) => setSelectedType(e.target.value)}
-              className="text-xs border border-slate-300 rounded-lg px-3 py-2 bg-slate-50 outline-none"
+              className="text-xs border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 outline-none font-medium"
             >
               <option value="">ทุกประเภท Movement</option>
               <option value="STOCK_IN">STOCK_IN</option>
@@ -98,7 +98,7 @@ function MovementsContent() {
             <select
               value={selectedWarehouse}
               onChange={(e) => setSelectedWarehouse(e.target.value)}
-              className="text-xs border border-slate-300 rounded-lg px-3 py-2 bg-slate-50 outline-none"
+              className="text-xs border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 outline-none font-medium"
             >
               <option value="">ทุกคลังสินค้า</option>
               {warehouses.map((w) => (
@@ -111,21 +111,21 @@ function MovementsContent() {
         </div>
 
         {/* Date Filter */}
-        <div className="flex items-center gap-3 pt-2 border-t border-slate-100 text-xs text-slate-500">
-          <Calendar className="w-4 h-4 text-slate-400" />
+        <div className="flex items-center gap-3 pt-2 border-t border-slate-100 dark:border-slate-800 text-xs text-slate-500 dark:text-slate-400">
+          <Calendar className="w-4 h-4 text-slate-400 dark:text-slate-500" />
           <span>วันที่เริ่ม:</span>
           <input
             type="date"
             value={startDate}
             onChange={(e) => setStartDate(e.target.value)}
-            className="border border-slate-300 rounded px-2 py-1 bg-slate-50 outline-none"
+            className="border border-slate-300 dark:border-slate-700 rounded px-2 py-1 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 outline-none"
           />
           <span>ถึง:</span>
           <input
             type="date"
             value={endDate}
             onChange={(e) => setEndDate(e.target.value)}
-            className="border border-slate-300 rounded px-2 py-1 bg-slate-50 outline-none"
+            className="border border-slate-300 dark:border-slate-700 rounded px-2 py-1 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 outline-none"
           />
           {(startDate || endDate || search || selectedType || selectedWarehouse) && (
             <button
@@ -136,7 +136,7 @@ function MovementsContent() {
                 setStartDate('');
                 setEndDate('');
               }}
-              className="text-emerald-600 hover:underline font-semibold ml-2"
+              className="text-emerald-600 dark:text-emerald-400 hover:underline font-semibold ml-2"
             >
               ล้าง Filter
             </button>
@@ -145,10 +145,10 @@ function MovementsContent() {
       </div>
 
       {/* Movements Table */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
+      <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
-            <thead className="bg-slate-50 text-slate-500 uppercase text-xs border-b border-slate-200">
+            <thead className="bg-slate-50 dark:bg-slate-800/60 text-slate-500 dark:text-slate-400 uppercase text-xs border-b border-slate-200 dark:border-slate-800">
               <tr>
                 <th className="p-4">Transaction ID</th>
                 <th className="p-4">วัน-เวลา</th>
@@ -162,16 +162,16 @@ function MovementsContent() {
                 <th className="p-4">เหตุผล / Ref</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
               {loading ? (
                 <tr>
-                  <td colSpan={10} className="text-center py-8 text-slate-400">
+                  <td colSpan={10} className="text-center py-8 text-slate-400 dark:text-slate-500">
                     กำลังโหลดประวัติ Stock Movements...
                   </td>
                 </tr>
               ) : movements.length === 0 ? (
                 <tr>
-                  <td colSpan={10} className="text-center py-8 text-slate-400">
+                  <td colSpan={10} className="text-center py-8 text-slate-400 dark:text-slate-500">
                     ไม่พบรายการเคลื่อนไหว
                   </td>
                 </tr>
@@ -187,42 +187,42 @@ function MovementsContent() {
                   });
 
                   return (
-                    <tr key={m.id} className="hover:bg-slate-50/80 transition-all">
-                      <td className="p-4 font-mono font-semibold text-slate-900 text-xs">{m.transactionId}</td>
-                      <td className="p-4 text-xs text-slate-500 whitespace-nowrap">{dateStr}</td>
+                    <tr key={m.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-all">
+                      <td className="p-4 font-mono font-semibold text-slate-900 dark:text-white text-xs">{m.transactionId}</td>
+                      <td className="p-4 text-xs text-slate-500 dark:text-slate-400 whitespace-nowrap">{dateStr}</td>
                       <td className="p-4">
                         <span
                           className={`px-2 py-0.5 rounded text-xs font-semibold border ${
                             m.type === 'STOCK_IN'
-                              ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                              ? 'bg-emerald-50 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800'
                               : m.type === 'STOCK_OUT'
-                              ? 'bg-rose-50 text-rose-600 border-rose-200'
+                              ? 'bg-rose-50 dark:bg-rose-950/80 text-rose-600 dark:text-rose-300 border-rose-200 dark:border-rose-800'
                               : m.type.startsWith('TRANSFER')
-                              ? 'bg-blue-50 text-blue-600 border-blue-200'
-                              : 'bg-amber-50 text-amber-600 border-amber-200'
+                              ? 'bg-blue-50 dark:bg-blue-950/80 text-blue-600 dark:text-blue-300 border-blue-200 dark:border-blue-800'
+                              : 'bg-amber-50 dark:bg-amber-950/80 text-amber-600 dark:text-amber-300 border-amber-200 dark:border-amber-800'
                           }`}
                         >
                           {m.type}
                         </span>
                       </td>
                       <td className="p-4">
-                        <p className="font-semibold text-slate-800 text-xs">{m.product.name}</p>
-                        <p className="font-mono text-[11px] text-slate-500">{m.product.sku}</p>
+                        <p className="font-semibold text-slate-800 dark:text-slate-200 text-xs">{m.product.name}</p>
+                        <p className="font-mono text-[11px] text-slate-500 dark:text-slate-400">{m.product.sku}</p>
                       </td>
-                      <td className="p-4 font-mono text-xs font-bold text-slate-700">{m.warehouse.code}</td>
+                      <td className="p-4 font-mono text-xs font-bold text-slate-700 dark:text-slate-300">{m.warehouse.code}</td>
                       <td
                         className={`p-4 text-right font-mono font-bold ${
-                          isPositive ? 'text-emerald-600' : 'text-rose-600'
+                          isPositive ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'
                         }`}
                       >
                         {isPositive ? `+${m.quantity}` : m.quantity}
                       </td>
-                      <td className="p-4 text-right font-mono text-slate-500 text-xs">{m.beforeOnHand}</td>
-                      <td className="p-4 text-right font-mono font-bold text-slate-800 text-xs">{m.afterOnHand}</td>
-                      <td className="p-4 text-xs text-slate-700 font-medium">{m.createdBy?.name}</td>
-                      <td className="p-4 text-xs text-slate-600">
-                        {m.reason && <p className="font-medium text-slate-800">{m.reason}</p>}
-                        {m.reference && <p className="font-mono text-slate-400">Ref: {m.reference}</p>}
+                      <td className="p-4 text-right font-mono text-slate-500 dark:text-slate-400 text-xs">{m.beforeOnHand}</td>
+                      <td className="p-4 text-right font-mono font-bold text-slate-800 dark:text-white text-xs">{m.afterOnHand}</td>
+                      <td className="p-4 text-xs text-slate-700 dark:text-slate-300 font-medium">{m.createdBy?.name}</td>
+                      <td className="p-4 text-xs text-slate-600 dark:text-slate-400">
+                        {m.reason && <p className="font-medium text-slate-800 dark:text-slate-200">{m.reason}</p>}
+                        {m.reference && <p className="font-mono text-slate-400 dark:text-slate-500">Ref: {m.reference}</p>}
                       </td>
                     </tr>
                   );
@@ -238,7 +238,7 @@ function MovementsContent() {
 
 export default function StockMovementsPage() {
   return (
-    <Suspense fallback={<div className="p-8 text-center text-slate-400">กำลังโหลด...</div>}>
+    <Suspense fallback={<div className="p-8 text-center text-slate-400 dark:text-slate-500">กำลังโหลด...</div>}>
       <MovementsContent />
     </Suspense>
   );

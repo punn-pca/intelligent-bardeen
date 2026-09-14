@@ -30,12 +30,12 @@ export default function APPage() {
   return (
     <div className="space-y-6 animate-in fade-in duration-200">
       {/* Header */}
-      <div className="border-b border-slate-200 pb-5">
-        <h1 className="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
-          <Receipt className="w-7 h-7 text-purple-600" />
+      <div className="border-b border-slate-200 dark:border-slate-800 pb-5">
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
+          <Receipt className="w-7 h-7 text-purple-600 dark:text-purple-400" />
           <span>บัญชีเจ้าหนี้การค้า & การจ่ายเงิน (Accounts Payable - AP)</span>
         </h1>
-        <p className="text-sm text-slate-500 mt-1">
+        <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
           ระบบติดตามใบบิลจัดซื้อ/ใบสั่งซื้อซัพพลายเออร์ ยอดจ่ายเงิน และเจ้าหนี้ค้างชำระ (Supplier Payable Outstanding)
         </p>
       </div>
@@ -43,44 +43,44 @@ export default function APPage() {
       {/* Summary Cards */}
       {summary && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs">
-            <p className="text-xs text-slate-500 font-semibold uppercase">ยอดเจ้าหนี้ตั้งค้างทั้งหมด (Total AP)</p>
-            <p className="text-xl font-bold text-slate-900 mt-1">฿{summary.totalAP.toLocaleString('th-TH')}</p>
+          <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs">
+            <p className="text-xs text-slate-500 dark:text-slate-400 font-semibold uppercase">ยอดเจ้าหนี้ตั้งค้างทั้งหมด (Total AP)</p>
+            <p className="text-xl font-bold text-slate-900 dark:text-white mt-1">฿{summary.totalAP.toLocaleString('th-TH')}</p>
           </div>
-          <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs">
-            <p className="text-xs text-slate-500 font-semibold uppercase">จ่ายเงินแล้ว (Total Paid)</p>
-            <p className="text-xl font-bold text-emerald-600 mt-1">฿{summary.totalPaid.toLocaleString('th-TH')}</p>
+          <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs">
+            <p className="text-xs text-slate-500 dark:text-slate-400 font-semibold uppercase">จ่ายเงินแล้ว (Total Paid)</p>
+            <p className="text-xl font-bold text-emerald-600 dark:text-emerald-400 mt-1">฿{summary.totalPaid.toLocaleString('th-TH')}</p>
           </div>
-          <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs">
-            <p className="text-xs text-slate-500 font-semibold uppercase">ยอดค้างจ่ายซัพพลายเออร์</p>
-            <p className="text-xl font-bold text-rose-600 mt-1">฿{summary.totalOutstanding.toLocaleString('th-TH')}</p>
+          <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs">
+            <p className="text-xs text-slate-500 dark:text-slate-400 font-semibold uppercase">ยอดค้างจ่ายซัพพลายเออร์</p>
+            <p className="text-xl font-bold text-rose-600 dark:text-rose-400 mt-1">฿{summary.totalOutstanding.toLocaleString('th-TH')}</p>
           </div>
-          <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs">
-            <p className="text-xs text-slate-500 font-semibold uppercase">จำนวนบิลค้างจ่าย</p>
-            <p className="text-xl font-bold text-amber-600 mt-1">{summary.unpaidCount} บิล</p>
+          <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs">
+            <p className="text-xs text-slate-500 dark:text-slate-400 font-semibold uppercase">จำนวนบิลค้างจ่าย</p>
+            <p className="text-xl font-bold text-amber-600 dark:text-amber-400 mt-1">{summary.unpaidCount} บิล</p>
           </div>
         </div>
       )}
 
       {/* Filter */}
-      <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs flex items-center justify-between">
+      <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs flex items-center justify-between">
         <div className="flex items-center gap-3 flex-1 max-w-md">
-          <Search className="w-4 h-4 text-slate-400" />
+          <Search className="w-4 h-4 text-slate-400 dark:text-slate-500" />
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="ค้นหาเลขที่ PO, ชื่อซัพพลายเออร์..."
-            className="w-full text-sm outline-none font-mono text-slate-800"
+            className="w-full text-sm outline-none font-mono bg-transparent text-slate-800 dark:text-white placeholder-slate-400 dark:placeholder-slate-500"
           />
         </div>
       </div>
 
       {/* AP Table */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
+      <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
-            <thead className="bg-slate-50 text-slate-600 uppercase font-bold border-b border-slate-200">
+            <thead className="bg-slate-50 dark:bg-slate-800/60 text-slate-600 dark:text-slate-400 uppercase font-bold border-b border-slate-200 dark:border-slate-800">
               <tr>
                 <th className="p-3">เลขที่เอกสาร PO</th>
                 <th className="p-3">ชื่อซัพพลายเออร์</th>
@@ -91,40 +91,40 @@ export default function APPage() {
                 <th className="p-3 text-center">สถานะ</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 font-mono">
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-800 font-mono">
               {loading ? (
                 <tr>
-                  <td colSpan={7} className="text-center py-8 text-slate-400">
+                  <td colSpan={7} className="text-center py-8 text-slate-400 dark:text-slate-500">
                     กำลังโหลดข้อมูลเจ้าหนี้การค้า...
                   </td>
                 </tr>
               ) : items.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="text-center py-8 text-slate-400">
+                  <td colSpan={7} className="text-center py-8 text-slate-400 dark:text-slate-500">
                     ไม่พบรายการเจ้าหนี้การค้า
                   </td>
                 </tr>
               ) : (
                 items.map((item) => (
-                  <tr key={item.id} className="hover:bg-slate-50">
-                    <td className="p-3 font-bold text-purple-600">
+                  <tr key={item.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-all">
+                    <td className="p-3 font-bold text-purple-600 dark:text-purple-400">
                       <Link href={`/documents?search=${item.documentNo}`} className="hover:underline">
                         {item.documentNo}
                       </Link>
                     </td>
-                    <td className="p-3 font-sans font-semibold text-slate-800">{item.supplierName}</td>
-                    <td className="p-3 text-slate-500">{new Date(item.issueDate).toLocaleDateString('th-TH')}</td>
-                    <td className="p-3 text-right font-bold text-slate-900">฿{item.grandTotal.toLocaleString('th-TH')}</td>
-                    <td className="p-3 text-right text-emerald-600">฿{item.paidAmount.toLocaleString('th-TH')}</td>
-                    <td className="p-3 text-right font-bold text-rose-600">฿{item.dueAmount.toLocaleString('th-TH')}</td>
+                    <td className="p-3 font-sans font-semibold text-slate-800 dark:text-slate-200">{item.supplierName}</td>
+                    <td className="p-3 text-slate-500 dark:text-slate-400">{new Date(item.issueDate).toLocaleDateString('th-TH')}</td>
+                    <td className="p-3 text-right font-bold text-slate-900 dark:text-white">฿{item.grandTotal.toLocaleString('th-TH')}</td>
+                    <td className="p-3 text-right text-emerald-600 dark:text-emerald-400">฿{item.paidAmount.toLocaleString('th-TH')}</td>
+                    <td className="p-3 text-right font-bold text-rose-600 dark:text-rose-400">฿{item.dueAmount.toLocaleString('th-TH')}</td>
                     <td className="p-3 text-center font-sans">
                       <span
                         className={`px-2 py-0.5 rounded text-[10px] font-bold border ${
                           item.status === 'PAID'
-                            ? 'bg-emerald-100 text-emerald-700 border-emerald-200'
+                            ? 'bg-emerald-50 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800'
                             : item.status === 'PARTIAL'
-                            ? 'bg-amber-100 text-amber-700 border-amber-200'
-                            : 'bg-rose-100 text-rose-700 border-rose-200'
+                            ? 'bg-amber-50 dark:bg-amber-950/80 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800'
+                            : 'bg-rose-50 dark:bg-rose-950/80 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-800'
                         }`}
                       >
                         {item.status === 'PAID' ? 'จ่ายครบแล้ว' : item.status === 'PARTIAL' ? 'จ่ายบางส่วน' : 'ค้างจ่าย'}

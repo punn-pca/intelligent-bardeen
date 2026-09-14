@@ -144,13 +144,13 @@ export default function CategoriesPage() {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-200">
-      <div className="flex items-center justify-between border-b border-slate-200 pb-5">
+      <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-5">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
-            <FolderTree className="w-7 h-7 text-emerald-600" />
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
+            <FolderTree className="w-7 h-7 text-emerald-600 dark:text-emerald-400" />
             <span>หมวดหมู่สินค้า (Category Management)</span>
           </h1>
-          <p className="text-sm text-slate-500 mt-1">จัดการหมวดหมู่สินค้า เพิ่ม แก้ไข ลบ และดูจำนวนสินค้าในแต่ละหมวดหมู่</p>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">จัดการหมวดหมู่สินค้า เพิ่ม แก้ไข ลบ และดูจำนวนสินค้าในแต่ละหมวดหมู่</p>
         </div>
 
         {canManage && (
@@ -166,40 +166,40 @@ export default function CategoriesPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {loading ? (
-          <div className="col-span-full py-8 text-center text-slate-400">กำลังโหลดหมวดหมู่สินค้า...</div>
+          <div className="col-span-full py-8 text-center text-slate-400 dark:text-slate-500">กำลังโหลดหมวดหมู่สินค้า...</div>
         ) : (
           categories.map((cat) => (
-            <div key={cat.id} className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs space-y-3 flex flex-col justify-between hover:border-slate-300 transition-all">
+            <div key={cat.id} className="bg-white dark:bg-slate-900 p-5 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs space-y-3 flex flex-col justify-between hover:border-slate-300 dark:hover:border-slate-700 transition-all">
               <div className="space-y-2">
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-lg flex items-center justify-center font-bold shrink-0">
+                    <div className="w-10 h-10 bg-emerald-50 dark:bg-emerald-950/80 text-emerald-600 dark:text-emerald-400 rounded-lg flex items-center justify-center font-bold shrink-0">
                       <Tag className="w-5 h-5" />
                     </div>
                     <div>
-                      <h3 className="font-bold text-slate-800 text-base leading-snug">{cat.name}</h3>
+                      <h3 className="font-bold text-slate-800 dark:text-slate-100 text-base leading-snug">{cat.name}</h3>
                     </div>
                   </div>
 
-                  <span className="bg-slate-100 text-slate-700 font-semibold px-2.5 py-1 rounded text-xs shrink-0">
+                  <span className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-semibold px-2.5 py-1 rounded text-xs shrink-0 border border-slate-200 dark:border-slate-700">
                     {cat.productCount} สินค้า
                   </span>
                 </div>
-                <p className="text-xs text-slate-500 leading-relaxed line-clamp-2">{cat.description || 'ไม่มีคำอธิบาย'}</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed line-clamp-2">{cat.description || 'ไม่มีคำอธิบาย'}</p>
               </div>
 
               {canManage && (
-                <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-2 text-xs">
+                <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end gap-2 text-xs">
                   <button
                     onClick={() => openEditModal(cat)}
-                    className="px-3 py-1.5 border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50 font-semibold flex items-center gap-1"
+                    className="px-3 py-1.5 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 font-semibold flex items-center gap-1"
                   >
-                    <Edit2 className="w-3.5 h-3.5 text-blue-600" />
+                    <Edit2 className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
                     <span>แก้ไข</span>
                   </button>
                   <button
                     onClick={() => openDeleteModal(cat)}
-                    className="px-3 py-1.5 border border-rose-200 text-rose-600 hover:bg-rose-50 rounded-lg font-semibold flex items-center gap-1"
+                    className="px-3 py-1.5 border border-rose-200 dark:border-rose-800 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/60 rounded-lg font-semibold flex items-center gap-1"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                     <span>ลบ</span>
@@ -214,8 +214,8 @@ export default function CategoriesPage() {
       {/* Add Modal */}
       {showAddModal && (
         <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full overflow-hidden border border-slate-100">
-            <div className="bg-slate-900 text-white px-6 py-4 flex items-center justify-between">
+          <div className="bg-white dark:bg-slate-900 rounded-xl shadow-2xl max-w-md w-full overflow-hidden border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white">
+            <div className="bg-slate-900 text-white px-6 py-4 flex items-center justify-between border-b border-slate-800">
               <h3 className="font-semibold text-base">เพิ่มหมวดหมู่สินค้าใหม่</h3>
               <button onClick={() => setShowAddModal(false)} className="text-slate-400 hover:text-white text-lg">
                 ✕
@@ -224,40 +224,40 @@ export default function CategoriesPage() {
 
             <form onSubmit={handleCreateCategory} className="p-6 space-y-4 text-xs">
               {errorMsg && (
-                <div className="bg-rose-50 border border-rose-200 text-rose-700 p-3 rounded-lg flex items-center gap-2">
-                  <AlertCircle className="w-4 h-4 shrink-0" />
+                <div className="bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300 p-3 rounded-lg flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 shrink-0 text-rose-600 dark:text-rose-400" />
                   <span>{errorMsg}</span>
                 </div>
               )}
 
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">ชื่อหมวดหมู่ *</label>
+                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">ชื่อหมวดหมู่ *</label>
                 <input
                   type="text"
                   required
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="เช่น อุปกรณ์เครือข่าย"
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none focus:border-emerald-500 font-medium"
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg outline-none focus:border-emerald-500 font-medium"
                 />
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">รายละเอียดคำอธิบาย</label>
+                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">รายละเอียดคำอธิบาย</label>
                 <textarea
                   rows={3}
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="คำอธิบายหมวดหมู่สินค้าเพิ่มเติม..."
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none focus:border-emerald-500"
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 rounded-lg outline-none focus:border-emerald-500"
                 />
               </div>
 
-              <div className="pt-4 border-t border-slate-100 flex items-center justify-end gap-3">
+              <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end gap-3">
                 <button
                   type="button"
                   onClick={() => setShowAddModal(false)}
-                  className="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-lg font-semibold"
+                  className="px-4 py-2 border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg font-semibold"
                 >
                   ยกเลิก
                 </button>
@@ -277,8 +277,8 @@ export default function CategoriesPage() {
       {/* Edit Modal */}
       {showEditModal && (
         <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full overflow-hidden border border-slate-100">
-            <div className="bg-slate-900 text-white px-6 py-4 flex items-center justify-between">
+          <div className="bg-white dark:bg-slate-900 rounded-xl shadow-2xl max-w-md w-full overflow-hidden border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white">
+            <div className="bg-slate-900 text-white px-6 py-4 flex items-center justify-between border-b border-slate-800">
               <h3 className="font-semibold text-base">แก้ไขหมวดหมู่สินค้า</h3>
               <button onClick={() => setShowEditModal(false)} className="text-slate-400 hover:text-white text-lg">
                 ✕
@@ -287,38 +287,38 @@ export default function CategoriesPage() {
 
             <form onSubmit={handleUpdateCategory} className="p-6 space-y-4 text-xs">
               {editErrorMsg && (
-                <div className="bg-rose-50 border border-rose-200 text-rose-700 p-3 rounded-lg flex items-center gap-2">
-                  <AlertCircle className="w-4 h-4 shrink-0" />
+                <div className="bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300 p-3 rounded-lg flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 shrink-0 text-rose-600 dark:text-rose-400" />
                   <span>{editErrorMsg}</span>
                 </div>
               )}
 
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">ชื่อหมวดหมู่ *</label>
+                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">ชื่อหมวดหมู่ *</label>
                 <input
                   type="text"
                   required
                   value={editName}
                   onChange={(e) => setEditName(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none focus:border-emerald-500 font-bold"
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg outline-none focus:border-emerald-500 font-bold"
                 />
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">รายละเอียดคำอธิบาย</label>
+                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">รายละเอียดคำอธิบาย</label>
                 <textarea
                   rows={3}
                   value={editDescription}
                   onChange={(e) => setEditDescription(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none focus:border-emerald-500"
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg outline-none focus:border-emerald-500"
                 />
               </div>
 
-              <div className="pt-4 border-t border-slate-100 flex items-center justify-end gap-3">
+              <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end gap-3">
                 <button
                   type="button"
                   onClick={() => setShowEditModal(false)}
-                  className="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-lg font-semibold"
+                  className="px-4 py-2 border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg font-semibold"
                 >
                   ยกเลิก
                 </button>
@@ -338,7 +338,7 @@ export default function CategoriesPage() {
       {/* Delete Modal */}
       {showDeleteModal && deleteTarget && (
         <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full overflow-hidden border border-slate-100">
+          <div className="bg-white dark:bg-slate-900 rounded-xl shadow-2xl max-w-md w-full overflow-hidden border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white">
             <div className="bg-rose-600 text-white px-6 py-4 flex items-center justify-between">
               <h3 className="font-semibold text-base flex items-center gap-2">
                 <AlertCircle className="w-5 h-5" />
@@ -351,27 +351,27 @@ export default function CategoriesPage() {
 
             <div className="p-6 space-y-4 text-xs">
               {deleteErrorMsg && (
-                <div className="bg-rose-50 border border-rose-200 text-rose-700 p-3 rounded-lg flex items-center gap-2">
-                  <AlertCircle className="w-4 h-4 shrink-0" />
+                <div className="bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300 p-3 rounded-lg flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 shrink-0 text-rose-600 dark:text-rose-400" />
                   <span>{deleteErrorMsg}</span>
                 </div>
               )}
 
-              <p className="text-slate-700 font-medium">
-                คุณแน่ใจหรือไม่ว่าต้องการลบหมวดหมู่ <strong className="text-slate-900 font-bold">{deleteTarget.name}</strong>?
+              <p className="text-slate-700 dark:text-slate-300 font-medium">
+                คุณแน่ใจหรือไม่ว่าต้องการลบหมวดหมู่ <strong className="text-slate-900 dark:text-white font-bold">{deleteTarget.name}</strong>?
               </p>
 
               {deleteTarget.productCount > 0 && (
-                <div className="bg-amber-50 border border-amber-200 text-amber-800 p-3 rounded-lg text-xs leading-relaxed">
+                <div className="bg-amber-50 dark:bg-amber-950/60 border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-300 p-3 rounded-lg text-xs leading-relaxed">
                   ⚠️ หมวดหมู่นี้มีสินค้าผูกอยู่ <strong>{deleteTarget.productCount} รายการ</strong> สินค้าเหล่านี้จะถูกย้ายไปยังหมวดหมู่สำรองโดยอัตโนมัติ
                 </div>
               )}
 
-              <div className="pt-4 border-t border-slate-100 flex items-center justify-end gap-3">
+              <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end gap-3">
                 <button
                   type="button"
                   onClick={() => setShowDeleteModal(false)}
-                  className="px-4 py-2 border border-slate-300 text-slate-600 hover:bg-slate-50 rounded-lg font-semibold"
+                  className="px-4 py-2 border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg font-semibold"
                 >
                   ยกเลิก
                 </button>

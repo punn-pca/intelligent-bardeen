@@ -110,13 +110,13 @@ function StockInForm() {
 
   if (successTx) {
     return (
-      <div className="max-w-md mx-auto bg-white p-8 rounded-2xl border border-slate-200 shadow-lg text-center space-y-4 animate-in zoom-in-95 duration-200">
-        <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto">
+      <div className="max-w-md mx-auto bg-white dark:bg-slate-900 p-8 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-lg text-center space-y-4 animate-in zoom-in-95 duration-200">
+        <div className="w-16 h-16 bg-emerald-100 dark:bg-emerald-950/80 text-emerald-600 dark:text-emerald-400 rounded-full flex items-center justify-center mx-auto">
           <CheckCircle2 className="w-10 h-10" />
         </div>
-        <h2 className="text-xl font-bold text-slate-900">ทำรายการรับสินค้าเข้าสำเร็จ!</h2>
-        <p className="text-sm text-slate-600">{successTx.message}</p>
-        <div className="p-3 bg-slate-50 rounded-lg text-xs font-mono text-slate-500">
+        <h2 className="text-xl font-bold text-slate-900 dark:text-white">ทำรายการรับสินค้าเข้าสำเร็จ!</h2>
+        <p className="text-sm text-slate-600 dark:text-slate-300">{successTx.message}</p>
+        <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-lg text-xs font-mono text-slate-500 dark:text-slate-400">
           Tx ID: {successTx.transactionId}
         </div>
         <div className="flex gap-2 pt-2">
@@ -133,7 +133,7 @@ function StockInForm() {
           </button>
           <button
             onClick={() => router.push('/inventory')}
-            className="flex-1 px-4 py-2 border border-slate-300 text-slate-700 text-xs font-semibold rounded-lg"
+            className="flex-1 px-4 py-2 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 text-xs font-semibold rounded-lg"
           >
             ดูคลังสินค้า
           </button>
@@ -144,27 +144,27 @@ function StockInForm() {
 
   return (
     <div className="max-w-2xl mx-auto space-y-6 animate-in fade-in duration-200">
-      <div className="border-b border-slate-200 pb-5">
-        <h1 className="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
-          <ArrowDownRight className="w-7 h-7 text-emerald-600" />
+      <div className="border-b border-slate-200 dark:border-slate-800 pb-5">
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
+          <ArrowDownRight className="w-7 h-7 text-emerald-600 dark:text-emerald-400" />
           <span>รับสินค้าเข้าคลัง (Stock Receive / Stock In)</span>
         </h1>
-        <p className="text-sm text-slate-500 mt-1">
+        <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
           บันทึกการรับสินค้าเข้าสต็อก เพิ่มจำนวนคงเหลือ และคำนวณราคาทุนเฉลี่ยถ่วงน้ำหนัก (AVCO)
         </p>
       </div>
 
-      <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs">
+      <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
         <form onSubmit={handlePreConfirm} className="space-y-4 text-xs">
           {errorMsg && (
-            <div className="bg-rose-50 border border-rose-200 text-rose-700 p-3 rounded-lg flex items-center gap-2">
+            <div className="bg-rose-50 dark:bg-rose-950/80 border border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300 p-3 rounded-lg flex items-center gap-2">
               <AlertCircle className="w-4 h-4 shrink-0" />
               <span>{errorMsg}</span>
             </div>
           )}
 
           <div>
-            <label className="block font-semibold text-slate-700 mb-1">เลือกสินค้า (มีช่องค้นหา SKU/บาร์โค้ด/ชื่อสินค้า) *</label>
+            <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">เลือกสินค้า (มีช่องค้นหา SKU/บาร์โค้ด/ชื่อสินค้า) *</label>
             <SearchableProductSelect
               products={products}
               value={productId}
@@ -175,12 +175,12 @@ function StockInForm() {
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">เลือกคลังสินค้า *</label>
+              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">เลือกคลังสินค้า *</label>
               <select
                 required
                 value={warehouseId}
                 onChange={(e) => setWarehouseId(e.target.value)}
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs bg-white font-medium outline-none focus:border-emerald-500"
+                className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg text-xs bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-medium outline-none focus:border-emerald-500"
               >
                 {warehouses.map((w) => (
                   <option key={w.id} value={w.id}>
@@ -191,7 +191,7 @@ function StockInForm() {
             </div>
 
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">จำนวนที่รับเข้า *</label>
+              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">จำนวนที่รับเข้า *</label>
               <input
                 type="number"
                 min="1"
@@ -199,55 +199,55 @@ function StockInForm() {
                 value={quantity}
                 onChange={(e) => setQuantity(e.target.value)}
                 placeholder="ระบุจำนวน"
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs font-mono font-bold text-slate-900 outline-none focus:border-emerald-500"
+                className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-lg text-xs font-mono font-bold text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 outline-none focus:border-emerald-500"
               />
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">ราคาทุนต่อหน่วย (฿)</label>
+              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">ราคาทุนต่อหน่วย (฿)</label>
               <input
                 type="number"
                 step="0.01"
                 value={costPrice}
                 onChange={(e) => setCostPrice(e.target.value)}
                 placeholder={selectedProdObj ? `ทุนเดิม: ฿${selectedProdObj.costPrice}` : 'ระบุราคาทุน'}
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs font-mono text-slate-900 outline-none focus:border-emerald-500"
+                className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-lg text-xs font-mono text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 outline-none focus:border-emerald-500"
               />
             </div>
 
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">เลขล็อต (Lot / Batch No.)</label>
+              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">เลขล็อต (Lot / Batch No.)</label>
               <input
                 type="text"
                 value={lotNumber}
                 onChange={(e) => setLotNumber(e.target.value)}
                 placeholder="เช่น LOT-202608-01"
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs font-mono outline-none focus:border-emerald-500"
+                className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-lg text-xs font-mono text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 outline-none focus:border-emerald-500"
               />
             </div>
           </div>
 
           <div>
-            <label className="block font-semibold text-slate-700 mb-1">เลขที่เอกสารอ้างอิง (Ref No.)</label>
+            <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">เลขที่เอกสารอ้างอิง (Ref No.)</label>
             <input
               type="text"
               value={reference}
               onChange={(e) => setReference(e.target.value)}
               placeholder="เช่น PO-2026-000001, INV-8899"
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs font-mono outline-none focus:border-emerald-500"
+              className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-lg text-xs font-mono text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 outline-none focus:border-emerald-500"
             />
           </div>
 
           <div>
-            <label className="block font-semibold text-slate-700 mb-1">เหตุผลการรับเข้า</label>
+            <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">เหตุผลการรับเข้า</label>
             <textarea
               rows={2}
               value={reason}
               onChange={(e) => setReason(e.target.value)}
               placeholder="ระบุเหตุผล เช่น รับเข้าสินค้าจากการสั่งซื้อใหม่..."
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs outline-none focus:border-emerald-500"
+              className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-lg text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 outline-none focus:border-emerald-500"
             />
           </div>
 

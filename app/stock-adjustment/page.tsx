@@ -134,18 +134,18 @@ export default function StockAdjustmentPage() {
 
   return (
     <div className="max-w-3xl mx-auto space-y-6 animate-in fade-in duration-200">
-      <div className="border-b border-slate-200 pb-5">
-        <h1 className="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
-          <Sliders className="w-7 h-7 text-amber-600" />
+      <div className="border-b border-slate-200 dark:border-slate-800 pb-5">
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
+          <Sliders className="w-7 h-7 text-amber-600 dark:text-amber-500" />
           <span>ระบบปรับยอดสต็อก (Stock Adjustment System)</span>
         </h1>
-        <p className="text-sm text-slate-500 mt-1">ปรับยอดสินค้าจากการตรวจนับจริง สินค้าเสียหาย หรือสูญหาย โดยต้องระบุเหตุผลและสร้าง Audit Log ทุกครั้ง</p>
+        <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">ปรับยอดสินค้าจากการตรวจนับจริง สินค้าเสียหาย หรือสูญหาย โดยต้องระบุเหตุผลและสร้าง Audit Log ทุกครั้ง</p>
       </div>
 
-      <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-xs">
+      <div className="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs">
         <form onSubmit={handlePreConfirm} className="space-y-4">
           {errorMsg && (
-            <div className="bg-rose-50 border border-rose-200 text-rose-700 p-3.5 rounded-lg text-sm flex items-start gap-2.5">
+            <div className="bg-rose-50 dark:bg-rose-950/80 border border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300 p-3.5 rounded-lg text-sm flex items-start gap-2.5">
               <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
               <span className="font-semibold">{errorMsg}</span>
             </div>
@@ -153,12 +153,12 @@ export default function StockAdjustmentPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">เลือกคลังสินค้า *</label>
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">เลือกคลังสินค้า *</label>
               <select
                 required
                 value={warehouseId}
                 onChange={(e) => setWarehouseId(e.target.value)}
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white outline-none focus:border-amber-500"
+                className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-white outline-none focus:border-amber-500"
               >
                 {warehouses.map((w) => (
                   <option key={w.id} value={w.id}>
@@ -169,12 +169,12 @@ export default function StockAdjustmentPage() {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">เลือกสินค้า *</label>
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">เลือกสินค้า *</label>
               <select
                 required
                 value={productId}
                 onChange={(e) => setProductId(e.target.value)}
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white outline-none focus:border-amber-500"
+                className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-white outline-none focus:border-amber-500"
               >
                 <option value="">-- เลือกสินค้า --</option>
                 {products.map((p) => (
@@ -186,15 +186,15 @@ export default function StockAdjustmentPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-3 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-200 text-center">
+          <div className="grid grid-cols-3 gap-4 bg-slate-50 dark:bg-slate-800/60 p-4 rounded-xl border border-slate-200 dark:border-slate-800 text-center">
             <div>
-              <p className="text-xs text-slate-500 font-semibold uppercase">Current Stock ในระบบ</p>
-              <p className="text-lg font-bold text-slate-800 mt-1">
+              <p className="text-xs text-slate-500 dark:text-slate-400 font-semibold uppercase">Current Stock ในระบบ</p>
+              <p className="text-lg font-bold text-slate-800 dark:text-slate-200 mt-1">
                 {currentStock !== null ? `${currentStock} ชิ้น` : '-'}
               </p>
             </div>
             <div>
-              <p className="text-xs text-slate-500 font-semibold uppercase">ยอดตรวจนับจริง (Actual Stock) *</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400 font-semibold uppercase">ยอดตรวจนับจริง (Actual Stock) *</p>
               <input
                 type="number"
                 min="0"
@@ -202,14 +202,14 @@ export default function StockAdjustmentPage() {
                 value={actualStock}
                 onChange={(e) => setActualStock(e.target.value)}
                 placeholder="48"
-                className="w-full px-3 py-1.5 border border-slate-300 rounded-lg text-sm text-center font-bold font-mono outline-none focus:border-amber-500 mt-1 bg-white"
+                className="w-full px-3 py-1.5 border border-slate-300 dark:border-slate-700 rounded-lg text-sm text-center font-bold font-mono outline-none focus:border-amber-500 mt-1 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
               />
             </div>
             <div>
-              <p className="text-xs text-slate-500 font-semibold uppercase">จำนวนปรับยอด (Delta)</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400 font-semibold uppercase">จำนวนปรับยอด (Delta)</p>
               <p
                 className={`text-lg font-bold font-mono mt-1 ${
-                  delta > 0 ? 'text-emerald-600' : delta < 0 ? 'text-rose-600' : 'text-slate-600'
+                  delta > 0 ? 'text-emerald-600 dark:text-emerald-400' : delta < 0 ? 'text-rose-600 dark:text-rose-400' : 'text-slate-600 dark:text-slate-400'
                 }`}
               >
                 {delta > 0 ? `+${delta}` : delta} ชิ้น
@@ -218,14 +218,14 @@ export default function StockAdjustmentPage() {
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1">
-              เหตุผลในการปรับยอด (Reason) <span className="text-rose-600 font-bold">* บังคับกรอก</span>
+            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+              เหตุผลในการปรับยอด (Reason) <span className="text-rose-600 dark:text-rose-400 font-bold">* บังคับกรอก</span>
             </label>
             <select
               required
               value={reason}
               onChange={(e) => setReason(e.target.value)}
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white outline-none focus:border-amber-500 mb-2"
+              className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-white outline-none focus:border-amber-500 mb-2"
             >
               <option value="">-- เลือกเหตุผลการปรับยอด --</option>
               <option value="ตรวจนับจริงแล้วไม่ตรง (Physical Count Discrepancy)">ตรวจนับจริงแล้วไม่ตรง (Physical Count Discrepancy)</option>
@@ -237,17 +237,17 @@ export default function StockAdjustmentPage() {
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1">หมายเหตุเพิ่มเติม (Note)</label>
+            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">หมายเหตุเพิ่มเติม (Note)</label>
             <input
               type="text"
               value={note}
               onChange={(e) => setNote(e.target.value)}
               placeholder="รายละเอียดเพิ่มเติม เช่น ลังบุบจากการขนส่ง 2 ชิ้น"
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm outline-none focus:border-amber-500"
+              className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 outline-none focus:border-amber-500"
             />
           </div>
 
-          <div className="pt-4 border-t border-slate-100 flex justify-end">
+          <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex justify-end">
             <button
               type="submit"
               className="px-6 py-2.5 bg-amber-600 hover:bg-amber-700 text-white font-semibold rounded-lg text-sm shadow-xs transition-all flex items-center gap-2"

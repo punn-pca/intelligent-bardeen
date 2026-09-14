@@ -99,217 +99,217 @@ export default function CompanySettingsPage() {
   return (
     <div className="max-w-4xl mx-auto space-y-6 animate-in fade-in duration-200">
       {/* Header */}
-      <div className="border-b border-slate-200 pb-5">
-        <h1 className="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
-          <Building2 className="w-7 h-7 text-blue-600" />
+      <div className="border-b border-slate-200 dark:border-slate-800 pb-5">
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
+          <Building2 className="w-7 h-7 text-blue-600 dark:text-blue-400" />
           <span>ระบบตั้งค่าบริษัท (Company Settings)</span>
         </h1>
-        <p className="text-sm text-slate-500 mt-1">
+        <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
           กำหนดข้อมูลนิติบุคคล เลขประจำตัวผู้เสียภาษี ช่องทางติดต่อ บัญชีธนาคาร และลายเซ็นเอกสาร PDF
         </p>
       </div>
 
       {successMsg && (
-        <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 p-4 rounded-xl text-sm flex items-center gap-2">
-          <CheckCircle2 className="w-5 h-5 shrink-0 text-emerald-600" />
+        <div className="bg-emerald-50 dark:bg-emerald-950/80 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 p-4 rounded-xl text-sm flex items-center gap-2">
+          <CheckCircle2 className="w-5 h-5 shrink-0 text-emerald-600 dark:text-emerald-400" />
           <span className="font-semibold">{successMsg}</span>
         </div>
       )}
 
       {errorMsg && (
-        <div className="bg-rose-50 border border-rose-200 text-rose-700 p-4 rounded-xl text-sm flex items-center gap-2">
-          <AlertCircle className="w-5 h-5 shrink-0 text-rose-600" />
+        <div className="bg-rose-50 dark:bg-rose-950/80 border border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300 p-4 rounded-xl text-sm flex items-center gap-2">
+          <AlertCircle className="w-5 h-5 shrink-0 text-rose-600 dark:text-rose-400" />
           <span>{errorMsg}</span>
         </div>
       )}
 
       {loading ? (
-        <div className="bg-white p-12 rounded-2xl border border-slate-200 text-center text-slate-400">
+        <div className="bg-white dark:bg-slate-900 p-12 rounded-2xl border border-slate-200 dark:border-slate-800 text-center text-slate-400 dark:text-slate-500">
           กำลังโหลดข้อมูลการตั้งค่าบริษัท...
         </div>
       ) : (
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Section 1: General Company Info */}
-          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-4">
-            <h2 className="text-base font-bold text-slate-900 flex items-center gap-2 border-b border-slate-100 pb-3">
-              <Building2 className="w-5 h-5 text-blue-600" />
+          <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs space-y-4">
+            <h2 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-3">
+              <Building2 className="w-5 h-5 text-blue-600 dark:text-blue-400" />
               <span>1. ข้อมูลทั่วไปของนิติบุคคล (Company Identity)</span>
             </h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">ชื่อบริษัท / นิติบุคคล *</label>
+                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">ชื่อบริษัท / นิติบุคคล *</label>
                 <input
                   type="text"
                   required
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none focus:border-blue-500 font-bold text-slate-900"
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg outline-none bg-white dark:bg-slate-800 focus:border-blue-500 font-bold text-slate-900 dark:text-white"
                 />
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">เลขประจำตัวผู้เสียภาษี (Tax ID) *</label>
+                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">เลขประจำตัวผู้เสียภาษี (Tax ID) *</label>
                 <input
                   type="text"
                   required
                   value={taxId}
                   onChange={(e) => setTaxId(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none focus:border-blue-500 font-mono"
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg outline-none bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:border-blue-500 font-mono"
                 />
               </div>
             </div>
 
             <div className="text-xs">
-              <label className="block font-semibold text-slate-700 mb-1">ที่อยู่จดทะเบียน *</label>
+              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">ที่อยู่จดทะเบียน *</label>
               <textarea
                 rows={2}
                 required
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none focus:border-blue-500"
+                className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg outline-none bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:border-blue-500"
               />
             </div>
           </div>
 
           {/* Section 2: Contact & Web */}
-          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-4">
-            <h2 className="text-base font-bold text-slate-900 flex items-center gap-2 border-b border-slate-100 pb-3">
-              <Globe className="w-5 h-5 text-indigo-600" />
+          <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs space-y-4">
+            <h2 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-3">
+              <Globe className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
               <span>2. ช่องทางติดต่อและเว็บไซต์ (Contact Details)</span>
             </h2>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
               <div>
-                <label className="block font-semibold text-slate-700 mb-1 flex items-center gap-1">
-                  <Phone className="w-3.5 h-3.5 text-slate-400" />
+                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1 flex items-center gap-1">
+                  <Phone className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
                   <span>เบอร์โทรศัพท์</span>
                 </label>
                 <input
                   type="text"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg outline-none bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:border-blue-500"
                 />
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-700 mb-1 flex items-center gap-1">
-                  <Mail className="w-3.5 h-3.5 text-slate-400" />
+                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1 flex items-center gap-1">
+                  <Mail className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
                   <span>อีเมล</span>
                 </label>
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg outline-none bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:border-blue-500"
                 />
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-700 mb-1 flex items-center gap-1">
-                  <Globe className="w-3.5 h-3.5 text-slate-400" />
+                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1 flex items-center gap-1">
+                  <Globe className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
                   <span>เว็บไซต์</span>
                 </label>
                 <input
                   type="text"
                   value={website}
                   onChange={(e) => setWebsite(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none focus:border-blue-500 font-mono"
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg outline-none bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:border-blue-500 font-mono"
                 />
               </div>
             </div>
           </div>
 
           {/* Section 3: Bank Account */}
-          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-4">
-            <h2 className="text-base font-bold text-slate-900 flex items-center gap-2 border-b border-slate-100 pb-3">
-              <CreditCard className="w-5 h-5 text-emerald-600" />
+          <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs space-y-4">
+            <h2 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-3">
+              <CreditCard className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
               <span>3. ข้อมูลบัญชีธนาคารสำหรับโอนเงิน (Bank Account Payment Details)</span>
             </h2>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">ชื่อธนาคาร</label>
+                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">ชื่อธนาคาร</label>
                 <input
                   type="text"
                   value={bankName}
                   onChange={(e) => setBankName(e.target.value)}
                   placeholder="เช่น ธนาคารกสิกรไทย (KBANK)"
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg outline-none bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:border-blue-500"
                 />
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">เลขที่บัญชี</label>
+                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">เลขที่บัญชี</label>
                 <input
                   type="text"
                   value={bankAccountNo}
                   onChange={(e) => setBankAccountNo(e.target.value)}
                   placeholder="เช่น 123-4-56789-0"
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none focus:border-blue-500 font-mono"
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg outline-none bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:border-blue-500 font-mono"
                 />
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">ชื่อบัญชี</label>
+                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">ชื่อบัญชี</label>
                 <input
                   type="text"
                   value={bankAccountName}
                   onChange={(e) => setBankAccountName(e.target.value)}
                   placeholder="เช่น บมจ. อินเทลลิเจนท์ บาร์ดีน"
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg outline-none bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:border-blue-500"
                 />
               </div>
             </div>
           </div>
 
           {/* Section 4: Document Customizations */}
-          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-4">
-            <h2 className="text-base font-bold text-slate-900 flex items-center gap-2 border-b border-slate-100 pb-3">
-              <FileText className="w-5 h-5 text-amber-600" />
+          <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs space-y-4">
+            <h2 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-3">
+              <FileText className="w-5 h-5 text-amber-600 dark:text-amber-400" />
               <span>4. กำหนดรูปแบบเอกสารและลายเซ็น PDF (PDF & Document Terms)</span>
             </h2>
 
             <div className="text-xs">
-              <label className="block font-semibold text-slate-700 mb-1">หมายเหตุเริ่มต้นท้ายเอกสาร (Default Document Notes)</label>
+              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">หมายเหตุเริ่มต้นท้ายเอกสาร (Default Document Notes)</label>
               <textarea
                 rows={2}
                 value={defaultNotes}
                 onChange={(e) => setDefaultNotes(e.target.value)}
                 placeholder="ข้อตกลงและเงื่อนไขเพิ่มเติมที่แสดงท้ายใบเสนอราคา/Invoice..."
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none focus:border-blue-500"
+                className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg outline-none bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:border-blue-500"
               />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">ป้ายกำกับลายเซ็นช่องที่ 1</label>
+                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">ป้ายกำกับลายเซ็นช่องที่ 1</label>
                 <input
                   type="text"
                   value={signaturePreparedLabel}
                   onChange={(e) => setSignaturePreparedLabel(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg outline-none bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:border-blue-500"
                 />
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">ป้ายกำกับลายเซ็นช่องที่ 2</label>
+                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">ป้ายกำกับลายเซ็นช่องที่ 2</label>
                 <input
                   type="text"
                   value={signatureApprovedLabel}
                   onChange={(e) => setSignatureApprovedLabel(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg outline-none bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:border-blue-500"
                 />
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">ป้ายกำกับลายเซ็นช่องที่ 3</label>
+                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">ป้ายกำกับลายเซ็นช่องที่ 3</label>
                 <input
                   type="text"
                   value={signatureReceivedLabel}
                   onChange={(e) => setSignatureReceivedLabel(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg outline-none bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:border-blue-500"
                 />
               </div>
             </div>

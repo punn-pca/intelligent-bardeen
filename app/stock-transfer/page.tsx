@@ -109,31 +109,31 @@ export default function StockTransferPage() {
 
   return (
     <div className="max-w-3xl mx-auto space-y-6 animate-in fade-in duration-200">
-      <div className="border-b border-slate-200 pb-5">
-        <h1 className="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
-          <ArrowLeftRight className="w-7 h-7 text-blue-600" />
+      <div className="border-b border-slate-200 dark:border-slate-800 pb-5">
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
+          <ArrowLeftRight className="w-7 h-7 text-blue-600 dark:text-blue-400" />
           <span>ระบบโอนสินค้าระหว่างคลัง (Stock Transfer System)</span>
         </h1>
-        <p className="text-sm text-slate-500 mt-1">โอนสินค้าระหว่างคลังสินค้าแบบ Atomic Transaction คลังต้นทางลดลง คลังปลายทางเพิ่มขึ้นพร้อมกัน</p>
+        <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">โอนสินค้าระหว่างคลังสินค้าแบบ Atomic Transaction คลังต้นทางลดลง คลังปลายทางเพิ่มขึ้นพร้อมกัน</p>
       </div>
 
-      <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-xs">
+      <div className="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs">
         <form onSubmit={handlePreConfirm} className="space-y-4">
           {errorMsg && (
-            <div className="bg-rose-50 border border-rose-200 text-rose-700 p-3.5 rounded-lg text-sm flex items-start gap-2.5">
+            <div className="bg-rose-50 dark:bg-rose-950/80 border border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300 p-3.5 rounded-lg text-sm flex items-start gap-2.5">
               <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
               <span className="font-semibold">{errorMsg}</span>
             </div>
           )}
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-200">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl border border-slate-200 dark:border-slate-800">
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">คลังสินค้าต้นทาง (Source) *</label>
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">คลังสินค้าต้นทาง (Source) *</label>
               <select
                 required
                 value={sourceWarehouseId}
                 onChange={(e) => setSourceWarehouseId(e.target.value)}
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white outline-none focus:border-blue-500"
+                className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-white outline-none focus:border-blue-500"
               >
                 {warehouses.map((w) => (
                   <option key={w.id} value={w.id}>
@@ -144,12 +144,12 @@ export default function StockTransferPage() {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">คลังสินค้าปลายทาง (Destination) *</label>
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">คลังสินค้าปลายทาง (Destination) *</label>
               <select
                 required
                 value={destinationWarehouseId}
                 onChange={(e) => setDestinationWarehouseId(e.target.value)}
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white outline-none focus:border-blue-500"
+                className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-white outline-none focus:border-blue-500"
               >
                 {warehouses.map((w) => (
                   <option key={w.id} value={w.id}>
@@ -162,12 +162,12 @@ export default function StockTransferPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">เลือกสินค้าที่จะโอน *</label>
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">เลือกสินค้าที่จะโอน *</label>
               <select
                 required
                 value={productId}
                 onChange={(e) => setProductId(e.target.value)}
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white outline-none focus:border-blue-500"
+                className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-white outline-none focus:border-blue-500"
               >
                 <option value="">-- เลือกสินค้า --</option>
                 {products.map((p) => (
@@ -179,7 +179,7 @@ export default function StockTransferPage() {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">จำนวนที่โอน *</label>
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">จำนวนที่โอน *</label>
               <input
                 type="number"
                 min="1"
@@ -187,36 +187,36 @@ export default function StockTransferPage() {
                 value={quantity}
                 onChange={(e) => setQuantity(e.target.value)}
                 placeholder="30"
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm outline-none font-mono focus:border-blue-500"
+                className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-lg text-sm text-slate-900 dark:text-white outline-none font-mono focus:border-blue-500 placeholder-slate-400 dark:placeholder-slate-500"
               />
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">เอกสารอ้างอิง (Transfer Order)</label>
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">เอกสารอ้างอิง (Transfer Order)</label>
               <input
                 type="text"
                 value={reference}
                 onChange={(e) => setReference(e.target.value)}
                 placeholder="เช่น TR-2026-0030"
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm outline-none focus:border-blue-500"
+                className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-lg text-sm text-slate-900 dark:text-white outline-none focus:border-blue-500 placeholder-slate-400 dark:placeholder-slate-500"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">หมายเหตุ</label>
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">หมายเหตุ</label>
               <input
                 type="text"
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
                 placeholder="เช่น โอนสินค้าเติมสต็อกสาขา"
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm outline-none focus:border-blue-500"
+                className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-lg text-sm text-slate-900 dark:text-white outline-none focus:border-blue-500 placeholder-slate-400 dark:placeholder-slate-500"
               />
             </div>
           </div>
 
-          <div className="pt-4 border-t border-slate-100 flex justify-end">
+          <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex justify-end">
             <button
               type="submit"
               className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg text-sm shadow-xs transition-all flex items-center gap-2"

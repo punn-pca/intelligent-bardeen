@@ -331,13 +331,13 @@ export default function ProductBundlesPage() {
   return (
     <div className="space-y-6 animate-in fade-in duration-200">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-5">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
-            <Layers className="w-7 h-7 text-blue-600" />
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
+            <Layers className="w-7 h-7 text-blue-600 dark:text-blue-400" />
             <span>ระบบจัดชุดสินค้า (Product Kit & Bundling Workstation)</span>
           </h1>
-          <p className="text-sm text-slate-500 mt-1">
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
             กำหนดสูตรสินค้าชุด (Bill of Materials) และประกอบสินค้าจากชิ้นส่วนอะไหล่ 800+ รายการ พร้อมหัก/เติมสต็อกให้อัตโนมัติ
           </p>
         </div>
@@ -354,8 +354,8 @@ export default function ProductBundlesPage() {
       </div>
 
       {successMsg && (
-        <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 p-4 rounded-xl text-sm flex items-center gap-2">
-          <CheckCircle2 className="w-5 h-5 shrink-0 text-emerald-600" />
+        <div className="bg-emerald-50 dark:bg-emerald-950/80 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 p-4 rounded-xl text-sm flex items-center gap-2">
+          <CheckCircle2 className="w-5 h-5 shrink-0 text-emerald-600 dark:text-emerald-400" />
           <span className="font-semibold">{successMsg}</span>
         </div>
       )}
@@ -363,27 +363,27 @@ export default function ProductBundlesPage() {
       {/* Bundle Recipes List */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {loading ? (
-          <div className="col-span-2 bg-white p-12 rounded-xl border border-slate-200 text-center text-slate-400">
+          <div className="col-span-2 bg-white dark:bg-slate-900 p-12 rounded-xl border border-slate-200 dark:border-slate-800 text-center text-slate-400 dark:text-slate-500">
             กำลังโหลดสูตรชุดสินค้า...
           </div>
         ) : bundles.length === 0 ? (
-          <div className="col-span-2 bg-white p-12 rounded-xl border border-slate-200 text-center text-slate-400">
+          <div className="col-span-2 bg-white dark:bg-slate-900 p-12 rounded-xl border border-slate-200 dark:border-slate-800 text-center text-slate-400 dark:text-slate-500">
             ยังไม่มีสูตรชุดสินค้าในระบบ กดปุ่ม "+ สร้างสูตรชุดสินค้าใหม่" เพื่อเริ่มต้น
           </div>
         ) : (
           bundles.map((bundle) => (
             <div
               key={bundle.id}
-              className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden flex flex-col justify-between group hover:border-slate-300 transition-all"
+              className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs overflow-hidden flex flex-col justify-between group hover:border-slate-300 dark:hover:border-slate-700 transition-all"
             >
-              <div className="p-5 border-b border-slate-100 space-y-2">
+              <div className="p-5 border-b border-slate-100 dark:border-slate-800/80 space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="px-2.5 py-0.5 bg-blue-50 text-blue-700 border border-blue-200 font-mono font-bold text-xs rounded-full">
+                  <span className="px-2.5 py-0.5 bg-blue-50 dark:bg-blue-950/80 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 font-mono font-bold text-xs rounded-full">
                     {bundle.sku}
                   </span>
 
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-bold text-slate-400 mr-1">
+                    <span className="text-xs font-bold text-slate-400 dark:text-slate-500 mr-1">
                       {bundle.bundleItems?.length || 0} รายการชิ้นส่วน
                     </span>
 
@@ -391,7 +391,7 @@ export default function ProductBundlesPage() {
                     {canManage && (
                       <button
                         onClick={() => openEditModal(bundle)}
-                        className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors border border-slate-200"
+                        className="p-1.5 text-slate-400 dark:text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-slate-800 rounded-lg transition-colors border border-slate-200 dark:border-slate-800"
                         title="แก้ไขสูตรจัดชุดสินค้า"
                       >
                         <Edit className="w-3.5 h-3.5" />
@@ -401,7 +401,7 @@ export default function ProductBundlesPage() {
                     {canManage && (
                       <button
                         onClick={() => setDeletingBundle(bundle)}
-                        className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors border border-slate-200"
+                        className="p-1.5 text-slate-400 dark:text-slate-500 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-slate-800 rounded-lg transition-colors border border-slate-200 dark:border-slate-800"
                         title="ลบสูตรจัดชุดสินค้า"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
@@ -409,26 +409,26 @@ export default function ProductBundlesPage() {
                     )}
                   </div>
                 </div>
-                <h3 className="text-base font-bold text-slate-900">{bundle.name}</h3>
-                <p className="text-xs text-slate-500">หน่วยนับ: {bundle.unit}</p>
+                <h3 className="text-base font-bold text-slate-900 dark:text-white">{bundle.name}</h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400">หน่วยนับ: {bundle.unit}</p>
               </div>
 
               {/* Component breakdown */}
-              <div className="p-5 bg-slate-50/50 flex-1 space-y-3">
-                <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider">
+              <div className="p-5 bg-slate-50/50 dark:bg-slate-950/40 flex-1 space-y-3">
+                <h4 className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
                   ชิ้นส่วนส่วนประกอบภายใน (COMPONENT RECIPE):
                 </h4>
                 <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
                   {(bundle.bundleItems || []).map((item: any) => (
                     <div
                       key={item.id}
-                      className="flex items-center justify-between bg-white p-2.5 rounded-lg border border-slate-200 text-xs"
+                      className="flex items-center justify-between bg-white dark:bg-slate-800 p-2.5 rounded-lg border border-slate-200 dark:border-slate-700 text-xs"
                     >
                       <div>
-                        <span className="font-mono font-bold text-slate-800">{item.componentProduct?.sku}</span>
-                        <span className="text-slate-600 ml-2">{item.componentProduct?.name}</span>
+                        <span className="font-mono font-bold text-slate-800 dark:text-slate-200">{item.componentProduct?.sku}</span>
+                        <span className="text-slate-600 dark:text-slate-400 ml-2">{item.componentProduct?.name}</span>
                       </div>
-                      <span className="font-bold text-blue-600 shrink-0 font-mono bg-blue-50 px-2 py-0.5 rounded">
+                      <span className="font-bold text-blue-600 dark:text-blue-400 shrink-0 font-mono bg-blue-50 dark:bg-blue-950/80 px-2 py-0.5 rounded border border-blue-100 dark:border-blue-900">
                         x{item.quantity} {item.componentProduct?.unit || 'ชิ้น'}
                       </span>
                     </div>
@@ -437,7 +437,7 @@ export default function ProductBundlesPage() {
               </div>
 
               {/* Action */}
-              <div className="p-4 bg-white border-t border-slate-100 flex justify-end">
+              <div className="p-4 bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800 flex justify-end">
                 <button
                   onClick={() => {
                     setActiveBundle(bundle);
@@ -457,15 +457,15 @@ export default function ProductBundlesPage() {
 
       {/* Modal 1: Create / Edit Recipe */}
       {showRecipeModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4 overflow-y-auto">
-          <div className="bg-white rounded-2xl shadow-xl border border-slate-200 w-full max-w-2xl p-6 space-y-5">
-            <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2 border-b border-slate-100 pb-3">
-              <Layers className="w-5 h-5 text-blue-600" />
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 dark:bg-slate-950/80 backdrop-blur-xs p-4 overflow-y-auto">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-800 w-full max-w-2xl p-6 space-y-5">
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-3">
+              <Layers className="w-5 h-5 text-blue-600 dark:text-blue-400" />
               <span>{editingBundleId ? 'แก้ไขสูตรจัดชุดสินค้า' : 'สร้างสูตรจัดชุดสินค้าใหม่ (Bundle Recipe)'}</span>
             </h3>
 
             {errorMsg && (
-              <div className="bg-rose-50 border border-rose-200 text-rose-700 p-3 rounded-lg text-xs flex items-center gap-2">
+              <div className="bg-rose-50 dark:bg-rose-950/80 border border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300 p-3 rounded-lg text-xs flex items-center gap-2">
                 <AlertCircle className="w-4 h-4 shrink-0" />
                 <span>{errorMsg}</span>
               </div>
@@ -475,14 +475,14 @@ export default function ProductBundlesPage() {
               {/* Searchable Parent Product Selector with Quick Add Button */}
               <div>
                 <div className="flex items-center justify-between mb-1">
-                  <label className="block font-semibold text-slate-700">เลือกสินค้าตัวแม่ (Parent Bundle Item) *</label>
+                  <label className="block font-semibold text-slate-700 dark:text-slate-300">เลือกสินค้าตัวแม่ (Parent Bundle Item) *</label>
                   {!editingBundleId && (
                     <button
                       type="button"
                       onClick={openQuickAddParentModal}
-                      className="text-xs text-blue-600 hover:text-blue-800 font-bold flex items-center gap-1"
+                      className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-bold flex items-center gap-1"
                     >
-                      <PackagePlus className="w-3.5 h-3.5 text-blue-600" />
+                      <PackagePlus className="w-3.5 h-3.5" />
                       <span>+ เพิ่มสินค้าแม่ใหม่</span>
                     </button>
                   )}
@@ -493,12 +493,12 @@ export default function ProductBundlesPage() {
                     type="text"
                     disabled
                     value={selectedParentProduct ? `[${selectedParentProduct.sku}] ${selectedParentProduct.name}` : selectedParentId}
-                    className="w-full px-3 py-2 bg-slate-100 border border-slate-300 rounded-lg text-xs font-bold text-slate-800 outline-none"
+                    className="w-full px-3 py-2 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs font-bold text-slate-800 dark:text-slate-200 outline-none"
                   />
                 ) : (
                   <div className="relative">
                     <div className="relative">
-                      <Search className="w-4 h-4 absolute left-3 top-2.5 text-slate-400" />
+                      <Search className="w-4 h-4 absolute left-3 top-2.5 text-slate-400 dark:text-slate-500" />
                       <input
                         type="text"
                         value={parentSearch}
@@ -508,7 +508,7 @@ export default function ProductBundlesPage() {
                           setShowParentDropdown(true);
                         }}
                         placeholder="ค้นหาสินค้าตัวแม่ (พิมพ์ SKU, บาร์โค้ด หรือชื่อสินค้า)..."
-                        className="w-full pl-9 pr-8 py-2 bg-white border border-slate-300 rounded-lg outline-none focus:border-blue-500 font-semibold text-slate-900"
+                        className="w-full pl-9 pr-8 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg outline-none focus:border-blue-500 font-semibold text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500"
                       />
                       {selectedParentId && (
                         <button
@@ -518,7 +518,7 @@ export default function ProductBundlesPage() {
                             setParentSearch('');
                             setShowParentDropdown(true);
                           }}
-                          className="absolute right-2.5 top-2 text-slate-400 hover:text-slate-600 font-bold"
+                          className="absolute right-2.5 top-2 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 font-bold"
                         >
                           ✕
                         </button>
@@ -526,9 +526,9 @@ export default function ProductBundlesPage() {
                     </div>
 
                     {showParentDropdown && (
-                      <div className="absolute left-0 right-0 top-full mt-1 z-30 max-h-48 overflow-y-auto bg-white border border-slate-200 rounded-xl shadow-xl divide-y divide-slate-100">
+                      <div className="absolute left-0 right-0 top-full mt-1 z-30 max-h-48 overflow-y-auto bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl divide-y divide-slate-100 dark:divide-slate-700">
                         {filteredParentProducts.length === 0 ? (
-                          <div className="p-3 text-center text-slate-400">ไม่พบสินค้าตัวแม่ กดปุ่ม "+ เพิ่มสินค้าแม่ใหม่" เพื่อสร้างเพิ่ม</div>
+                          <div className="p-3 text-center text-slate-400 dark:text-slate-500">ไม่พบสินค้าตัวแม่ กดปุ่ม "+ เพิ่มสินค้าแม่ใหม่" เพื่อสร้างเพิ่ม</div>
                         ) : (
                           filteredParentProducts.slice(0, 15).map((p) => (
                             <div
@@ -538,16 +538,16 @@ export default function ProductBundlesPage() {
                                 setParentSearch(`[${p.sku}] ${p.name}`);
                                 setShowParentDropdown(false);
                               }}
-                              className={`p-2.5 hover:bg-blue-50 cursor-pointer flex items-center justify-between transition-colors ${
-                                selectedParentId === p.id ? 'bg-blue-50 font-bold' : ''
+                              className={`p-2.5 hover:bg-blue-50 dark:hover:bg-slate-700 cursor-pointer flex items-center justify-between transition-colors ${
+                                selectedParentId === p.id ? 'bg-blue-50 dark:bg-slate-700/80 font-bold' : ''
                               }`}
                             >
                               <div>
-                                <span className="font-mono font-bold text-blue-600 mr-2">[{p.sku}]</span>
-                                <span className="text-slate-800">{p.name}</span>
+                                <span className="font-mono font-bold text-blue-600 dark:text-blue-400 mr-2">[{p.sku}]</span>
+                                <span className="text-slate-800 dark:text-slate-200">{p.name}</span>
                               </div>
                               {p.isBundle && (
-                                <span className="text-[10px] bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full font-bold">
+                                <span className="text-[10px] bg-purple-100 dark:bg-purple-950/80 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800 px-2 py-0.5 rounded-full font-bold">
                                   ชุดแม่ (Bundle)
                                 </span>
                               )}
@@ -561,23 +561,23 @@ export default function ProductBundlesPage() {
               </div>
 
               {/* Add Component search dropdown */}
-              <div className="border border-slate-200 p-3 rounded-xl bg-slate-50 space-y-2">
-                <label className="block font-semibold text-slate-700">ค้นหาและเพิ่มชิ้นส่วนลูก (Component Parts)</label>
+              <div className="border border-slate-200 dark:border-slate-800 p-3 rounded-xl bg-slate-50 dark:bg-slate-950/50 space-y-2">
+                <label className="block font-semibold text-slate-700 dark:text-slate-300">ค้นหาและเพิ่มชิ้นส่วนลูก (Component Parts)</label>
                 <div className="flex gap-2">
                   <div className="relative flex-1">
-                    <Search className="w-4 h-4 absolute left-3 top-2.5 text-slate-400" />
+                    <Search className="w-4 h-4 absolute left-3 top-2.5 text-slate-400 dark:text-slate-500" />
                     <input
                       type="text"
                       value={productSearch}
                       onChange={(e) => setProductSearch(e.target.value)}
                       placeholder="พิมพ์ SKU หรือชื่อสินค้าอะไหล่ (จาก 800+ รายการ)..."
-                      className="w-full pl-9 pr-3 py-2 bg-white border border-slate-300 rounded-lg outline-none focus:border-blue-500"
+                      className="w-full pl-9 pr-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg outline-none focus:border-blue-500 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500"
                     />
                   </div>
                 </div>
 
                 {productSearch && (
-                  <div className="max-h-36 overflow-y-auto bg-white border border-slate-200 rounded-lg divide-y divide-slate-100 shadow-xs">
+                  <div className="max-h-36 overflow-y-auto bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg divide-y divide-slate-100 dark:divide-slate-700 shadow-xs">
                     {filteredSearchProducts.slice(0, 10).map((p) => (
                       <div
                         key={p.id}
@@ -585,10 +585,10 @@ export default function ProductBundlesPage() {
                           handleAddComponentRow(p.id);
                           setProductSearch('');
                         }}
-                        className="p-2 hover:bg-blue-50 cursor-pointer flex items-center justify-between"
+                        className="p-2 hover:bg-blue-50 dark:hover:bg-slate-700 cursor-pointer flex items-center justify-between"
                       >
-                        <span className="font-mono font-bold text-slate-900">[{p.sku}] {p.name}</span>
-                        <span className="text-blue-600 font-bold">+ เพิ่ม</span>
+                        <span className="font-mono font-bold text-slate-900 dark:text-white">[{p.sku}] {p.name}</span>
+                        <span className="text-blue-600 dark:text-blue-400 font-bold">+ เพิ่ม</span>
                       </div>
                     ))}
                   </div>
@@ -597,10 +597,10 @@ export default function ProductBundlesPage() {
 
               {/* Components selected table */}
               <div className="space-y-2">
-                <label className="block font-semibold text-slate-700">รายการชิ้นส่วนประกอบที่เลือกไว้ ({recipeComponents.length} รายการ):</label>
-                <div className="border border-slate-200 rounded-xl overflow-hidden">
+                <label className="block font-semibold text-slate-700 dark:text-slate-300">รายการชิ้นส่วนประกอบที่เลือกไว้ ({recipeComponents.length} รายการ):</label>
+                <div className="border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden">
                   <table className="w-full text-left">
-                    <thead className="bg-slate-100 text-slate-600 text-[11px] uppercase">
+                    <thead className="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-[11px] uppercase">
                       <tr>
                         <th className="p-2.5">รหัสสินค้าลูก</th>
                         <th className="p-2.5">ชื่อสินค้า</th>
@@ -608,10 +608,10 @@ export default function ProductBundlesPage() {
                         <th className="p-2.5 text-center w-12">ลบ</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-100">
+                    <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                       {recipeComponents.length === 0 ? (
                         <tr>
-                          <td colSpan={4} className="text-center py-4 text-slate-400">
+                          <td colSpan={4} className="text-center py-4 text-slate-400 dark:text-slate-500">
                             ยังไม่มีชิ้นส่วนลูก เลือกชิ้นส่วนจากกล่องค้นหาด้านบน
                           </td>
                         </tr>
@@ -621,23 +621,23 @@ export default function ProductBundlesPage() {
                           if (!prod) return null;
 
                           return (
-                            <tr key={c.componentProductId}>
-                              <td className="p-2.5 font-mono font-bold text-blue-600">{prod.sku}</td>
-                              <td className="p-2.5 text-slate-800">{prod.name}</td>
+                            <tr key={c.componentProductId} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/50">
+                              <td className="p-2.5 font-mono font-bold text-blue-600 dark:text-blue-400">{prod.sku}</td>
+                              <td className="p-2.5 text-slate-800 dark:text-slate-200">{prod.name}</td>
                               <td className="p-2.5 text-right">
                                 <input
                                   type="number"
                                   min="1"
                                   value={c.quantity}
                                   onChange={(e) => handleComponentQtyChange(c.componentProductId, parseInt(e.target.value) || 1)}
-                                  className="w-20 px-2 py-1 border border-slate-300 rounded text-right font-mono font-bold"
+                                  className="w-20 px-2 py-1 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded text-right font-mono font-bold"
                                 />
                               </td>
                               <td className="p-2.5 text-center">
                                 <button
                                   type="button"
                                   onClick={() => handleRemoveComponentRow(c.componentProductId)}
-                                  className="text-rose-500 hover:text-rose-700"
+                                  className="text-rose-500 hover:text-rose-700 dark:hover:text-rose-400"
                                 >
                                   <Trash2 className="w-4 h-4 mx-auto" />
                                 </button>
@@ -651,14 +651,14 @@ export default function ProductBundlesPage() {
                 </div>
               </div>
 
-              <div className="flex justify-end gap-2 pt-2">
+              <div className="flex justify-end gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
                 <button
                   type="button"
                   onClick={() => {
                     setShowRecipeModal(false);
                     setEditingBundleId(null);
                   }}
-                  className="px-4 py-2 border border-slate-300 rounded-lg text-slate-600 font-semibold"
+                  className="px-4 py-2 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-semibold"
                 >
                   ยกเลิก
                 </button>
@@ -677,9 +677,9 @@ export default function ProductBundlesPage() {
 
       {/* Modal 1.5: Quick Add New Parent Product */}
       {showQuickParentModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4">
-          <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-lg overflow-hidden">
-            <div className="bg-slate-900 text-white px-6 py-4 flex items-center justify-between">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 dark:bg-slate-950/80 backdrop-blur-xs p-4">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 w-full max-w-lg overflow-hidden">
+            <div className="bg-slate-900 dark:bg-slate-950 text-white px-6 py-4 flex items-center justify-between border-b border-slate-800">
               <h3 className="font-bold text-base flex items-center gap-2">
                 <PackagePlus className="w-5 h-5 text-blue-400" />
                 <span>สร้างสินค้าตัวแม่ใหม่ (Quick Add Bundle Product)</span>
@@ -695,7 +695,7 @@ export default function ProductBundlesPage() {
 
             <form onSubmit={handleCreateQuickParent} className="p-6 space-y-4 text-xs">
               {quickParentError && (
-                <div className="bg-rose-50 border border-rose-200 text-rose-700 p-3 rounded-lg flex items-center gap-2">
+                <div className="bg-rose-50 dark:bg-rose-950/80 border border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300 p-3 rounded-lg flex items-center gap-2">
                   <AlertCircle className="w-4 h-4 shrink-0" />
                   <span>{quickParentError}</span>
                 </div>
@@ -703,48 +703,48 @@ export default function ProductBundlesPage() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">รหัส SKU สินค้าแม่ *</label>
+                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">รหัส SKU สินค้าแม่ *</label>
                   <input
                     type="text"
                     required
                     value={quickParentSku}
                     onChange={(e) => setQuickParentSku(e.target.value.toUpperCase())}
                     placeholder="เช่น BUNDLE-SET-001"
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none font-mono uppercase focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg outline-none bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-mono uppercase focus:border-blue-500"
                   />
                 </div>
 
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">บาร์โค้ด (Barcode)</label>
+                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">บาร์โค้ด (Barcode)</label>
                   <input
                     type="text"
                     value={quickParentBarcode}
                     onChange={(e) => setQuickParentBarcode(e.target.value)}
                     placeholder="รหัสบาร์โค้ด..."
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none font-mono focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg outline-none bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-mono focus:border-blue-500"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">ชื่อสินค้าตัวแม่ (Parent Bundle Name) *</label>
+                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">ชื่อสินค้าตัวแม่ (Parent Bundle Name) *</label>
                 <input
                   type="text"
                   required
                   value={quickParentName}
                   onChange={(e) => setQuickParentName(e.target.value)}
                   placeholder="เช่น ชุดตู้หยอดเหรียญซักผ้าสำเร็จรูป (Set A)"
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none font-bold text-slate-900 focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg outline-none bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-bold focus:border-blue-500"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">หมวดหมู่สินค้า *</label>
+                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">หมวดหมู่สินค้า *</label>
                   <select
                     value={quickParentCategoryId}
                     onChange={(e) => setQuickParentCategoryId(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none font-semibold focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg outline-none bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-semibold focus:border-blue-500"
                   >
                     {categories.map((cat) => (
                       <option key={cat.id} value={cat.id}>
@@ -755,47 +755,47 @@ export default function ProductBundlesPage() {
                 </div>
 
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">หน่วยนับ *</label>
+                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">หน่วยนับ *</label>
                   <input
                     type="text"
                     required
                     value={quickParentUnit}
                     onChange={(e) => setQuickParentUnit(e.target.value)}
                     placeholder="เช่น ชุด, เซ็ต, เครื่อง"
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg outline-none bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:border-blue-500"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">ราคาทุน (Cost Price ฿)</label>
+                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">ราคาทุน (Cost Price ฿)</label>
                   <input
                     type="number"
                     step="0.01"
                     value={quickParentCostPrice}
                     onChange={(e) => setQuickParentCostPrice(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none font-mono text-right focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg outline-none bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-mono text-right focus:border-blue-500"
                   />
                 </div>
 
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">ราคาขาย (Selling Price ฿)</label>
+                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">ราคาขาย (Selling Price ฿)</label>
                   <input
                     type="number"
                     step="0.01"
                     value={quickParentSellingPrice}
                     onChange={(e) => setQuickParentSellingPrice(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none font-mono font-bold text-blue-600 text-right focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg outline-none bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 font-mono font-bold text-right focus:border-blue-500"
                   />
                 </div>
               </div>
 
-              <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-3">
+              <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end gap-3">
                 <button
                   type="button"
                   onClick={() => setShowQuickParentModal(false)}
-                  className="px-4 py-2 border border-slate-300 text-slate-600 rounded-lg font-semibold hover:bg-slate-50"
+                  className="px-4 py-2 border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 rounded-lg font-semibold hover:bg-slate-50 dark:hover:bg-slate-800"
                 >
                   ยกเลิก
                 </button>
@@ -815,30 +815,30 @@ export default function ProductBundlesPage() {
 
       {/* Modal 2: Assemble Workstation */}
       {showAssembleModal && activeBundle && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4">
-          <div className="bg-white rounded-2xl shadow-xl border border-slate-200 w-full max-w-lg p-6 space-y-5">
-            <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2 border-b border-slate-100 pb-3">
-              <ArrowRightLeft className="w-5 h-5 text-indigo-600" />
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 dark:bg-slate-950/80 backdrop-blur-xs p-4">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-800 w-full max-w-lg p-6 space-y-5">
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-3">
+              <ArrowRightLeft className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
               <span>ประกอบ / ถอดชุดสินค้า: [{activeBundle.sku}]</span>
             </h3>
 
             {errorMsg && (
-              <div className="bg-rose-50 border border-rose-200 text-rose-700 p-3 rounded-lg text-xs flex items-center gap-2">
+              <div className="bg-rose-50 dark:bg-rose-950/80 border border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300 p-3 rounded-lg text-xs flex items-center gap-2">
                 <AlertCircle className="w-4 h-4 shrink-0" />
                 <span>{errorMsg}</span>
               </div>
             )}
 
             <form onSubmit={handleExecuteAssemble} className="space-y-4 text-xs">
-              <div className="bg-indigo-50 p-3 rounded-xl border border-indigo-100">
-                <p className="font-bold text-indigo-900">{activeBundle.name}</p>
-                <p className="text-[11px] text-indigo-700 mt-0.5">
+              <div className="bg-indigo-50 dark:bg-indigo-950/50 p-3 rounded-xl border border-indigo-100 dark:border-indigo-900">
+                <p className="font-bold text-indigo-900 dark:text-indigo-200">{activeBundle.name}</p>
+                <p className="text-[11px] text-indigo-700 dark:text-indigo-300 mt-0.5">
                   ประกอบจากชิ้นส่วนทั้งหมด {activeBundle.bundleItems?.length || 0} รายการ
                 </p>
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">เลือกโหมดการทำงาน</label>
+                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">เลือกโหมดการทำงาน</label>
                 <div className="grid grid-cols-2 gap-2">
                   <button
                     type="button"
@@ -846,7 +846,7 @@ export default function ProductBundlesPage() {
                     className={`py-2 rounded-lg font-bold text-xs border transition-all ${
                       assembleMode === 'ASSEMBLE'
                         ? 'bg-indigo-600 text-white border-indigo-600 shadow-xs'
-                        : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
+                        : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700'
                     }`}
                   >
                     🔨 ประกอบเข้าคลัง (Assemble)
@@ -857,7 +857,7 @@ export default function ProductBundlesPage() {
                     className={`py-2 rounded-lg font-bold text-xs border transition-all ${
                       assembleMode === 'DISASSEMBLE'
                         ? 'bg-amber-600 text-white border-amber-600 shadow-xs'
-                        : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
+                        : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700'
                     }`}
                   >
                     🔧 ถอดชิ้นส่วน (Disassemble)
@@ -866,11 +866,11 @@ export default function ProductBundlesPage() {
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">เลือกคลังสินค้า *</label>
+                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">เลือกคลังสินค้า *</label>
                 <select
                   value={selectedWarehouseId}
                   onChange={(e) => setSelectedWarehouseId(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none focus:border-indigo-500 font-semibold"
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg outline-none bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:border-indigo-500 font-semibold"
                 >
                   {warehouses.map((w) => (
                     <option key={w.id} value={w.id}>
@@ -881,21 +881,21 @@ export default function ProductBundlesPage() {
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">จำนวนชุดสินค้าที่ต้องการดำเนินงาน *</label>
+                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">จำนวนชุดสินค้าที่ต้องการดำเนินงาน *</label>
                 <input
                   type="number"
                   min="1"
                   value={assembleQty}
                   onChange={(e) => setAssembleQty(parseInt(e.target.value) || 1)}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none focus:border-indigo-500 font-mono font-bold text-sm"
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg outline-none focus:border-indigo-500 font-mono font-bold text-sm"
                 />
               </div>
 
-              <div className="flex justify-end gap-2 pt-2">
+              <div className="flex justify-end gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
                 <button
                   type="button"
                   onClick={() => setShowAssembleModal(false)}
-                  className="px-4 py-2 border border-slate-300 rounded-lg text-slate-600 font-semibold"
+                  className="px-4 py-2 border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 rounded-lg font-semibold hover:bg-slate-50 dark:hover:bg-slate-800"
                 >
                   ยกเลิก
                 </button>
@@ -914,25 +914,25 @@ export default function ProductBundlesPage() {
 
       {/* Modal 3: Delete Bundle Recipe Confirmation */}
       {deletingBundle && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4">
-          <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-md p-6 space-y-4">
-            <div className="flex items-center gap-3 text-rose-600 border-b border-slate-100 pb-3">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 dark:bg-slate-950/80 backdrop-blur-xs p-4">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 w-full max-w-md p-6 space-y-4">
+            <div className="flex items-center gap-3 text-rose-600 dark:text-rose-400 border-b border-slate-100 dark:border-slate-800 pb-3">
               <AlertCircle className="w-6 h-6 shrink-0" />
-              <h3 className="font-bold text-lg text-slate-900">ยืนยันการลบสูตรสินค้าชุด</h3>
+              <h3 className="font-bold text-lg text-slate-900 dark:text-white">ยืนยันการลบสูตรสินค้าชุด</h3>
             </div>
 
-            <p className="text-sm text-slate-600 leading-relaxed">
-              คุณต้องการลบสูตรสินค้าชุด <strong className="text-slate-900">[{deletingBundle.sku}] {deletingBundle.name}</strong> ใช่หรือไม่?
+            <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+              คุณต้องการลบสูตรสินค้าชุด <strong className="text-slate-900 dark:text-white">[{deletingBundle.sku}] {deletingBundle.name}</strong> ใช่หรือไม่?
             </p>
-            <p className="text-xs text-slate-500 bg-slate-50 p-3 rounded-lg border border-slate-200">
+            <p className="text-xs text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-800/60 p-3 rounded-lg border border-slate-200 dark:border-slate-700">
               * การลบสูตรสินค้าชุดจะทำการยกเลิกสถานะสินค้าชุดและลบรายการส่วนประกอบภายใน แต่จะไม่กระทบสต็อกสินค้าที่มีอยู่แล้ว
             </p>
 
-            <div className="flex justify-end gap-3 pt-3">
+            <div className="flex justify-end gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
               <button
                 type="button"
                 onClick={() => setDeletingBundle(null)}
-                className="px-4 py-2 border border-slate-300 text-slate-600 rounded-xl text-sm font-semibold hover:bg-slate-50"
+                className="px-4 py-2 border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 rounded-xl text-sm font-semibold hover:bg-slate-50 dark:hover:bg-slate-800"
               >
                 ยกเลิก
               </button>
