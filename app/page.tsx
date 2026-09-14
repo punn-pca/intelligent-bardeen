@@ -43,8 +43,8 @@ export default function DashboardPage() {
   });
 
   const [lowStockProducts, setLowStockProducts] = useState<any[]>([]);
-  const [dailyData, setDailyData] = useState<any[]>([]);
   const [categoryValuation, setCategoryValuation] = useState<any[]>([]);
+  const [dailyData, setDailyData] = useState<any[]>([]);
   const [topMovements, setTopMovements] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -52,51 +52,43 @@ export default function DashboardPage() {
     async function loadDashboardData() {
       try {
         setLoading(true);
-
-        const [prodRes, invRes, movRes, catRes] = await Promise.all([
-          fetch('/api/products?limit=2000'),
-          fetch('/api/inventory'),
-          fetch('/api/stock/movements?limit=1000'),
-          fetch('/api/categories'),
+        const [prodRes, invRes, movRes] = await Promise.all([
+          fetch('/api/products').then((r) => r.json()),
+          fetch('/api/inventory').then((r) => r.json()),
+          fetch('/api/stock/movements').then((r) => r.json()),
         ]);
 
-        const prodData = await prodRes.json();
-        const invData = await invRes.json();
-        const movData = await movRes.json();
-        const catData = await catRes.json();
+        const prods = Array.isArray(prodRes) ? prodRes : prodRes.products || [];
+        const invs = Array.isArray(invRes) ? invRes : invRes.inventory || [];
+        const movs = Array.isArray(movRes) ? movRes : movRes.movements || [];
 
-        const prods = prodData.data || (Array.isArray(prodData) ? prodData : []);
-        const invs = invData.data || (Array.isArray(invData) ? invData : []);
-        const movs = movData.data || (Array.isArray(movData) ? movData : []);
+        // Aggregate Metrics
+        const totalProducts = prods.length;
+        const totalSku = prods.filter((p: any) => p.sku).length;
+        const inStock = prods.filter((p: any) => p.stockStatus === 'IN_STOCK').length;
+        const lowStock = prods.filter((p: any) => p.stockStatus === 'LOW_STOCK').length;
+        const outOfStock = prods.filter((p: any) => p.stockStatus === 'OUT_OF_STOCK').length;
+        const totalValuation = invs.reduce((sum: number, item: any) => sum + (item.stockValue || 0), 0);
 
-        // Metric Calculations
-        const totalProducts = prodData.pagination?.total || prods.length;
-        const totalSku = prodData.pagination?.total || prods.length;
-        const inStockCount = prods.filter((p: any) => p.stockStatus === 'IN_STOCK').length;
-        const lowStockCount = prods.filter((p: any) => p.stockStatus === 'LOW_STOCK').length;
-        const outOfStockCount = prods.filter((p: any) => p.stockStatus === 'OUT_OF_STOCK').length;
-
-        const totalValuation = invs.reduce((acc: number, item: any) => acc + item.stockValue, 0);
-
-        // Today In / Out
-        const todayStr = new Date().toISOString().slice(0, 10);
+        // Movement totals for today
+        const todayStr = new Date().toISOString().split('T')[0];
         let todayIn = 0;
         let todayOut = 0;
 
         movs.forEach((m: any) => {
-          const mDate = new Date(m.createdAt).toISOString().slice(0, 10);
+          const mDate = new Date(m.createdAt).toISOString().split('T')[0];
           if (mDate === todayStr) {
-            if (m.type === 'RECEIVE' || m.type === 'STOCK_IN') todayIn += Math.abs(m.quantity);
-            if (m.type === 'ISSUE' || m.type === 'STOCK_OUT') todayOut += Math.abs(m.quantity);
+            if (m.type === 'IN') todayIn += m.quantity;
+            if (m.type === 'OUT') todayOut += Math.abs(m.quantity);
           }
         });
 
         setMetrics({
           totalProducts,
           totalSku,
-          inStockCount,
-          lowStockCount,
-          outOfStockCount,
+          inStockCount: inStock,
+          lowStockCount: lowStock,
+          outOfStockCount: outOfStock,
           totalValuation,
           todayStockIn: todayIn,
           todayStockOut: todayOut,
@@ -201,10 +193,10 @@ export default function DashboardPage() {
   return (
     <div className="space-y-6 animate-in fade-in duration-200">
       {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-5">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Dashboard บริหารคลังสินค้า</h1>
-          <p className="text-sm text-slate-500 mt-1">
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">Dashboard บริหารคลังสินค้า</h1>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
             ภาพรวมการเคลื่อนไหวสต็อก มูลค่าสินค้าคงคลัง และรายการสินค้าเตือนภัย
           </p>
         </div>
@@ -230,128 +222,128 @@ export default function DashboardPage() {
       {/* KPI Cards Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Total Products */}
-        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs flex items-center justify-between">
+        <div className="bg-white dark:bg-slate-900 p-5 rounded-xl border border-slate-200 dark:border-slate-800/80 shadow-xs flex items-center justify-between transition-colors">
           <div>
-            <span className="text-xs font-semibold text-slate-500">จำนวนสินค้าทั้งหมด</span>
+            <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">จำนวนสินค้าทั้งหมด</span>
             <div className="flex items-baseline gap-2 mt-1">
-              <span className="text-2xl font-black text-slate-900 font-mono">
-                {loading ? '...' : metrics.totalProducts.toLocaleString()}
+              <span className="text-2xl font-black text-slate-900 dark:text-slate-100 font-mono">
+                {metrics.totalProducts.toLocaleString()}
               </span>
-              <span className="text-xs text-slate-500 font-medium">รายการ</span>
+              <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">รายการ</span>
             </div>
           </div>
-          <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-600">
+          <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-300">
             <Package className="w-5 h-5" />
           </div>
         </div>
 
         {/* Total SKUs */}
-        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs flex items-center justify-between">
+        <div className="bg-white dark:bg-slate-900 p-5 rounded-xl border border-slate-200 dark:border-slate-800/80 shadow-xs flex items-center justify-between transition-colors">
           <div>
-            <span className="text-xs font-semibold text-slate-500">จำนวน SKU</span>
+            <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">จำนวน SKU</span>
             <div className="flex items-baseline gap-2 mt-1">
-              <span className="text-2xl font-black text-slate-900 font-mono">
-                {loading ? '...' : metrics.totalSku.toLocaleString()}
+              <span className="text-2xl font-black text-slate-900 dark:text-slate-100 font-mono">
+                {metrics.totalSku.toLocaleString()}
               </span>
-              <span className="text-xs text-slate-500 font-medium">SKU</span>
+              <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">SKU</span>
             </div>
           </div>
-          <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600">
+          <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-950/60 flex items-center justify-center text-blue-600 dark:text-blue-400">
             <Boxes className="w-5 h-5" />
           </div>
         </div>
 
         {/* Total Valuation */}
-        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs flex items-center justify-between">
+        <div className="bg-white dark:bg-slate-900 p-5 rounded-xl border border-slate-200 dark:border-slate-800/80 shadow-xs flex items-center justify-between transition-colors">
           <div>
-            <span className="text-xs font-semibold text-slate-500">มูลค่าสต็อกรวม</span>
+            <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">มูลค่าสต็อกรวม</span>
             <div className="flex items-baseline gap-2 mt-1">
-              <span className="text-2xl font-black text-emerald-600 font-mono">
-                ฿{loading ? '...' : metrics.totalValuation.toLocaleString(undefined, { minimumFractionDigits: 0 })}
+              <span className="text-2xl font-black text-emerald-600 dark:text-emerald-400 font-mono">
+                ฿{metrics.totalValuation.toLocaleString(undefined, { minimumFractionDigits: 0 })}
               </span>
             </div>
           </div>
-          <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600">
+          <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
             <CircleDollarSign className="w-5 h-5" />
           </div>
         </div>
 
         {/* Low Stock Warning */}
-        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs flex items-center justify-between">
+        <div className="bg-white dark:bg-slate-900 p-5 rounded-xl border border-slate-200 dark:border-slate-800/80 shadow-xs flex items-center justify-between transition-colors">
           <div>
-            <span className="text-xs font-semibold text-slate-500">สินค้าใกล้หมด</span>
+            <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">สินค้าใกล้หมด</span>
             <div className="flex items-baseline gap-2 mt-1">
-              <span className="text-2xl font-black text-amber-600 font-mono">
-                {loading ? '...' : metrics.lowStockCount.toLocaleString()}
+              <span className="text-2xl font-black text-amber-600 dark:text-amber-400 font-mono">
+                {metrics.lowStockCount.toLocaleString()}
               </span>
-              <span className="text-xs text-slate-500 font-medium">รายการ</span>
+              <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">รายการ</span>
             </div>
           </div>
-          <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center text-amber-600">
+          <div className="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-950/60 flex items-center justify-center text-amber-600 dark:text-amber-400">
             <AlertTriangle className="w-5 h-5" />
           </div>
         </div>
 
         {/* Out of Stock */}
-        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs flex items-center justify-between">
+        <div className="bg-white dark:bg-slate-900 p-5 rounded-xl border border-slate-200 dark:border-slate-800/80 shadow-xs flex items-center justify-between transition-colors">
           <div>
-            <span className="text-xs font-semibold text-slate-500">สินค้าหมดสต็อก</span>
+            <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">สินค้าหมดสต็อก</span>
             <div className="flex items-baseline gap-2 mt-1">
-              <span className="text-2xl font-black text-rose-600 font-mono">
-                {loading ? '...' : metrics.outOfStockCount.toLocaleString()}
+              <span className="text-2xl font-black text-rose-600 dark:text-rose-400 font-mono">
+                {metrics.outOfStockCount.toLocaleString()}
               </span>
-              <span className="text-xs text-slate-500 font-medium">รายการ</span>
+              <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">รายการ</span>
             </div>
           </div>
-          <div className="w-10 h-10 rounded-xl bg-rose-50 flex items-center justify-center text-rose-600">
+          <div className="w-10 h-10 rounded-xl bg-rose-50 dark:bg-rose-950/60 flex items-center justify-center text-rose-600 dark:text-rose-400">
             <XCircle className="w-5 h-5" />
           </div>
         </div>
 
         {/* Today Stock In */}
-        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs flex items-center justify-between">
+        <div className="bg-white dark:bg-slate-900 p-5 rounded-xl border border-slate-200 dark:border-slate-800/80 shadow-xs flex items-center justify-between transition-colors">
           <div>
-            <span className="text-xs font-semibold text-slate-500">รับเข้าวันนี้</span>
+            <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">รับเข้าวันนี้</span>
             <div className="flex items-baseline gap-2 mt-1">
-              <span className="text-2xl font-black text-emerald-600 font-mono">
-                +{loading ? '...' : metrics.todayStockIn.toLocaleString()}
+              <span className="text-2xl font-black text-emerald-600 dark:text-emerald-400 font-mono">
+                +{metrics.todayStockIn.toLocaleString()}
               </span>
-              <span className="text-xs text-slate-500 font-medium">ชิ้น</span>
+              <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">ชิ้น</span>
             </div>
           </div>
-          <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600">
+          <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
             <ArrowDownRight className="w-5 h-5" />
           </div>
         </div>
 
         {/* Today Stock Out */}
-        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs flex items-center justify-between">
+        <div className="bg-white dark:bg-slate-900 p-5 rounded-xl border border-slate-200 dark:border-slate-800/80 shadow-xs flex items-center justify-between transition-colors">
           <div>
-            <span className="text-xs font-semibold text-slate-500">เบิกออกวันนี้</span>
+            <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">เบิกออกวันนี้</span>
             <div className="flex items-baseline gap-2 mt-1">
-              <span className="text-2xl font-black text-rose-600 font-mono">
-                -{loading ? '...' : metrics.todayStockOut.toLocaleString()}
+              <span className="text-2xl font-black text-rose-600 dark:text-rose-400 font-mono">
+                -{metrics.todayStockOut.toLocaleString()}
               </span>
-              <span className="text-xs text-slate-500 font-medium">ชิ้น</span>
+              <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">ชิ้น</span>
             </div>
           </div>
-          <div className="w-10 h-10 rounded-xl bg-rose-50 flex items-center justify-center text-rose-600">
+          <div className="w-10 h-10 rounded-xl bg-rose-50 dark:bg-rose-950/60 flex items-center justify-center text-rose-600 dark:text-rose-400">
             <ArrowUpRight className="w-5 h-5" />
           </div>
         </div>
 
         {/* Recent Movements */}
-        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs flex items-center justify-between">
+        <div className="bg-white dark:bg-slate-900 p-5 rounded-xl border border-slate-200 dark:border-slate-800/80 shadow-xs flex items-center justify-between transition-colors">
           <div>
-            <span className="text-xs font-semibold text-slate-500">รายการเคลื่อนไหวล่าสุด</span>
+            <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">รายการเคลื่อนไหวล่าสุด</span>
             <div className="flex items-baseline gap-2 mt-1">
-              <span className="text-2xl font-black text-purple-600 font-mono">
-                {loading ? '...' : metrics.recentMovementsCount.toLocaleString()}
+              <span className="text-2xl font-black text-purple-600 dark:text-purple-400 font-mono">
+                {metrics.recentMovementsCount.toLocaleString()}
               </span>
-              <span className="text-xs text-slate-500 font-medium">ครั้ง</span>
+              <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">ครั้ง</span>
             </div>
           </div>
-          <div className="w-10 h-10 rounded-xl bg-purple-50 flex items-center justify-center text-purple-600">
+          <div className="w-10 h-10 rounded-xl bg-purple-50 dark:bg-purple-950/60 flex items-center justify-center text-purple-600 dark:text-purple-400">
             <History className="w-5 h-5" />
           </div>
         </div>
@@ -360,24 +352,24 @@ export default function DashboardPage() {
       {/* Analytics Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Bar Chart: Daily Stock Movement */}
-        <div className="lg:col-span-2 bg-white p-5 rounded-xl border border-slate-200 shadow-xs space-y-4">
+        <div className="lg:col-span-2 bg-white dark:bg-slate-900 p-5 rounded-xl border border-slate-200 dark:border-slate-800/80 shadow-xs space-y-4 transition-colors">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <BarChart3 className="w-5 h-5 text-blue-600" />
-              <h2 className="font-bold text-slate-900 text-sm">การเคลื่อนไหวสต็อกประจำวัน (7 วันล่าสุด)</h2>
+              <BarChart3 className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+              <h2 className="font-bold text-slate-900 dark:text-white text-sm">การเคลื่อนไหวสต็อกประจำวัน (7 วันล่าสุด)</h2>
             </div>
           </div>
 
           <div className="h-64 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={dailyData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                <XAxis dataKey="day" tick={{ fontSize: 11, fill: '#64748b' }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fontSize: 11, fill: '#64748b' }} axisLine={false} tickLine={false} />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#334155" />
+                <XAxis dataKey="day" tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
                 <Tooltip
                   contentStyle={{
                     backgroundColor: '#0f172a',
-                    border: 'none',
+                    borderColor: '#334155',
                     borderRadius: '8px',
                     color: '#fff',
                     fontSize: '12px',
@@ -391,15 +383,15 @@ export default function DashboardPage() {
         </div>
 
         {/* Pie Chart: Valuation by Category */}
-        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs space-y-4 flex flex-col justify-between">
-          <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
-            <PieChartIcon className="w-5 h-5 text-indigo-600" />
-            <h2 className="font-bold text-slate-900 text-sm">สัดส่วนมูลค่าสต็อกตามหมวดหมู่</h2>
+        <div className="bg-white dark:bg-slate-900 p-5 rounded-xl border border-slate-200 dark:border-slate-800/80 shadow-xs space-y-4 flex flex-col justify-between transition-colors">
+          <div className="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-3">
+            <PieChartIcon className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+            <h2 className="font-bold text-slate-900 dark:text-white text-sm">สัดส่วนมูลค่าสต็อกตามหมวดหมู่</h2>
           </div>
 
           {categoryValuation.length === 0 ? (
             <div className="h-64 flex items-center justify-center">
-              <span className="text-xs text-slate-400">ไม่มีข้อมูลหมวดหมู่</span>
+              <span className="text-xs text-slate-400 dark:text-slate-500">ไม่มีข้อมูลหมวดหมู่</span>
             </div>
           ) : (
             <div className="space-y-4">
@@ -423,7 +415,7 @@ export default function DashboardPage() {
                       formatter={(value: any) => [`฿${Number(value).toLocaleString()}`, 'มูลค่า']}
                       contentStyle={{
                         backgroundColor: '#0f172a',
-                        border: 'none',
+                        borderColor: '#334155',
                         borderRadius: '8px',
                         color: '#fff',
                         fontSize: '12px',
@@ -434,7 +426,7 @@ export default function DashboardPage() {
               </div>
 
               {/* Scrollable Custom Legend List */}
-              <div className="max-h-36 overflow-y-auto space-y-2 pr-1 border-t border-slate-100 pt-3">
+              <div className="max-h-36 overflow-y-auto space-y-2 pr-1 border-t border-slate-100 dark:border-slate-800 pt-3">
                 {categoryValuation.map((item, index) => {
                   const totalVal = categoryValuation.reduce((sum, i) => sum + i.value, 0);
                   const color = COLORS[index % COLORS.length];
@@ -446,15 +438,15 @@ export default function DashboardPage() {
                           className="w-2.5 h-2.5 rounded-full shrink-0"
                           style={{ backgroundColor: color }}
                         />
-                        <span className="text-slate-700 font-medium truncate" title={item.name}>
+                        <span className="text-slate-700 dark:text-slate-300 font-medium truncate" title={item.name}>
                           {item.name}
                         </span>
                       </div>
-                      <div className="flex items-center gap-2 shrink-0 text-slate-600">
-                        <span className="font-semibold text-slate-900">
+                      <div className="flex items-center gap-2 shrink-0 text-slate-600 dark:text-slate-400">
+                        <span className="font-semibold text-slate-900 dark:text-slate-100">
                           ฿{item.value.toLocaleString()}
                         </span>
-                        <span className="text-slate-400 text-[10px] min-w-[36px] text-right">
+                        <span className="text-slate-400 dark:text-slate-500 text-[10px] min-w-[36px] text-right">
                           ({pct}%)
                         </span>
                       </div>
@@ -470,20 +462,20 @@ export default function DashboardPage() {
       {/* Tables Row: Low Stock Warning & Top Fast-Moving Products */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Low Stock Table */}
-        <div className="lg:col-span-2 bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
-          <div className="p-4 border-b border-slate-100 flex items-center justify-between">
+        <div className="lg:col-span-2 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800/80 shadow-xs overflow-hidden transition-colors">
+          <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <AlertTriangle className="w-5 h-5 text-amber-500" />
-              <h2 className="font-bold text-slate-900 text-sm">รายการสินค้าต้องเฝ้าระวัง (Low & Out of Stock)</h2>
+              <h2 className="font-bold text-slate-900 dark:text-white text-sm">รายการสินค้าต้องเฝ้าระวัง (Low & Out of Stock)</h2>
             </div>
-            <Link href="/inventory" className="text-xs text-blue-600 font-semibold hover:underline">
+            <Link href="/inventory" className="text-xs text-blue-600 dark:text-blue-400 font-semibold hover:underline">
               ดูตารางสต็อกทั้งหมด →
             </Link>
           </div>
 
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="bg-slate-50 text-slate-500 uppercase">
+              <thead className="bg-slate-50 dark:bg-slate-800/60 text-slate-500 dark:text-slate-400 uppercase">
                 <tr>
                   <th className="p-3">SKU</th>
                   <th className="p-3">ชื่อสินค้า</th>
@@ -492,26 +484,26 @@ export default function DashboardPage() {
                   <th className="p-3 text-center">สถานะ</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                 {lowStockProducts.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="text-center py-6 text-slate-400">
+                    <td colSpan={5} className="text-center py-6 text-slate-400 dark:text-slate-500">
                       ไม่มีสินค้าใกล้หมดสต็อก
                     </td>
                   </tr>
                 ) : (
                   lowStockProducts.map((p) => (
-                    <tr key={p.id} className="hover:bg-slate-50">
-                      <td className="p-3 font-mono font-bold text-slate-900">{p.sku}</td>
-                      <td className="p-3 font-semibold text-slate-800">{p.name}</td>
-                      <td className="p-3 text-slate-500">{p.category?.name || '-'}</td>
-                      <td className="p-3 text-right font-mono font-bold">{p.totalOnHand}</td>
+                    <tr key={p.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                      <td className="p-3 font-mono font-bold text-slate-900 dark:text-slate-100">{p.sku}</td>
+                      <td className="p-3 font-semibold text-slate-800 dark:text-slate-200">{p.name}</td>
+                      <td className="p-3 text-slate-500 dark:text-slate-400">{p.category?.name || '-'}</td>
+                      <td className="p-3 text-right font-mono font-bold text-slate-900 dark:text-slate-100">{p.totalOnHand}</td>
                       <td className="p-3 text-center">
                         <span
                           className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
                             p.stockStatus === 'OUT_OF_STOCK'
-                              ? 'bg-rose-100 text-rose-700'
-                              : 'bg-amber-100 text-amber-700'
+                              ? 'bg-rose-100 dark:bg-rose-950/80 text-rose-700 dark:text-rose-300'
+                              : 'bg-amber-100 dark:bg-amber-950/80 text-amber-700 dark:text-amber-300'
                           }`}
                         >
                           {p.stockStatus === 'OUT_OF_STOCK' ? 'หมดสต็อก' : 'ใกล้หมด'}
@@ -526,25 +518,25 @@ export default function DashboardPage() {
         </div>
 
         {/* Top Fast-Moving Products Card */}
-        <div className="bg-white rounded-xl border border-slate-200 shadow-xs p-4 space-y-4">
-          <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
-            <TrendingUp className="w-5 h-5 text-emerald-600" />
-            <h2 className="font-bold text-slate-900 text-sm">สินค้ายอดนิยมเคลื่อนไหวสูงสุด (Fast-Moving)</h2>
+        <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800/80 shadow-xs p-4 space-y-4 transition-colors">
+          <div className="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-3">
+            <TrendingUp className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+            <h2 className="font-bold text-slate-900 dark:text-white text-sm">สินค้ายอดนิยมเคลื่อนไหวสูงสุด (Fast-Moving)</h2>
           </div>
 
           <div className="space-y-3">
             {topMovements.length === 0 ? (
-              <p className="text-xs text-slate-400 text-center py-4">ยังไม่มีประวัติการหมุนเวียนสินค้า</p>
+              <p className="text-xs text-slate-400 dark:text-slate-500 text-center py-4">ยังไม่มีประวัติการหมุนเวียนสินค้า</p>
             ) : (
               topMovements.map((item, idx) => (
-                <div key={idx} className="flex items-center justify-between p-2.5 bg-slate-50 rounded-lg text-xs">
+                <div key={idx} className="flex items-center justify-between p-2.5 bg-slate-50 dark:bg-slate-800/60 rounded-lg text-xs">
                   <div className="flex items-center gap-2 truncate">
-                    <span className="w-5 h-5 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-[10px]">
+                    <span className="w-5 h-5 rounded-full bg-blue-100 dark:bg-blue-900/60 text-blue-700 dark:text-blue-300 flex items-center justify-center font-bold text-[10px]">
                       {idx + 1}
                     </span>
-                    <span className="font-semibold text-slate-800 truncate">{item.name}</span>
+                    <span className="font-semibold text-slate-800 dark:text-slate-200 truncate">{item.name}</span>
                   </div>
-                  <span className="font-mono font-bold text-blue-600 shrink-0">{item.count} ชิ้น</span>
+                  <span className="font-mono font-bold text-blue-600 dark:text-blue-400 shrink-0">{item.count} ชิ้น</span>
                 </div>
               ))
             )}
