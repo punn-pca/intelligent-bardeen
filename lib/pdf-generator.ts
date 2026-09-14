@@ -170,13 +170,14 @@ export function generateDocumentHTML(doc: DocumentPrintData): string {
     <meta charset="UTF-8">
     <title>${doc?.documentNo || 'Document'} - ${title}</title>
     <style>
+      @import url('https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap');
       @page {
         size: A4 portrait;
         margin: 12mm 10mm;
       }
       * { box-sizing: border-box; }
       body {
-        font-family: 'Sarabun', 'Garuda', 'Angsana New', sans-serif;
+        font-family: 'Prompt', 'Garuda', sans-serif;
         color: #000;
         margin: 0;
         padding: 0;
