@@ -29,9 +29,9 @@ async function runAllTests() {
     const warehouseUser = await prisma.user.findFirstOrThrow({ where: { username: 'warehouse' } });
     const accountingUser = await prisma.user.findFirstOrThrow({ where: { username: 'accounting' } });
 
-    const whMain = await prisma.warehouse.findFirstOrThrow({ where: { code: 'MAIN' } });
-    const whBranch = await prisma.warehouse.findFirstOrThrow({ where: { code: 'BRANCH-01' } });
-    const supplier = await prisma.supplier.findFirstOrThrow({ where: { code: 'SUP-001' } });
+    const whMain = await prisma.warehouse.findFirstOrThrow({ where: { code: 'WH-MAIN' } });
+    const whBranch = await prisma.warehouse.findFirstOrThrow({ where: { code: 'WH-BRANCH1' } });
+    const supplier = await prisma.supplier.findFirstOrThrow({ where: { code: 'SUPP-001' } });
     const customer = await prisma.customer.findFirstOrThrow({ where: { code: 'CUST-001' } });
     const category = await prisma.category.findFirst();
 
