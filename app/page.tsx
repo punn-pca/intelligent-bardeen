@@ -153,7 +153,17 @@ export default function DashboardPage() {
     loadDashboardData();
   }, []);
 
-  const COLORS = ['#2563eb', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
+  const COLORS = [
+    '#2563eb', // Blue
+    '#10b981', // Emerald
+    '#f59e0b', // Amber
+    '#ef4444', // Red
+    '#8b5cf6', // Purple
+    '#06b6d4', // Cyan
+    '#ec4899', // Pink
+    '#6366f1', // Indigo
+    '#84cc16', // Lime
+  ];
 
   return (
     <div className="space-y-6 animate-in fade-in duration-200">
@@ -348,46 +358,79 @@ export default function DashboardPage() {
         </div>
 
         {/* Pie Chart: Valuation by Category */}
-        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs space-y-4">
-          <div className="flex items-center gap-2">
+        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs space-y-4 flex flex-col justify-between">
+          <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
             <PieChartIcon className="w-5 h-5 text-indigo-600" />
             <h2 className="font-bold text-slate-900 text-sm">สัดส่วนมูลค่าสต็อกตามหมวดหมู่</h2>
           </div>
 
-          <div className="h-64 w-full flex items-center justify-center">
-            {categoryValuation.length === 0 ? (
+          {categoryValuation.length === 0 ? (
+            <div className="h-64 flex items-center justify-center">
               <span className="text-xs text-slate-400">ไม่มีข้อมูลหมวดหมู่</span>
-            ) : (
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={categoryValuation}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={50}
-                    outerRadius={80}
-                    paddingAngle={3}
-                    dataKey="value"
-                  >
-                    {categoryValuation.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip
-                    formatter={(value: any) => [`฿${Number(value).toLocaleString()}`, 'มูลค่า']}
-                    contentStyle={{
-                      backgroundColor: '#0f172a',
-                      border: 'none',
-                      borderRadius: '8px',
-                      color: '#fff',
-                      fontSize: '12px',
-                    }}
-                  />
-                  <Legend wrapperStyle={{ fontSize: '11px', paddingTop: '10px' }} />
-                </PieChart>
-              </ResponsiveContainer>
-            )}
-          </div>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <div className="h-44 w-full flex items-center justify-center">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={categoryValuation}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={45}
+                      outerRadius={70}
+                      paddingAngle={3}
+                      dataKey="value"
+                    >
+                      {categoryValuation.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip
+                      formatter={(value: any) => [`฿${Number(value).toLocaleString()}`, 'มูลค่า']}
+                      contentStyle={{
+                        backgroundColor: '#0f172a',
+                        border: 'none',
+                        borderRadius: '8px',
+                        color: '#fff',
+                        fontSize: '12px',
+                      }}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+
+              {/* Scrollable Custom Legend List */}
+              <div className="max-h-36 overflow-y-auto space-y-2 pr-1 border-t border-slate-100 pt-3">
+                {categoryValuation.map((item, index) => {
+                  const totalVal = categoryValuation.reduce((sum, i) => sum + i.value, 0);
+                  const color = COLORS[index % COLORS.length];
+                  const pct = totalVal > 0 ? ((item.value / totalVal) * 100).toFixed(1) : '0';
+                  return (
+                    <div key={item.name} className="flex items-center justify-between text-xs">
+                      <div className="flex items-center gap-2 truncate pr-2">
+                        <span
+                          className="w-2.5 h-2.5 rounded-full shrink-0"
+                          style={{ backgroundColor: color }}
+                        />
+                        <span className="text-slate-700 font-medium truncate" title={item.name}>
+                          {item.name}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0 text-slate-600">
+                        <span className="font-semibold text-slate-900">
+                          ฿{item.value.toLocaleString()}
+                        </span>
+                        <span className="text-slate-400 text-[10px] min-w-[36px] text-right">
+                          ({pct}%)
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
