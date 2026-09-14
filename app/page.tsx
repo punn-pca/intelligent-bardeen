@@ -26,8 +26,8 @@ import {
   PieChart,
   Pie,
   Cell,
-  Legend,
 } from 'recharts';
+import { CardSkeleton, TableSkeleton, ChartSkeleton } from '@/components/common/Skeleton';
 
 export default function DashboardPage() {
   const [metrics, setMetrics] = useState<any>({
@@ -164,6 +164,39 @@ export default function DashboardPage() {
     '#6366f1', // Indigo
     '#84cc16', // Lime
   ];
+
+  if (loading) {
+    return (
+      <div className="space-y-6 animate-in fade-in duration-200">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-5">
+          <div>
+            <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">Dashboard บริหารคลังสินค้า</h1>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+              กำลังโหลดข้อมูลระบบและสต็อกสินค้า...
+            </p>
+          </div>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <CardSkeleton />
+          <CardSkeleton />
+          <CardSkeleton />
+          <CardSkeleton />
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2">
+            <ChartSkeleton />
+          </div>
+          <ChartSkeleton />
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2">
+            <TableSkeleton rows={5} cols={5} />
+          </div>
+          <TableSkeleton rows={5} cols={2} />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 animate-in fade-in duration-200">
