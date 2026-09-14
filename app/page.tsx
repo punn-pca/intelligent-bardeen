@@ -53,14 +53,14 @@ export default function DashboardPage() {
       try {
         setLoading(true);
         const [prodRes, invRes, movRes] = await Promise.all([
-          fetch('/api/products').then((r) => r.json()),
-          fetch('/api/inventory').then((r) => r.json()),
-          fetch('/api/stock/movements').then((r) => r.json()),
+          fetch('/api/products?limit=2000').then((r) => r.json()).catch(() => ({ data: [] })),
+          fetch('/api/inventory').then((r) => r.json()).catch(() => ({ data: [] })),
+          fetch('/api/stock/movements?limit=1000').then((r) => r.json()).catch(() => ({ data: [] })),
         ]);
 
-        const prods = Array.isArray(prodRes) ? prodRes : prodRes.products || [];
-        const invs = Array.isArray(invRes) ? invRes : invRes.inventory || [];
-        const movs = Array.isArray(movRes) ? movRes : movRes.movements || [];
+        const prods = Array.isArray(prodRes) ? prodRes : prodRes.data || prodRes.products || [];
+        const invs = Array.isArray(invRes) ? invRes : invRes.data || invRes.inventory || [];
+        const movs = Array.isArray(movRes) ? movRes : movRes.data || movRes.movements || [];
 
         // Aggregate Metrics
         const totalProducts = prods.length;
